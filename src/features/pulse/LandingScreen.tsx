@@ -69,12 +69,12 @@ export function LandingScreen({ onSubmit }: Props) {
             />
           </div>
           <div className="group/cta relative mx-auto">
-            <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-tech-blue via-ultraviolet to-aqua opacity-70 blur-lg transition duration-500 group-hover/cta:opacity-100 group-hover/cta:blur-xl" />
+            <div className="absolute -inset-0.5 rounded-2xl bg-ultraviolet opacity-50 blur-lg transition duration-500 group-hover/cta:opacity-80 group-hover/cta:blur-xl" />
             <button
               type="submit"
-              className="relative inline-flex items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-ultraviolet via-[#a347ff] to-tech-blue px-10 py-5 text-base font-bold uppercase tracking-[0.18em] text-white shadow-[0_10px_50px_-10px_rgba(134,14,255,0.9)] transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_20px_70px_-10px_rgba(134,14,255,1)]"
+              className="relative inline-flex items-center gap-3 overflow-hidden rounded-2xl bg-ultraviolet px-10 py-5 text-base font-bold uppercase tracking-[0.18em] text-white shadow-[0_10px_50px_-10px_rgba(134,14,255,0.9)] transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_20px_70px_-10px_rgba(134,14,255,1)]"
             >
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full" />
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full" />
               <span className="relative">Reveal my visibility</span>
               <span aria-hidden className="relative text-lg transition-transform duration-300 group-hover/cta:translate-x-1">→</span>
             </button>
