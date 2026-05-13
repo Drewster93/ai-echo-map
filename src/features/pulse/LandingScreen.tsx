@@ -50,27 +50,39 @@ export function LandingScreen({ onSubmit }: Props) {
           location you operate.
         </p>
 
-        <form onSubmit={handle} className="mx-auto mt-12 flex max-w-xl flex-col gap-4">
+        <form onSubmit={handle} className="mx-auto mt-12 max-w-xl">
           <div className="group relative">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-ultraviolet via-tech-blue to-ultraviolet opacity-50 blur-xl transition group-focus-within:opacity-90" />
-            <input
-              autoFocus
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="Starbucks"
-              className="relative w-full rounded-2xl border border-white/15 bg-dark-plum/80 px-6 py-5 text-center text-xl text-white placeholder:text-white/30 focus:border-ultraviolet focus:outline-none"
-            />
-          </div>
-          <div className="group/cta relative mx-auto">
-            <div className="absolute -inset-0.5 rounded-2xl bg-ultraviolet opacity-50 blur-lg transition duration-500 group-hover/cta:opacity-80 group-hover/cta:blur-xl" />
-            <button
-              type="submit"
-              className="relative inline-flex items-center gap-3 overflow-hidden rounded-2xl bg-ultraviolet px-10 py-5 text-base font-bold uppercase tracking-[0.18em] text-white shadow-[0_10px_50px_-10px_rgba(134,14,255,0.9)] transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_20px_70px_-10px_rgba(134,14,255,1)]"
-            >
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full" />
-              <span className="relative">Reveal my visibility</span>
-              <span aria-hidden className="relative text-lg transition-transform duration-300 group-hover/cta:translate-x-1">→</span>
-            </button>
+            <div className="absolute -inset-1 rounded-full bg-ultraviolet opacity-40 blur-2xl transition duration-500 group-focus-within:opacity-80 group-focus-within:blur-3xl" />
+            <div className="relative flex items-center gap-2 rounded-full border border-white/15 bg-dark-plum/80 p-2 pl-6 backdrop-blur-xl transition focus-within:border-ultraviolet/60">
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="h-5 w-5 shrink-0 text-white/40"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+              </svg>
+              <input
+                autoFocus
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="Enter a brand name…"
+                className="min-w-0 flex-1 bg-transparent py-3 text-lg text-white placeholder:text-white/30 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="group/cta relative inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full bg-ultraviolet px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white shadow-[0_8px_30px_-8px_rgba(134,14,255,0.9)] transition-all duration-300 hover:shadow-[0_14px_50px_-8px_rgba(134,14,255,1)]"
+              >
+                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover/cta:translate-x-full" />
+                <span className="relative">Reveal</span>
+                <span aria-hidden className="relative text-base transition-transform duration-300 group-hover/cta:translate-x-1">
+                  →
+                </span>
+              </button>
+            </div>
           </div>
         </form>
 
