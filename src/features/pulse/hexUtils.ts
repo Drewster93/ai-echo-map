@@ -51,44 +51,44 @@ export function styleForIntensity(i: number): HexStyle {
   if (i < 20) {
     return {
       fillColor: "#1B0C3B",
-      fillOpacity: 0.08,
+      fillOpacity: 0.05,
       color: "#3072FC",
-      weight: 1,
+      weight: 0.5,
       glow: "rgba(48,114,252,0.0)",
     };
   }
   if (i < 40) {
     return {
       fillColor: "#3072FC",
-      fillOpacity: 0.35,
+      fillOpacity: 0.22,
       color: "#3072FC",
-      weight: 1,
-      glow: "rgba(48,114,252,0.35)",
+      weight: 0.6,
+      glow: "rgba(48,114,252,0.25)",
     };
   }
   if (i < 60) {
     return {
       fillColor: "#3072FC",
-      fillOpacity: 0.7,
+      fillOpacity: 0.4,
       color: "#7BFFFF",
-      weight: 1,
-      glow: "rgba(48,114,252,0.6)",
+      weight: 0.7,
+      glow: "rgba(48,114,252,0.45)",
     };
   }
   if (i < 80) {
     return {
       fillColor: "#860EFF",
-      fillOpacity: 0.8,
+      fillOpacity: 0.5,
       color: "#860EFF",
-      weight: 1.2,
-      glow: "rgba(134,14,255,0.7)",
+      weight: 0.8,
+      glow: "rgba(134,14,255,0.55)",
     };
   }
   return {
     fillColor: "#FF5B02",
-    fillOpacity: 0.9,
+    fillOpacity: 0.6,
     color: "#7BFFFF",
-    weight: 1.4,
-    glow: "rgba(255,91,2,0.8)",
+    weight: 1,
+    glow: "rgba(255,91,2,0.7)",
   };
 }
