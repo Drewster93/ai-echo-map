@@ -1,0 +1,162 @@
+import { motion, AnimatePresence } from "framer-motion";
+import type { HexCell, Location } from "./types";
+import { COMPETITORS } from "./mockData";
+import { PulseCircle } from "./PulseCircle";
+
+interface Props {
+  hex: HexCell | null;
+  locations: Location[];
+  onClose: () => void;
+}
+
+const STATUS_DOT: Record<string, string> = {
+  mentioned: "bg-soft-green shadow-[0_0_10px_#DAFFB6]",
+  competitor_higher: "bg-orange-uberall shadow-[0_0_10px_#FF5B02]",
+  not_mentioned: "border border-white/30 bg-dark-plum",
+};
+const STATUS_LABEL: Record<string, string> = {
+  mentioned: "Mentioned",
+  competitor_higher: "Mentioned · competitor ranked higher",
+  not_mentioned: "Not mentioned",
+};
+
+export function DetailPanel({ hex, locations, onClose }: Props) {
+  const hexLocations = hex ? locations.filter((l) => hex.locationIds.includes(l.id)) : [];
+  const score = hex ? Math.round(hex.intensity) : 0;
+  const cluster = hex?.cluster ?? "";
+  const allPrompts = hexLocations.flatMap((l) => l.prompts).slice(0, 8);
+  const competitorsMentioned = Array.from(
+    new Set(allPrompts.map((p) => p.competitor).filter(Boolean) as string[]),
+  ).slice(0, 4);
+  const fallbackCompetitors = competitorsMentioned.length
+    ? competitorsMentioned
+    : COMPETITORS.slice(0, 3);
+
+  // SVG ring math
+  const R = 54;
+  const C = 2 * Math.PI * R;
+  const dash = (score / 100) * C;
+
+  return (
+    <AnimatePresence>
+      {hex && (
+        <motion.aside
+          key={hex.h3}
+          initial={{ x: 460, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: 460, opacity: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          className="glass thin-scroll absolute right-5 top-1/2 z-30 flex max-h-[80vh] w-[420px] -translate-y-1/2 flex-col overflow-hidden rounded-2xl shadow-[0_30px_80px_-30px_rgba(134,14,255,0.6)]"
+        >
+          <div className="flex items-start justify-between gap-3 p-6 pb-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-aqua/80">
+                Hex cluster
+              </p>
+              <h3 className="mt-1 font-display text-2xl leading-tight text-white">
+                {cluster}
+                <span className="block text-sm font-normal text-white/50">
+                  {hexLocations.length} store{hexLocations.length === 1 ? "" : "s"}
+                </span>
+              </h3>
+            </div>
+            <button
+              onClick={onClose}
+              className="rounded-md border border-white/15 px-2 py-1 text-xs text-white/60 hover:border-ultraviolet hover:text-white"
+              aria-label="Close panel"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="flex items-center gap-5 px-6 pb-5">
+            <div className="relative h-[140px] w-[140px] shrink-0">
+              <div className="absolute inset-0 grid place-items-center">
+                <PulseCircle size={140} color="#3072FC" opacity={0.25} />
+              </div>
+              <svg viewBox="0 0 140 140" className="absolute inset-0 -rotate-90">
+                <defs>
+                  <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#3072FC" />
+                    <stop offset="100%" stopColor="#860EFF" />
+                  </linearGradient>
+                </defs>
+                <circle cx="70" cy="70" r={R} stroke="rgba(255,255,255,0.08)" strokeWidth="6" fill="none" />
+                <circle
+                  cx="70"
+                  cy="70"
+                  r={R}
+                  stroke="url(#ring)"
+                  strokeWidth="6"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeDasharray={`${dash} ${C}`}
+                  style={{ transition: "stroke-dasharray 0.8s cubic-bezier(0.16,1,0.3,1)" }}
+                />
+              </svg>
+              <div className="absolute inset-0 grid place-items-center">
+                <div className="text-center">
+                  <div className="font-display text-4xl text-white">{score}</div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/50">/ 100</div>
+                </div>
+              </div>
+            </div>
+            <div className="text-sm">
+              <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/50">
+                AI Visibility Score
+              </div>
+              <p className="mt-2 leading-snug text-white/70">
+                Aggregated mention rate across all assistants for prompts in this area.
+              </p>
+            </div>
+          </div>
+
+          <div className="px-6 pb-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/50">
+              Prompts tested
+            </p>
+          </div>
+          <ul className="thin-scroll flex-1 space-y-2 overflow-y-auto px-6 pb-4">
+            {allPrompts.map((p, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2.5"
+              >
+                <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[p.status]}`} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm text-white">{p.prompt}</p>
+                  <p className="text-[11px] text-white/45">
+                    {STATUS_LABEL[p.status]} · {p.assistant}
+                    {p.competitor ? ` · ${p.competitor}` : ""}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="px-6 pb-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/50">
+              Top competitors mentioned instead
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {fallbackCompetitors.map((c) => (
+                <span
+                  key={c}
+                  className="rounded-full border border-tech-blue/50 bg-dark-plum px-3 py-1 text-xs text-white"
+                >
+                  {c}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-white/5 p-4">
+            <button className="w-full rounded-xl bg-ultraviolet py-3 text-sm font-bold text-white shadow-[0_8px_30px_-8px_rgba(134,14,255,0.9)] transition hover:translate-y-[-1px]">
+              Improve visibility →
+            </button>
+          </div>
+        </motion.aside>
+      )}
+    </AnimatePresence>
+  );
+}
