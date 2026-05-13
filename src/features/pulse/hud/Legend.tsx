@@ -8,8 +8,8 @@ export function Legend() {
         className="h-2.5 w-56 rounded-full"
         style={{
           background:
-            "linear-gradient(to right, #1B0C3B 0%, #3072FC 35%, #860EFF 70%, #FF5B02 100%)",
-          boxShadow: "0 0 16px rgba(134,14,255,0.35)",
+            "linear-gradient(to right, #2A1452 0%, #4B1A99 25%, #6B1FD6 50%, #860EFF 75%, #C026FF 100%)",
+          boxShadow: "0 0 16px rgba(134,14,255,0.45)",
         }}
       />
       <div className="flex justify-between text-[10px] text-white/60">
