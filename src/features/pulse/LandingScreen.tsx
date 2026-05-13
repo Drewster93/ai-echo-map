@@ -28,13 +28,6 @@ export function LandingScreen({ onSubmit }: Props) {
         <PulseArc size={900} color="#FFFFFF" opacity={0.13} />
       </div>
 
-      {/* Top brand */}
-      <div className="absolute left-8 top-7 flex items-center gap-2">
-        <div className="h-2.5 w-2.5 rounded-full bg-ultraviolet shadow-[0_0_12px_#860EFF]" />
-        <span className="text-xs font-bold uppercase tracking-[0.25em] text-white/70">
-          Uberall · AI Visibility Pulse
-        </span>
-      </div>
 
       <motion.div
         className="relative z-10 mx-auto w-full max-w-3xl text-center"
