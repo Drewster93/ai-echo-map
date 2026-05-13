@@ -33,7 +33,7 @@
   --color-ring: var(--ring);
 
   /* Uberall brand palette */
-  --color-dark-plum: #1b0c3b;
+  --color-dark-plum: #260e5a;
   --color-ultraviolet: #860eff;
   --color-tech-blue: #3072fc;
   --color-orange-uberall: #ff5b02;
@@ -47,11 +47,11 @@
 
 :root {
   --radius: 0.75rem;
-  --background: #1b0c3b;
+  --background: #260e5a;
   --foreground: #ffffff;
-  --card: #1b0c3b;
+  --card: #260e5a;
   --card-foreground: #ffffff;
-  --popover: #1b0c3b;
+  --popover: #260e5a;
   --popover-foreground: #ffffff;
   --primary: #860eff;
   --primary-foreground: #ffffff;
@@ -60,7 +60,7 @@
   --muted: rgba(255, 255, 255, 0.08);
   --muted-foreground: rgba(255, 255, 255, 0.6);
   --accent: #7bffff;
-  --accent-foreground: #1b0c3b;
+  --accent-foreground: #260e5a;
   --destructive: #ff5b02;
   --destructive-foreground: #ffffff;
   --border: rgba(134, 14, 255, 0.3);
@@ -144,11 +144,11 @@
 /* Mesh gradient for landing */
 .mesh-bg {
   background:
-    radial-gradient(at 20% 30%, rgba(134, 14, 255, 0.55) 0px, transparent 55%),
-    radial-gradient(at 80% 20%, rgba(48, 114, 252, 0.4) 0px, transparent 55%),
-    radial-gradient(at 70% 80%, rgba(134, 14, 255, 0.45) 0px, transparent 55%),
-    radial-gradient(at 30% 90%, rgba(48, 114, 252, 0.3) 0px, transparent 60%),
-    #1b0c3b;
+    radial-gradient(at 20% 30%, rgba(134, 14, 255, 0.45) 0px, transparent 55%),
+    radial-gradient(at 80% 20%, rgba(48, 114, 252, 0.32) 0px, transparent 55%),
+    radial-gradient(at 70% 80%, rgba(134, 14, 255, 0.4) 0px, transparent 55%),
+    radial-gradient(at 30% 90%, rgba(48, 114, 252, 0.25) 0px, transparent 60%),
+    #260e5a;
   animation: mesh-drift 18s ease-in-out infinite alternate;
 }
 @keyframes mesh-drift {
