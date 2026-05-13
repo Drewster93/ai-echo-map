@@ -18,7 +18,7 @@ export function LandingScreen({ onSubmit }: Props) {
   return (
     <motion.div
       key="landing"
-      className="mesh-bg relative flex h-full w-full items-center justify-center overflow-hidden px-6"
+      className="relative flex h-full w-full items-center justify-center overflow-hidden bg-dark-plum px-6"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.08, filter: "blur(8px)" }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
