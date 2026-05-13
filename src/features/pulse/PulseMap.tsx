@@ -127,9 +127,19 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
         const el = (polygon as unknown as { _path?: SVGPathElement })._path;
         if (el) {
           el.style.setProperty("--delay", `${(idx % 40) * 35}ms`);
-          // Bloom intensity tracks the cell's heat level.
-          const blur = 4 + cell.intensity * 0.12;
-          el.style.filter = `drop-shadow(0 0 ${blur.toFixed(1)}px ${style.glow})`;
+          // Multi-pass bloom: tight inner halo + mid glow + wide atmospheric
+          // bloom. Each pass scales with intensity so hot cells visibly bleed
+          // light into their neighbors while cold cells stay crisp.
+          const t = Math.max(0, Math.min(1, cell.intensity / 100));
+          const inner = (2 + t * 6).toFixed(1);
+          const mid = (6 + t * 18).toFixed(1);
+          const wide = (12 + t * 38).toFixed(1);
+          el.style.filter = [
+            `drop-shadow(0 0 ${inner}px ${style.glow})`,
+            `drop-shadow(0 0 ${mid}px ${style.glow})`,
+            `drop-shadow(0 0 ${wide}px ${style.glow})`,
+          ].join(" ");
+          el.style.setProperty("opacity", String(0.85 + t * 0.15));
         }
       });
     });
