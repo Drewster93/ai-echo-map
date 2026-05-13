@@ -18,13 +18,16 @@ export function LandingScreen({ onSubmit }: Props) {
   return (
     <motion.div
       key="landing"
-      className="relative flex h-full w-full items-center justify-center overflow-hidden bg-dark-plum px-6"
+      className="landing-bg relative flex h-full w-full items-center justify-center overflow-hidden px-6"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.08, filter: "blur(8px)" }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
+      <div className="landing-scan" />
+      <div className="landing-grain" />
+
       {/* Pulse arc behind input */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[40%]">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 z-[1] -translate-x-1/2 -translate-y-[40%]">
         <PulseArc size={900} color="#FFFFFF" opacity={0.13} />
       </div>
 
