@@ -51,6 +51,12 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
       ).addTo(map);
       mapRef.current = map;
       hexLayerRef.current = L.layerGroup().addTo(map);
+      // Make the hex SVG overlay additively blend so overlapping cells bloom
+      // like Uber/kepler.gl heatmaps.
+      const overlayPane = map.getPanes().overlayPane;
+      if (overlayPane) {
+        overlayPane.classList.add("hex-overlay-pane");
+      }
       markerLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
       // Fly to Berlin
@@ -101,18 +107,19 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
         fillOpacity: style.fillOpacity,
         color: isSelected ? "#7BFFFF" : style.color,
         weight: isSelected ? 2 : style.weight,
-        opacity: isSelected ? 1 : 0.85,
-        className: "hex-fade-in",
+        opacity: isSelected ? 1 : 0.55,
+        lineJoin: "round",
+        className: "hex-fade-in hex-cell",
         interactive: true,
         bubblingMouseEvents: false,
       });
       polygon.on("click", () => onHexSelect(cell.h3));
       polygon.on("mouseover", () => {
-        polygon.setStyle({ weight: 2, color: "#7BFFFF" });
+        polygon.setStyle({ weight: 2, color: "#7BFFFF", opacity: 1 });
       });
       polygon.on("mouseout", () => {
         if (selectedHex !== cell.h3) {
-          polygon.setStyle({ weight: style.weight, color: style.color });
+          polygon.setStyle({ weight: style.weight, color: style.color, opacity: 0.55 });
         }
       });
       polygon.addTo(layer);
@@ -120,7 +127,9 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
         const el = (polygon as unknown as { _path?: SVGPathElement })._path;
         if (el) {
           el.style.setProperty("--delay", `${(idx % 40) * 35}ms`);
-          el.style.filter = `drop-shadow(0 0 6px ${style.glow})`;
+          // Bloom intensity tracks the cell's heat level.
+          const blur = 4 + cell.intensity * 0.12;
+          el.style.filter = `drop-shadow(0 0 ${blur.toFixed(1)}px ${style.glow})`;
         }
       });
     });
