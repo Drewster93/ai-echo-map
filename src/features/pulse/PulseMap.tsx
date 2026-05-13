@@ -66,12 +66,16 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
       markerLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
       // Fly to Berlin
+      // Cinematic two-stage cinematic zoom: a slow continental glide first,
+      // then a smooth flyTo into Berlin using flyTo's parabolic interpolation
+      // so altitude eases out instead of snapping.
       setTimeout(() => {
-        map.flyTo([52.515, 13.405], 11.2, { duration: 2.6, easeLinearity: 0.2 });
-      }, 400);
-      // Force a re-render-ish by touching state via micro-tick: we rely on subsequent effects firing
-      // because deps include [locations] / [hexCells] which already changed before this resolved.
-      // Manually invoke renderers:
+        map.flyTo([52.515, 13.405], 11.6, {
+          duration: 4.2,
+          easeLinearity: 0.12,
+          noMoveStart: false,
+        });
+      }, 650);
       renderMarkers();
       renderHex();
     })();
