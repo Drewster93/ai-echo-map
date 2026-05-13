@@ -86,9 +86,6 @@ export function LandingScreen({ onSubmit }: Props) {
           </div>
         </form>
 
-        <p className="mt-10 text-xs italic text-white/50">
-          Try any brand name — the demo dataset adapts instantly.
-        </p>
       </motion.div>
 
       <div className="absolute bottom-6 right-8 text-[10px] uppercase tracking-[0.3em] text-white/30">
