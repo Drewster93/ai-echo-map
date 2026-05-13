@@ -180,13 +180,15 @@
   position: absolute;
   inset: 0;
   margin: auto;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-radius: 9999px;
-  background: #3072fc;
+  background: #7BFFFF;
+  border: 1.5px solid #ffffff;
   box-shadow:
-    0 0 12px rgba(48, 114, 252, 0.9),
-    0 0 24px rgba(48, 114, 252, 0.5);
+    0 0 10px rgba(123, 255, 255, 1),
+    0 0 22px rgba(123, 255, 255, 0.8),
+    0 0 38px rgba(48, 114, 252, 0.6);
 }
 .sonar-ring {
   position: absolute;
@@ -195,7 +197,7 @@
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  border: 1.5px solid #3072fc;
+  border: 1.5px solid #7BFFFF;
   opacity: 0;
   animation: sonar 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
