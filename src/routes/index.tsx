@@ -1,26 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { LandingScreen } from "@/features/pulse/LandingScreen";
+import { MapApp } from "@/features/pulse/MapApp";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "AI Visibility Pulse · Uberall" },
+      {
+        name: "description",
+        content:
+          "See where AI assistants like ChatGPT, Perplexity, Gemini and Claude mention your brand — mapped, hex by hex, in real time.",
+      },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  const [brand, setBrand] = useState<string | null>(null);
+  return (
+    <main className="h-screen w-screen overflow-hidden bg-dark-plum text-white">
+      <AnimatePresence mode="wait">
+        {brand === null ? (
+          <LandingScreen key="landing" onSubmit={setBrand} />
+        ) : (
+          <MapApp key="map" brand={brand} onSwitchBrand={() => setBrand(null)} />
+        )}
+      </AnimatePresence>
+    </main>
+  );
 }
