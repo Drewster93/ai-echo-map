@@ -40,6 +40,15 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
           maxZoom: 19,
         },
       ).addTo(map);
+      // Labels-only overlay so streets/places remain legible above hex layer
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+        {
+          subdomains: "abcd",
+          maxZoom: 19,
+          pane: "shadowPane",
+        },
+      ).addTo(map);
       mapRef.current = map;
       hexLayerRef.current = L.layerGroup().addTo(map);
       markerLayerRef.current = L.layerGroup().addTo(map);
