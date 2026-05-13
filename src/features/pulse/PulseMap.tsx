@@ -31,7 +31,13 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
         zoomControl: false,
         attributionControl: true,
         worldCopyJump: true,
-      }).setView([51.0, 5.0], 5);
+        zoomSnap: 0.25,
+        zoomDelta: 0.5,
+        wheelPxPerZoomLevel: 120,
+        fadeAnimation: true,
+        zoomAnimation: true,
+        markerZoomAnimation: true,
+      }).setView([30.0, 10.0], 2.5);
       L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
         {
