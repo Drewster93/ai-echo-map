@@ -36,7 +36,7 @@ export function LandingScreen({ onSubmit }: Props) {
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
       >
         <p className="mb-6 text-xs font-bold uppercase tracking-[0.3em] text-white/50">
-          Real-time AI mention intelligence
+          Local Geo
         </p>
         <h1 className="font-display text-balance text-5xl leading-[1.05] text-white md:text-7xl">
           Enter your brand to see{" "}
