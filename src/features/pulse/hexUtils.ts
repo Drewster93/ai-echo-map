@@ -47,48 +47,49 @@ export interface HexStyle {
   glow: string;
 }
 
+// Purple-only intensity scale: deep plum (low) → ultraviolet → hot magenta (high).
 export function styleForIntensity(i: number): HexStyle {
   if (i < 20) {
     return {
-      fillColor: "#1B0C3B",
-      fillOpacity: 0.05,
-      color: "#3072FC",
+      fillColor: "#2A1452",
+      fillOpacity: 0.18,
+      color: "#3D1F73",
       weight: 0.5,
-      glow: "rgba(48,114,252,0.0)",
+      glow: "rgba(61,31,115,0.0)",
     };
   }
   if (i < 40) {
     return {
-      fillColor: "#3072FC",
-      fillOpacity: 0.22,
-      color: "#3072FC",
+      fillColor: "#4B1A99",
+      fillOpacity: 0.32,
+      color: "#5C25B8",
       weight: 0.6,
-      glow: "rgba(48,114,252,0.25)",
+      glow: "rgba(75,26,153,0.3)",
     };
   }
   if (i < 60) {
     return {
-      fillColor: "#3072FC",
-      fillOpacity: 0.4,
-      color: "#7BFFFF",
+      fillColor: "#6B1FD6",
+      fillOpacity: 0.45,
+      color: "#860EFF",
       weight: 0.7,
-      glow: "rgba(48,114,252,0.45)",
+      glow: "rgba(107,31,214,0.5)",
     };
   }
   if (i < 80) {
     return {
       fillColor: "#860EFF",
-      fillOpacity: 0.5,
-      color: "#860EFF",
+      fillOpacity: 0.58,
+      color: "#A855F7",
       weight: 0.8,
-      glow: "rgba(134,14,255,0.55)",
+      glow: "rgba(134,14,255,0.65)",
     };
   }
   return {
-    fillColor: "#FF5B02",
-    fillOpacity: 0.6,
-    color: "#7BFFFF",
+    fillColor: "#C026FF",
+    fillOpacity: 0.72,
+    color: "#E879F9",
     weight: 1,
-    glow: "rgba(255,91,2,0.7)",
+    glow: "rgba(192,38,255,0.85)",
   };
 }
