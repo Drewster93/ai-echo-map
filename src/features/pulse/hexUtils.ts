@@ -47,49 +47,57 @@ export interface HexStyle {
   glow: string;
 }
 
-// Purple-only intensity scale: deep plum (low) → ultraviolet → hot magenta (high).
-export function styleForIntensity(i: number): HexStyle {
-  if (i < 20) {
-    return {
-      fillColor: "#2A1452",
-      fillOpacity: 0.18,
-      color: "#3D1F73",
-      weight: 0.5,
-      glow: "rgba(61,31,115,0.0)",
-    };
-  }
-  if (i < 40) {
-    return {
-      fillColor: "#4B1A99",
-      fillOpacity: 0.32,
-      color: "#5C25B8",
-      weight: 0.6,
-      glow: "rgba(75,26,153,0.3)",
-    };
-  }
-  if (i < 60) {
-    return {
-      fillColor: "#6B1FD6",
-      fillOpacity: 0.45,
-      color: "#860EFF",
-      weight: 0.7,
-      glow: "rgba(107,31,214,0.5)",
-    };
-  }
-  if (i < 80) {
-    return {
-      fillColor: "#860EFF",
-      fillOpacity: 0.58,
-      color: "#A855F7",
-      weight: 0.8,
-      glow: "rgba(134,14,255,0.65)",
-    };
-  }
+// Continuous Uber/kepler.gl-style color ramp.
+// Deep indigo → violet → magenta → hot pink → near-white at the peak.
+// Each stop is [r, g, b].
+const RAMP: Array<[number, number, number]> = [
+  [26, 11, 56],     // 0   deep indigo
+  [58, 22, 124],    // 0.2 violet
+  [124, 28, 196],   // 0.4 purple
+  [192, 38, 255],   // 0.6 magenta
+  [240, 92, 220],   // 0.8 hot pink
+  [255, 220, 240],  // 1.0 near-white peak
+];
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
+function sampleRamp(t: number): [number, number, number] {
+  const x = Math.max(0, Math.min(1, t));
+  const scaled = x * (RAMP.length - 1);
+  const i = Math.floor(scaled);
+  const f = scaled - i;
+  const c0 = RAMP[i];
+  const c1 = RAMP[Math.min(i + 1, RAMP.length - 1)];
+  return [lerp(c0[0], c1[0], f), lerp(c0[1], c1[1], f), lerp(c0[2], c1[2], f)];
+}
+
+function rgb([r, g, b]: [number, number, number], a = 1) {
+  if (a >= 1) return `rgb(${r | 0}, ${g | 0}, ${b | 0})`;
+  return `rgba(${r | 0}, ${g | 0}, ${b | 0}, ${a})`;
+}
+
+// Kepler-style smooth styling: continuous color, tight matching stroke,
+// opacity and glow that scale with intensity.
+export function styleForIntensity(intensity: number): HexStyle {
+  const t = Math.max(0, Math.min(1, intensity / 100));
+  const fill = sampleRamp(t);
+  // Stroke is a slightly lifted version of the fill so cells read as one surface.
+  const stroke = sampleRamp(Math.min(1, t + 0.12));
+
+  // Opacity ramps from a soft floor to nearly opaque at the peak.
+  const fillOpacity = 0.28 + t * 0.6; // 0.28 → 0.88
+
+  // Glow grows with intensity for a bloom feel.
+  const glowAlpha = 0.15 + t * 0.7;
+  const glow = rgb(fill, glowAlpha);
+
   return {
-    fillColor: "#C026FF",
-    fillOpacity: 0.72,
-    color: "#E879F9",
-    weight: 1,
-    glow: "rgba(192,38,255,0.85)",
+    fillColor: rgb(fill),
+    fillOpacity,
+    color: rgb(stroke),
+    weight: 0.4,
+    glow,
   };
 }

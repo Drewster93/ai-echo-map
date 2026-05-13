@@ -215,6 +215,19 @@
   }
 }
 
+/* Uber/kepler-style additive hex layer: overlapping cells bloom together. */
+.hex-overlay-pane {
+  mix-blend-mode: screen;
+}
+.hex-cell {
+  shape-rendering: geometricPrecision;
+  transition:
+    fill 0.35s ease,
+    stroke 0.35s ease,
+    fill-opacity 0.35s ease,
+    filter 0.35s ease;
+}
+
 /* Hex pulse on the SVG paths in the GeoJSON layer */
 .hex-pulse {
   transition:
