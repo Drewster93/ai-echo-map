@@ -217,30 +217,15 @@
 
 /* Hex pulse on the SVG paths in the GeoJSON layer */
 .hex-pulse {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: hex-pulse 1.8s ease-in-out infinite;
-  animation-delay: var(--delay, 0ms);
   transition:
     fill 0.4s ease,
     stroke 0.4s ease,
     fill-opacity 0.4s ease;
   cursor: pointer;
 }
-@keyframes hex-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.04);
-  }
-}
 .hex-fade-in {
-  animation:
-    hex-fade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both,
-    hex-pulse 1.8s ease-in-out infinite;
-  animation-delay: var(--delay, 0ms), calc(var(--delay, 0ms) + 600ms);
+  animation: hex-fade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay, 0ms);
 }
 @keyframes hex-fade {
   from {
