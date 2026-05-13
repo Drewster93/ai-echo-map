@@ -47,11 +47,11 @@
 
 :root {
   --radius: 0.75rem;
-  --background: #1b0c3b;
+  --background: #260e5a;
   --foreground: #ffffff;
-  --card: #1b0c3b;
+  --card: #260e5a;
   --card-foreground: #ffffff;
-  --popover: #1b0c3b;
+  --popover: #260e5a;
   --popover-foreground: #ffffff;
   --primary: #860eff;
   --primary-foreground: #ffffff;
