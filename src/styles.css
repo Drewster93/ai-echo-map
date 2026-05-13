@@ -111,14 +111,25 @@
   }
 }
 
-/* Map tinting */
+/* Map tinting — keep streets readable, add subtle brand tint */
 .leaflet-container {
-  background: #1b0c3b !important;
+  background: #0a0612 !important;
   font-family: var(--font-sans);
   outline: none;
 }
 .leaflet-tile-pane {
-  filter: hue-rotate(245deg) saturate(1.3) brightness(0.55) contrast(1.1);
+  filter: saturate(0.85) brightness(0.95) contrast(1.05);
+}
+/* Brand-tint overlay sits above tiles but below data layers */
+.leaflet-tile-pane::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(134, 14, 255, 0.10), transparent 70%),
+    rgba(27, 12, 59, 0.18);
+  mix-blend-mode: overlay;
 }
 .leaflet-control-attribution {
   background: rgba(27, 12, 59, 0.7) !important;
