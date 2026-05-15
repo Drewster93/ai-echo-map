@@ -37,14 +37,15 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
         fadeAnimation: true,
         zoomAnimation: true,
         markerZoomAnimation: true,
-      }).setView([30.0, 10.0], 2.5);
+      }).setView([48.5, 11.0], 4.5);
       // Realistic satellite basemap (Esri World Imagery) — same look as
       // Uber/Kepler.gl realistic mode.
-      L.tileLayer(
+      const baseLayer = L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         {
           attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics",
           maxZoom: 19,
+          keepBuffer: 4,
         },
       ).addTo(map);
       // Reference overlay: roads, boundaries, place labels on top of imagery
@@ -74,17 +75,23 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
       }
       markerLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
-      // Fly to Berlin
-      // Cinematic two-stage cinematic zoom: a slow continental glide first,
-      // then a smooth flyTo into Berlin using flyTo's parabolic interpolation
-      // so altitude eases out instead of snapping.
-      setTimeout(() => {
-        map.flyTo([52.515, 13.405], 11.6, {
-          duration: 4.2,
-          easeLinearity: 0.12,
-          noMoveStart: false,
+      // Smooth single flyTo into Berlin once the base imagery has loaded so
+      // we don't fight tile-pop during the animation.
+      const flyToBerlin = () => {
+        map.flyTo([52.515, 13.405], 12, {
+          duration: 3.2,
+          easeLinearity: 0.25,
         });
-      }, 650);
+      };
+      let flown = false;
+      const trigger = () => {
+        if (flown) return;
+        flown = true;
+        flyToBerlin();
+      };
+      baseLayer.once("load", trigger);
+      // Fallback in case tiles are cached and 'load' doesn't fire promptly
+      setTimeout(trigger, 1200);
       renderMarkers();
       renderHex();
     })();
