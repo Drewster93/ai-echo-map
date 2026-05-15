@@ -111,34 +111,34 @@
   }
 }
 
-/* Map tinting — keep streets readable, add subtle brand tint */
+/* Map tinting — deep dark treatment, satellite tiles crushed way down */
 .leaflet-container {
-  background: #0a0612 !important;
+  background: #050208 !important;
   font-family: var(--font-sans);
   outline: none;
 }
 .leaflet-tile-pane {
-  filter: saturate(0.85) brightness(0.95) contrast(1.05);
+  filter: saturate(0.6) brightness(0.32) contrast(1.1);
 }
-/* Brand-tint overlay sits above tiles but below data layers */
+/* Heavy vignette + dark overlay sits above tiles but below data layers */
 .leaflet-tile-pane::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(134, 14, 255, 0.10), transparent 70%),
-    rgba(27, 12, 59, 0.18);
-  mix-blend-mode: overlay;
+    radial-gradient(ellipse at 50% 50%, rgba(134, 14, 255, 0.06), transparent 70%),
+    rgba(3, 1, 10, 0.55);
+  mix-blend-mode: multiply;
 }
 .leaflet-control-attribution {
-  background: rgba(27, 12, 59, 0.7) !important;
-  color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(5, 2, 15, 0.8) !important;
+  color: rgba(255, 255, 255, 0.3) !important;
   font-size: 10px !important;
-  border: 1px solid rgba(134, 14, 255, 0.2);
+  border: 1px solid rgba(134, 14, 255, 0.15);
 }
 .leaflet-control-attribution a {
-  color: rgba(123, 255, 255, 0.6) !important;
+  color: rgba(123, 255, 255, 0.5) !important;
 }
 
 /* Mesh gradient for landing */
