@@ -48,15 +48,16 @@ export interface HexStyle {
 }
 
 // Continuous Uber/kepler.gl-style color ramp.
-// Deep indigo → violet → magenta → hot pink → near-white at the peak.
+// Deep indigo → violet → magenta → muted pink — deliberately capped
+// well below white so nothing blows out against the dark basemap.
 // Each stop is [r, g, b].
 const RAMP: Array<[number, number, number]> = [
-  [26, 11, 56],     // 0   deep indigo
-  [58, 22, 124],    // 0.2 violet
-  [124, 28, 196],   // 0.4 purple
-  [192, 38, 255],   // 0.6 magenta
-  [240, 92, 220],   // 0.8 hot pink
-  [255, 220, 240],  // 1.0 near-white peak
+  [12, 4, 28],      // 0   deep indigo
+  [38, 14, 88],     // 0.2 violet
+  [92, 20, 158],    // 0.4 purple
+  [158, 30, 210],   // 0.6 magenta
+  [198, 60, 170],   // 0.8 hot pink
+  [220, 130, 195],  // 1.0 capped peak (never white)
 ];
 
 function lerp(a: number, b: number, t: number) {
@@ -86,11 +87,11 @@ export function styleForIntensity(intensity: number): HexStyle {
   // Stroke is a slightly lifted version of the fill so cells read as one surface.
   const stroke = sampleRamp(Math.min(1, t + 0.12));
 
-  // Opacity ramps from a soft floor to nearly opaque at the peak.
-  const fillOpacity = 0.28 + t * 0.6; // 0.28 → 0.88
+  // Opacity ramps from a very soft floor to moderately opaque at the peak.
+  const fillOpacity = 0.18 + t * 0.52; // 0.18 → 0.70
 
   // Glow grows with intensity for a bloom feel.
-  const glowAlpha = 0.15 + t * 0.7;
+  const glowAlpha = 0.12 + t * 0.55;
   const glow = rgb(fill, glowAlpha);
 
   return {
