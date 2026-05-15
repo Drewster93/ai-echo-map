@@ -38,21 +38,30 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
         zoomAnimation: true,
         markerZoomAnimation: true,
       }).setView([30.0, 10.0], 2.5);
+      // Realistic satellite basemap (Esri World Imagery) — same look as
+      // Uber/Kepler.gl realistic mode.
       L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         {
-          attribution: "© OpenStreetMap · CARTO",
-          subdomains: "abcd",
+          attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics",
           maxZoom: 19,
         },
       ).addTo(map);
-      // Labels-only overlay so streets/places remain legible above hex layer
+      // Reference overlay: roads, boundaries, place labels on top of imagery
       L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
         {
-          subdomains: "abcd",
           maxZoom: 19,
           pane: "shadowPane",
+          opacity: 0.9,
+        },
+      ).addTo(map);
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
+        {
+          maxZoom: 19,
+          pane: "shadowPane",
+          opacity: 0.85,
         },
       ).addTo(map);
       mapRef.current = map;
