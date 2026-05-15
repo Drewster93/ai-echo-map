@@ -37,14 +37,15 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
         fadeAnimation: true,
         zoomAnimation: true,
         markerZoomAnimation: true,
-      }).setView([30.0, 10.0], 2.5);
+      }).setView([48.5, 11.0], 4.5);
       // Realistic satellite basemap (Esri World Imagery) — same look as
       // Uber/Kepler.gl realistic mode.
-      L.tileLayer(
+      const baseLayer = L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         {
           attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics",
           maxZoom: 19,
+          keepBuffer: 4,
         },
       ).addTo(map);
       // Reference overlay: roads, boundaries, place labels on top of imagery
