@@ -278,6 +278,15 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
         onClose={() => setSelectedHex(null)}
       />
     </motion.div>
+    {revealing && (
+      <ResultsSection
+        brand={brand}
+        locations={brandedLocations}
+        assistant={assistant}
+        avgScore={avgScore}
+      />
+    )}
+    </>
   );
 }
 
