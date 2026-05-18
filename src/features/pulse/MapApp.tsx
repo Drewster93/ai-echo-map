@@ -78,12 +78,23 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
+  const competitorStats = useMemo(
+    () => getCityCompetitorStats(brandedLocations),
+    [brandedLocations],
+  );
+  const competitorMarkers = useMemo(
+    () => (showCompetitors ? buildCompetitorMarkers(brandedLocations) : []),
+    [brandedLocations, showCompetitors],
+  );
+
   const tour = useBlindSpotTour({
     mapHandle,
     locations: brandedLocations,
     scoreFor,
     reducedMotion,
+    competitorStats: showCompetitors ? competitorStats : null,
   });
+
 
   const setSelectedHex = useCallback(
     (h3: string | null) => {
