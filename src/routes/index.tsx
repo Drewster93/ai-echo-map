@@ -32,15 +32,16 @@ function Index() {
           revealing={revealing}
         />
       )}
-      <AnimatePresence>
+      <AnimatePresence mode="popLayout">
         {!revealing && introDone && (
           <LandingScreen key="landing" onSubmit={setBrand} />
         )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {!introDone && <IntroSequence key="intro" onDone={() => setIntroDone(true)} />}
+        {!introDone && (
+          <IntroSequence key="intro" onDone={() => setIntroDone(true)} />
+        )}
       </AnimatePresence>
     </main>
   );
 }
+
 
