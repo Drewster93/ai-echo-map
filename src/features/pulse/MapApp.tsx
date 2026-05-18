@@ -15,6 +15,7 @@ import { useBlindSpotTour, type PulseMapHandle } from "./tour/useBlindSpotTour";
 import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
 import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
+import { ResultsSection } from "./ResultsSection";
 import type { Assistant, Location, TimeRange } from "./types";
 
 interface Props {
@@ -175,8 +176,9 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   } as const;
 
   return (
+    <>
     <motion.div
-      className="relative h-full w-full"
+      className="relative h-screen w-full"
       animate={{ opacity: revealing ? 1 : 0.55, scale: revealing ? 1 : 1.06 }}
       transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
     >
@@ -276,6 +278,15 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
         onClose={() => setSelectedHex(null)}
       />
     </motion.div>
+    {revealing && (
+      <ResultsSection
+        brand={brand}
+        locations={brandedLocations}
+        assistant={assistant}
+        avgScore={avgScore}
+      />
+    )}
+    </>
   );
 }
 

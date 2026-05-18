@@ -24,7 +24,13 @@ function Index() {
   const [brand, setBrand] = useState<string | null>(null);
   const revealing = brand !== null;
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-[#05030d] text-white">
+    <main
+      className={
+        revealing
+          ? "relative min-h-screen w-screen overflow-x-hidden bg-[#05030d] text-white"
+          : "relative h-screen w-screen overflow-hidden bg-[#05030d] text-white"
+      }
+    >
       {revealing && (
         <MapApp
           brand={brand ?? "Preview"}
