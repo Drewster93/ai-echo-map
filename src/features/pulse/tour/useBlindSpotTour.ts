@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Location } from "../types";
+import type { CityCompetitorStats } from "../competitorData";
 import { selectTourStops, summaryLine, type TourStop } from "./selectTourStops";
 
 export type TourPhase = "idle" | "preroll" | "stop" | "outro" | "done";
