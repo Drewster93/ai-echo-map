@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [brand, setBrand] = useState<string | null>(null);
   return (
-    <main className="h-screen w-screen overflow-hidden bg-dark-plum text-white">
+    <main className="h-screen w-screen overflow-hidden bg-[#05030d] text-white">
       <AnimatePresence mode="wait">
         {brand === null ? (
           <LandingScreen key="landing" onSubmit={setBrand} />
