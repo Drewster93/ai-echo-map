@@ -15,6 +15,7 @@ import { useBlindSpotTour, type PulseMapHandle } from "./tour/useBlindSpotTour";
 import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
 import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
+import { ResultsSection } from "./ResultsSection";
 import type { Assistant, Location, TimeRange } from "./types";
 
 interface Props {
