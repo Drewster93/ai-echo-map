@@ -64,7 +64,7 @@ export function IntroSequence({ onDone }: Props) {
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
       >
         <motion.div
-          className="mb-8 flex items-center gap-3"
+          className="mb-6 flex items-center gap-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
@@ -78,6 +78,16 @@ export function IntroSequence({ onDone }: Props) {
           </span>
         </motion.div>
 
+        <motion.div
+          className="mb-5 inline-flex items-center gap-2 rounded-full border border-ultraviolet/40 bg-ultraviolet/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.3em] text-ultraviolet"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <span className="h-1 w-1 rounded-full bg-ultraviolet" />
+          World's First · Local GEO
+        </motion.div>
+
         <motion.h1
           className="font-display text-balance text-5xl leading-[1.05] text-white md:text-7xl"
           initial={{ opacity: 0, y: 18, filter: "blur(12px)" }}
@@ -89,13 +99,14 @@ export function IntroSequence({ onDone }: Props) {
         </motion.h1>
 
         <motion.p
-          className="mt-6 max-w-md text-sm text-white/55"
+          className="mt-6 max-w-lg text-balance text-sm leading-relaxed text-white/60 md:text-base"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 1.1, ease: "easeOut" }}
+          transition={{ duration: 0.9, delay: 1.0, ease: "easeOut" }}
         >
-          See where AI is talking about you — mapped, hex by hex.
+          The first platform for <span className="text-white/90">Local Generative Engine Optimization</span> — see how ChatGPT, Perplexity, Gemini and Claude answer for your locations, hex by hex.
         </motion.p>
+
 
         {/* Loading sweep */}
         <motion.div
