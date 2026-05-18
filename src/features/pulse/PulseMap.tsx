@@ -61,6 +61,8 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   focusRef.current = focus;
   const onUserInteractRef = useRef(onUserInteract);
   onUserInteractRef.current = onUserInteract;
+  const onArrivedRef = useRef(onArrived);
+  onArrivedRef.current = onArrived;
 
   useImperativeHandle(
     ref,
