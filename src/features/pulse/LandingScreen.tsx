@@ -23,7 +23,7 @@ export function LandingScreen({ onSubmit }: Props) {
       exit={{ opacity: 0, scale: 1.08, filter: "blur(8px)" }}
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="landing-scan" />
+      
       <div className="landing-grain" />
 
       {/* Pulse arc behind input */}
