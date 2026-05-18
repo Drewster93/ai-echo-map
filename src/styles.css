@@ -78,7 +78,7 @@
     height: 100%;
   }
   body {
-    background-color: var(--color-dark-plum);
+    background-color: #05030d;
     color: #ffffff;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
