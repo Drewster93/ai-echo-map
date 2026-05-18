@@ -1,20 +1,52 @@
-import { useEffect, useMemo, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import type { HexCell, Location } from "./types";
 import { styleForIntensity } from "./hexUtils";
+import type { PulseMapHandle, TourFocus } from "./tour/useBlindSpotTour";
 
 interface Props {
   locations: Location[];
   hexCells: HexCell[];
   onHexSelect: (h3: string | null) => void;
   selectedHex: string | null;
-  /** When true, dive from high-altitude into Berlin. */
+  /** When true, dive from high-altitude into the initial framing. */
   dive?: boolean;
+  /** Fires once after the initial dive finishes. */
+  onArrived?: () => void;
+  /** Fires when the user touches the map (drag/wheel/touch). */
+  onUserInteract?: () => void;
+  /** Active focus window — non-focused cells dim out. */
+  focus?: TourFocus | null;
 }
 
-// Dynamically loaded leaflet (client only) to avoid SSR `window is not defined`.
 type LeafletNS = typeof import("leaflet");
 
-export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive = true }: Props) {
+function haversineKm(a: [number, number], b: [number, number]): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b[0] - a[0]);
+  const dLng = toRad(b[1] - a[1]);
+  const lat1 = toRad(a[0]);
+  const lat2 = toRad(b[0]);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function cellCentroid(boundary: [number, number][]): [number, number] {
+  let lat = 0;
+  let lng = 0;
+  for (const [a, b] of boundary) {
+    lat += a;
+    lng += b;
+  }
+  return [lat / boundary.length, lng / boundary.length];
+}
+
+export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
+  { locations, hexCells, onHexSelect, selectedHex, dive = true, onArrived, onUserInteract, focus = null },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const LRef = useRef<LeafletNS | null>(null);
@@ -23,6 +55,57 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
   const readyRef = useRef(false);
   const dovedRef = useRef(false);
   const dataRenderedRef = useRef(false);
+  const initialBoundsRef = useRef<import("leaflet").LatLngBounds | null>(null);
+  const arrivedFiredRef = useRef(false);
+  const focusRef = useRef<TourFocus | null>(focus);
+  focusRef.current = focus;
+  const onUserInteractRef = useRef(onUserInteract);
+  onUserInteractRef.current = onUserInteract;
+
+  useImperativeHandle(
+    ref,
+    (): PulseMapHandle => ({
+      flyTo: (center, zoom, durationSec = 1.2) =>
+        new Promise((resolve) => {
+          const map = mapRef.current;
+          if (!map) {
+            resolve();
+            return;
+          }
+          if (durationSec <= 0) {
+            map.setView(center, zoom);
+            resolve();
+            return;
+          }
+          map.flyTo(center, zoom, { duration: durationSec, easeLinearity: 0.25 });
+          map.once("moveend", () => resolve());
+        }),
+      flyToInitial: (durationSec = 1.2) =>
+        new Promise((resolve) => {
+          const map = mapRef.current;
+          const bounds = initialBoundsRef.current;
+          if (!map || !bounds) {
+            resolve();
+            return;
+          }
+          if (durationSec <= 0) {
+            map.fitBounds(bounds, { padding: [120, 120], animate: false });
+            resolve();
+            return;
+          }
+          map.flyToBounds(bounds, {
+            padding: [120, 120],
+            duration: durationSec,
+            easeLinearity: 0.25,
+          });
+          map.once("moveend", () => resolve());
+        }),
+      stop: () => {
+        mapRef.current?.stop();
+      },
+    }),
+    [],
+  );
 
   // Init map once
   useEffect(() => {
@@ -42,20 +125,15 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
         zoomAnimation: true,
         markerZoomAnimation: true,
       });
-      // Center initial view on the centroid of all locations at a zoom that
-      // already shows most of them — feels intentional rather than parked
-      // over one city.
-      const initialBounds = computeBounds(locations);
-      if (initialBounds) {
-        map.fitBounds(initialBounds, { padding: [120, 120], animate: false });
-        // Pull back one notch so the dive has somewhere to go.
+      const bounds = computeBounds(locations);
+      initialBoundsRef.current = bounds;
+      if (bounds) {
+        map.fitBounds(bounds, { padding: [120, 120], animate: false });
         map.setZoom(Math.max(map.getZoom() - 1.5, 3));
       } else {
         map.setView([50, 5], 4);
       }
-      // Realistic satellite basemap (Esri World Imagery) — same look as
-      // Uber/Kepler.gl realistic mode.
-      const baseLayer = L.tileLayer(
+      L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         {
           attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics",
@@ -63,40 +141,31 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
           keepBuffer: 4,
         },
       ).addTo(map);
-      // Reference overlay: roads, boundaries, place labels on top of imagery
       L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-        {
-          maxZoom: 19,
-          pane: "shadowPane",
-          opacity: 0.9,
-        },
+        { maxZoom: 19, pane: "shadowPane", opacity: 0.9 },
       ).addTo(map);
       L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
-        {
-          maxZoom: 19,
-          pane: "shadowPane",
-          opacity: 0.85,
-        },
+        { maxZoom: 19, pane: "shadowPane", opacity: 0.85 },
       ).addTo(map);
       mapRef.current = map;
       hexLayerRef.current = L.layerGroup().addTo(map);
-      // Make the hex SVG overlay additively blend so overlapping cells bloom
-      // like Uber/kepler.gl heatmaps.
       const overlayPane = map.getPanes().overlayPane;
-      if (overlayPane) {
-        overlayPane.classList.add("hex-overlay-pane");
-      }
+      if (overlayPane) overlayPane.classList.add("hex-overlay-pane");
       markerLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
-      // Defer heavy hex/marker rendering — only paint them once we arrive,
-      // otherwise the 31 multi-pass drop-shadow polygons stutter the flyTo.
+
+      // User-interact listeners — cancel tour on real user input
+      const fireInteract = () => onUserInteractRef.current?.();
+      const container = map.getContainer();
+      container.addEventListener("mousedown", fireInteract);
+      container.addEventListener("wheel", fireInteract, { passive: true });
+      container.addEventListener("touchstart", fireInteract, { passive: true });
+
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
         runDive(map);
-      } else if (!dive) {
-        // Not revealing yet — render nothing; the map just preloads tiles.
       }
     })();
     return () => {
@@ -129,17 +198,26 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
     const layer = hexLayerRef.current;
     if (!L || !layer) return;
     layer.clearLayers();
+    const activeFocus = focusRef.current;
     hexCells.forEach((cell, idx) => {
       const style = styleForIntensity(cell.intensity);
       const isSelected = selectedHex === cell.h3;
+      let dim = false;
+      if (activeFocus) {
+        const c = cellCentroid(cell.boundary);
+        const dist = haversineKm(c, activeFocus.center);
+        dim = dist > activeFocus.radiusKm;
+      }
+      const fillOpacity = dim ? 0.08 : style.fillOpacity;
+      const strokeOpacity = dim ? 0.12 : 0.55;
       const polygon = L.polygon(cell.boundary, {
         fillColor: style.fillColor,
-        fillOpacity: style.fillOpacity,
+        fillOpacity,
         color: isSelected ? "#7BFFFF" : style.color,
         weight: isSelected ? 2 : style.weight,
-        opacity: isSelected ? 1 : 0.55,
+        opacity: isSelected ? 1 : strokeOpacity,
         lineJoin: "round",
-        className: "hex-fade-in hex-cell",
+        className: dim ? "hex-cell hex-dim" : "hex-fade-in hex-cell",
         interactive: true,
         bubblingMouseEvents: false,
       });
@@ -149,28 +227,29 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
       });
       polygon.on("mouseout", () => {
         if (selectedHex !== cell.h3) {
-          polygon.setStyle({ weight: style.weight, color: style.color, opacity: 0.55 });
+          polygon.setStyle({ weight: style.weight, color: style.color, opacity: strokeOpacity });
         }
       });
       polygon.addTo(layer);
       queueMicrotask(() => {
         const el = (polygon as unknown as { _path?: SVGPathElement })._path;
-        if (el) {
-          el.style.setProperty("--delay", `${(idx % 40) * 35}ms`);
-          // Multi-pass bloom: tight inner halo + mid glow + wide atmospheric
-          // bloom. Each pass scales with intensity so hot cells visibly bleed
-          // light into their neighbors while cold cells stay crisp.
-          const t = Math.max(0, Math.min(1, cell.intensity / 100));
-          const inner = (2 + t * 6).toFixed(1);
-          const mid = (6 + t * 18).toFixed(1);
-          const wide = (12 + t * 38).toFixed(1);
-          el.style.filter = [
-            `drop-shadow(0 0 ${inner}px ${style.glow})`,
-            `drop-shadow(0 0 ${mid}px ${style.glow})`,
-            `drop-shadow(0 0 ${wide}px ${style.glow})`,
-          ].join(" ");
-          el.style.setProperty("opacity", String(0.85 + t * 0.15));
+        if (!el) return;
+        el.style.setProperty("--delay", `${(idx % 40) * 35}ms`);
+        if (dim) {
+          el.style.filter = "none";
+          el.style.setProperty("opacity", "0.45");
+          return;
         }
+        const t = Math.max(0, Math.min(1, cell.intensity / 100));
+        const inner = (2 + t * 6).toFixed(1);
+        const mid = (6 + t * 18).toFixed(1);
+        const wide = (12 + t * 38).toFixed(1);
+        el.style.filter = [
+          `drop-shadow(0 0 ${inner}px ${style.glow})`,
+          `drop-shadow(0 0 ${mid}px ${style.glow})`,
+          `drop-shadow(0 0 ${wide}px ${style.glow})`,
+        ].join(" ");
+        el.style.setProperty("opacity", String(0.85 + t * 0.15));
       });
     });
   }
@@ -190,23 +269,30 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (!L || !bounds) {
       paintData();
+      fireArrived();
       return;
     }
     const padded = bounds.pad(0.15);
     const targetCenter = padded.getCenter();
     const targetZoom = Math.min(map.getBoundsZoom(padded), 7);
+    initialBoundsRef.current = bounds;
     if (reduced) {
       map.setView(targetCenter, targetZoom);
       paintData();
+      fireArrived();
       return;
     }
-    map.flyTo(targetCenter, targetZoom, {
-      duration: 1.8,
-      easeLinearity: 0.25,
-    });
+    map.flyTo(targetCenter, targetZoom, { duration: 1.8, easeLinearity: 0.25 });
     map.once("moveend", () => {
       paintData();
+      fireArrived();
     });
+  }
+
+  function fireArrived() {
+    if (arrivedFiredRef.current) return;
+    arrivedFiredRef.current = true;
+    onArrived?.();
   }
 
   function computeBounds(locs: Location[]): import("leaflet").LatLngBounds | null {
@@ -215,7 +301,6 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
     return L.latLngBounds(locs.map((l) => [l.lat, l.lng] as [number, number]));
   }
 
-  // Kick off the dive when `dive` flips true after the map is ready
   useEffect(() => {
     if (!dive || dovedRef.current) return;
     const map = mapRef.current;
@@ -224,21 +309,20 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
     runDive(map);
   }, [dive]);
 
-  // Re-render markers when locations change (only after first paint)
   useEffect(() => {
     if (readyRef.current && dataRenderedRef.current) renderMarkers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locations]);
 
-  // Re-render hex layer (only after first paint)
   const cellKey = useMemo(
     () => hexCells.map((c) => `${c.h3}:${c.intensity.toFixed(1)}`).join("|"),
     [hexCells],
   );
+  const focusKey = focus ? `${focus.center[0]},${focus.center[1]},${focus.radiusKm}` : "none";
   useEffect(() => {
     if (readyRef.current && dataRenderedRef.current) renderHex();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cellKey, selectedHex]);
+  }, [cellKey, selectedHex, focusKey]);
 
   return <div ref={containerRef} className="absolute inset-0 z-0" />;
-}
+});
