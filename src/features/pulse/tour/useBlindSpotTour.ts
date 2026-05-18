@@ -77,7 +77,11 @@ export function useBlindSpotTour({ mapHandle, locations, scoreFor, reducedMotion
   const start = useCallback(async () => {
     if (!mapHandle) return;
     if (runningRef.current) return;
-    const stops = selectTourStops(locationsRef.current, scoreForRef.current);
+    const stops = selectTourStops(
+      locationsRef.current,
+      scoreForRef.current,
+      competitorStatsRef.current ?? undefined,
+    );
     if (stops.length === 0) {
       setPhase("done");
       return;
