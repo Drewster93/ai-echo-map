@@ -261,11 +261,28 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     });
   }
 
+  function renderCompetitors() {
+    const L = LRef.current;
+    const layer = competitorLayerRef.current;
+    if (!L || !layer) return;
+    layer.clearLayers();
+    competitorMarkers.forEach((m) => {
+      const icon = L.divIcon({
+        className: "",
+        html: `<div class="ghost-marker"><span class="ghost-ring"></span><span class="ghost-initial">${m.initial}</span></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      });
+      L.marker([m.lat, m.lng], { icon, interactive: false, keyboard: false }).addTo(layer);
+    });
+  }
+
   function paintData() {
     if (dataRenderedRef.current) return;
     dataRenderedRef.current = true;
     renderMarkers();
     renderHex();
+    renderCompetitors();
   }
 
   function runDive(map: import("leaflet").Map) {
