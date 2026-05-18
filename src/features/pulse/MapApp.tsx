@@ -8,11 +8,13 @@ import { Legend } from "./hud/Legend";
 import { StatBlock } from "./hud/StatBlock";
 import { HeatReplayButton } from "./hud/HeatReplayButton";
 import { ReplayTourPill } from "./hud/ReplayTourPill";
+import { CompetitorTogglePill } from "./hud/CompetitorTogglePill";
 import { TourInsightCard } from "./tour/TourInsightCard";
 import { TourOutroSummary } from "./tour/TourOutroSummary";
 import { useBlindSpotTour, type PulseMapHandle } from "./tour/useBlindSpotTour";
 import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
+import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
 import type { Assistant, Location, TimeRange } from "./types";
 
 interface Props {
@@ -28,6 +30,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const [replayDay, setReplayDay] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [mapHandle, setMapHandle] = useState<PulseMapHandle | null>(null);
+  const [showCompetitors, setShowCompetitors] = useState(false);
 
   const locations: Location[] = MOCK_LOCATIONS;
 
@@ -75,12 +78,23 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
+  const competitorStats = useMemo(
+    () => getCityCompetitorStats(brandedLocations),
+    [brandedLocations],
+  );
+  const competitorMarkers = useMemo(
+    () => (showCompetitors ? buildCompetitorMarkers(brandedLocations) : []),
+    [brandedLocations, showCompetitors],
+  );
+
   const tour = useBlindSpotTour({
     mapHandle,
     locations: brandedLocations,
     scoreFor,
     reducedMotion,
+    competitorStats: showCompetitors ? competitorStats : null,
   });
+
 
   const setSelectedHex = useCallback(
     (h3: string | null) => {
@@ -176,6 +190,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
         focus={tour.focus}
         onArrived={handleArrived}
         onUserInteract={handleUserInteract}
+        competitorMarkers={competitorMarkers}
       />
 
       <motion.div
@@ -211,6 +226,12 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
           </motion.div>
           <motion.div custom={4} variants={hudVariants} initial="hidden" animate="show">
             <HeatReplayButton playing={playing} progress={replayProgress} onClick={startReplay} />
+          </motion.div>
+          <motion.div custom={5} variants={hudVariants} initial="hidden" animate="show">
+            <CompetitorTogglePill
+              active={showCompetitors}
+              onToggle={() => setShowCompetitors((v) => !v)}
+            />
           </motion.div>
           {tour.phase === "done" && tour.summary && (
             <motion.div

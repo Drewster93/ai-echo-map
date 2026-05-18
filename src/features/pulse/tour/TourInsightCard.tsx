@@ -23,6 +23,11 @@ export function TourInsightCard({ stop }: Props) {
         </div>
         <div className="mt-1 font-display text-2xl text-white">{stop.city}</div>
         <div className="mt-2 text-sm leading-snug text-white/80">{stop.insight}</div>
+        {stop.comparison && (
+          <div className="mt-2 border-t border-white/10 pt-2 text-xs leading-snug text-aqua/90">
+            {stop.comparison}
+          </div>
+        )}
       </div>
     </motion.div>
   );

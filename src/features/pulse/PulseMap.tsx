@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "rea
 import type { HexCell, Location } from "./types";
 import { styleForIntensity } from "./hexUtils";
 import type { PulseMapHandle, TourFocus } from "./tour/useBlindSpotTour";
+import type { CompetitorMarker } from "./competitorData";
 
 interface Props {
   locations: Location[];
@@ -16,6 +17,8 @@ interface Props {
   onUserInteract?: () => void;
   /** Active focus window — non-focused cells dim out. */
   focus?: TourFocus | null;
+  /** Ghost competitor markers — rendered when non-empty. */
+  competitorMarkers?: CompetitorMarker[];
 }
 
 type LeafletNS = typeof import("leaflet");
@@ -44,7 +47,7 @@ function cellCentroid(boundary: [number, number][]): [number, number] {
 }
 
 export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
-  { locations, hexCells, onHexSelect, selectedHex, dive = true, onArrived, onUserInteract, focus = null },
+  { locations, hexCells, onHexSelect, selectedHex, dive = true, onArrived, onUserInteract, focus = null, competitorMarkers = [] },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,6 +55,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   const LRef = useRef<LeafletNS | null>(null);
   const hexLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
+  const competitorLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const readyRef = useRef(false);
   const dovedRef = useRef(false);
   const dataRenderedRef = useRef(false);
@@ -156,6 +160,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       const overlayPane = map.getPanes().overlayPane;
       if (overlayPane) overlayPane.classList.add("hex-overlay-pane");
       markerLayerRef.current = L.layerGroup().addTo(map);
+      competitorLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
 
       // User-interact listeners — cancel tour on real user input
@@ -256,11 +261,28 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     });
   }
 
+  function renderCompetitors() {
+    const L = LRef.current;
+    const layer = competitorLayerRef.current;
+    if (!L || !layer) return;
+    layer.clearLayers();
+    competitorMarkers.forEach((m) => {
+      const icon = L.divIcon({
+        className: "",
+        html: `<div class="ghost-marker"><span class="ghost-ring"></span><span class="ghost-initial">${m.initial}</span></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      });
+      L.marker([m.lat, m.lng], { icon, interactive: false, keyboard: false }).addTo(layer);
+    });
+  }
+
   function paintData() {
     if (dataRenderedRef.current) return;
     dataRenderedRef.current = true;
     renderMarkers();
     renderHex();
+    renderCompetitors();
   }
 
   function runDive(map: import("leaflet").Map) {
@@ -325,6 +347,15 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     if (readyRef.current && dataRenderedRef.current) renderHex();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellKey, selectedHex, focusKey]);
+
+  const competitorKey = useMemo(
+    () => competitorMarkers.map((m) => `${m.lat},${m.lng},${m.name}`).join("|"),
+    [competitorMarkers],
+  );
+  useEffect(() => {
+    if (readyRef.current && dataRenderedRef.current) renderCompetitors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [competitorKey]);
 
   return <div ref={containerRef} className="absolute inset-0 z-0" />;
 });
