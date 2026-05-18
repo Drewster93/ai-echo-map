@@ -23,7 +23,8 @@ export function LandingScreen({ onSubmit }: Props) {
     <motion.div
       key="landing"
       className="landing-bg absolute inset-0 z-30 items-center justify-center overflow-hidden px-6 flex flex-col"
-      initial={{ opacity: 1 }}
+      initial={{ opacity: 0, filter: "blur(10px)" }}
+      animate={{ opacity: 1, filter: "blur(0px)" }}
       exit={{
         opacity: 0,
         scale: 1.25,
@@ -31,6 +32,7 @@ export function LandingScreen({ onSubmit }: Props) {
       }}
       transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
     >
+
       <div className="landing-grain" />
 
       {/* Aperture flash that emanates from the input on exit */}

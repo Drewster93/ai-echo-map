@@ -19,9 +19,10 @@ export function IntroSequence({ onDone }: Props) {
       key="intro"
       className="landing-bg absolute inset-0 z-40 flex flex-col items-center justify-center overflow-hidden px-6"
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.08, filter: "blur(18px)" }}
-      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+      exit={{ opacity: 0, filter: "blur(8px)" }}
+      transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
     >
+
       {/* Expanding pulse rings */}
       {[0, 0.25, 0.5, 0.75].map((delay, i) => (
         <motion.span
