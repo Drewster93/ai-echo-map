@@ -79,12 +79,13 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
       }
       markerLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
-      renderMarkers();
-      renderHex();
-      // If reveal was triggered before the map finished initializing, dive now.
+      // Defer heavy hex/marker rendering — only paint them once we arrive,
+      // otherwise the 31 multi-pass drop-shadow polygons stutter the flyTo.
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
         runDive(map);
+      } else if (!dive) {
+        // Not revealing yet — render nothing; the map just preloads tiles.
       }
     })();
     return () => {
