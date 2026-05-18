@@ -41,7 +41,18 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
         fadeAnimation: true,
         zoomAnimation: true,
         markerZoomAnimation: true,
-      }).setView([52.515, 13.405], 5);
+      });
+      // Center initial view on the centroid of all locations at a zoom that
+      // already shows most of them — feels intentional rather than parked
+      // over one city.
+      const initialBounds = computeBounds(locations);
+      if (initialBounds) {
+        map.fitBounds(initialBounds, { padding: [120, 120], animate: false });
+        // Pull back one notch so the dive has somewhere to go.
+        map.setZoom(Math.max(map.getZoom() - 1.5, 3));
+      } else {
+        map.setView([50, 5], 4);
+      }
       // Realistic satellite basemap (Esri World Imagery) — same look as
       // Uber/Kepler.gl realistic mode.
       const baseLayer = L.tileLayer(
@@ -172,25 +183,36 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
   }
 
   function runDive(map: import("leaflet").Map) {
+    const L = LRef.current;
+    const bounds = computeBounds(locations);
     const reduced =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      map.setView([52.515, 13.405], 12);
+    if (!L || !bounds) {
       paintData();
       return;
     }
-    // Short dive (z5 → z12) — fewer levels means smoother animation and
-    // far fewer satellite tiles to fetch mid-flight.
-    map.flyTo([52.515, 13.405], 12, {
-      duration: 2.0,
+    // Target: fit all locations comfortably so several cities are visible at
+    // once. Padding keeps HUD chrome from covering markers.
+    const target = (map as unknown as { _getBoundsCenterZoom: (b: import("leaflet").LatLngBounds, o: unknown) => { center: import("leaflet").LatLng; zoom: number } })._getBoundsCenterZoom(bounds, { padding: [140, 140] });
+    if (reduced) {
+      map.setView(target.center, target.zoom);
+      paintData();
+      return;
+    }
+    map.flyTo(target.center, target.zoom, {
+      duration: 1.8,
       easeLinearity: 0.25,
     });
-    // Paint heavy hex/marker layers only after we arrive, so the flyTo stays
-    // fluid. `moveend` fires once the camera settles.
     map.once("moveend", () => {
       paintData();
     });
+  }
+
+  function computeBounds(locs: Location[]): import("leaflet").LatLngBounds | null {
+    const L = LRef.current;
+    if (!L || locs.length === 0) return null;
+    return L.latLngBounds(locs.map((l) => [l.lat, l.lng] as [number, number]));
   }
 
   // Kick off the dive when `dive` flips true after the map is ready
