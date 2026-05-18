@@ -23,13 +23,13 @@ function Index() {
   const revealing = brand !== null;
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-[#05030d] text-white">
-      {/* MapApp is always mounted so Leaflet + satellite tiles preload behind
-          the landing screen, eliminating init lag at reveal time. */}
-      <MapApp
-        brand={brand ?? "Preview"}
-        onSwitchBrand={() => setBrand(null)}
-        revealing={revealing}
-      />
+      {revealing && (
+        <MapApp
+          brand={brand ?? "Preview"}
+          onSwitchBrand={() => setBrand(null)}
+          revealing={revealing}
+        />
+      )}
       <AnimatePresence>
         {!revealing && <LandingScreen key="landing" onSubmit={setBrand} />}
       </AnimatePresence>
