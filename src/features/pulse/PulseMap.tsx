@@ -7,12 +7,14 @@ interface Props {
   hexCells: HexCell[];
   onHexSelect: (h3: string | null) => void;
   selectedHex: string | null;
+  /** When true, dive from high-altitude into Berlin. */
+  dive?: boolean;
 }
 
 // Dynamically loaded leaflet (client only) to avoid SSR `window is not defined`.
 type LeafletNS = typeof import("leaflet");
 
-export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Props) {
+export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive = true }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const LRef = useRef<LeafletNS | null>(null);
