@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "rea
 import type { HexCell, Location } from "./types";
 import { styleForIntensity } from "./hexUtils";
 import type { PulseMapHandle, TourFocus } from "./tour/useBlindSpotTour";
+import type { CompetitorMarker } from "./competitorData";
 
 interface Props {
   locations: Location[];
@@ -16,6 +17,8 @@ interface Props {
   onUserInteract?: () => void;
   /** Active focus window — non-focused cells dim out. */
   focus?: TourFocus | null;
+  /** Ghost competitor markers — rendered when non-empty. */
+  competitorMarkers?: CompetitorMarker[];
 }
 
 type LeafletNS = typeof import("leaflet");
