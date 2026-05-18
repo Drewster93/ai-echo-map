@@ -69,6 +69,7 @@ function aggregateByCity(
 export function selectTourStops(
   locations: Location[],
   scoreFor: (loc: Location) => number,
+  competitorStats?: Map<string, CityCompetitorStats>,
 ): TourStop[] {
   const cities = aggregateByCity(locations, scoreFor).filter((c) => c.promptCount > 0);
   if (cities.length === 0) return [];
@@ -77,6 +78,12 @@ export function selectTourStops(
   const stronghold = sorted[0];
   const blindspot = sorted[sorted.length - 1];
   const middle = sorted.length >= 3 ? sorted[Math.floor(sorted.length / 2)] : null;
+
+  const compFor = (city: string): string | undefined => {
+    const s = competitorStats?.get(city);
+    if (!s?.leader) return undefined;
+    return `vs ${s.leader} — leading in ${s.leaderWins}/${s.totalPrompts} prompts here.`;
+  };
 
   const used = new Set<string>();
   const stops: TourStop[] = [];
@@ -90,6 +97,7 @@ export function selectTourStops(
       zoom: 11,
       headline: "Your stronghold",
       insight: `Leading in ${stronghold.mentionedCount}/${stronghold.promptCount} prompts — your strongest market.`,
+      comparison: compFor(stronghold.city),
     });
   }
 
@@ -102,6 +110,7 @@ export function selectTourStops(
       zoom: 11,
       headline: "Your blind spot",
       insight: `Invisible in ${blindspot.notMentionedCount}/${blindspot.promptCount} local prompts — high intent, no presence.`,
+      comparison: compFor(blindspot.city),
     });
   }
 
@@ -115,6 +124,7 @@ export function selectTourStops(
       zoom: 11,
       headline: "Your opportunity",
       insight: `Mentioned in ${opp.mentionedCount}/${opp.promptCount} prompts — one content push from leading.`,
+      comparison: compFor(opp.city),
     });
   }
 
