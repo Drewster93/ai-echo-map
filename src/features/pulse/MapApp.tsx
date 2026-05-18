@@ -190,6 +190,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
         focus={tour.focus}
         onArrived={handleArrived}
         onUserInteract={handleUserInteract}
+        competitorMarkers={competitorMarkers}
       />
 
       <motion.div
