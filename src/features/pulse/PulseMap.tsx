@@ -47,7 +47,7 @@ function cellCentroid(boundary: [number, number][]): [number, number] {
 }
 
 export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
-  { locations, hexCells, onHexSelect, selectedHex, dive = true, onArrived, onUserInteract, focus = null },
+  { locations, hexCells, onHexSelect, selectedHex, dive = true, onArrived, onUserInteract, focus = null, competitorMarkers = [] },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
