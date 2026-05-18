@@ -78,25 +78,13 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
       }
       markerLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
-      // Smooth single flyTo into Berlin once the base imagery has loaded so
-      // we don't fight tile-pop during the animation.
-      const flyToBerlin = () => {
-        map.flyTo([52.515, 13.405], 12, {
-          duration: 3.2,
-          easeLinearity: 0.25,
-        });
-      };
-      let flown = false;
-      const trigger = () => {
-        if (flown) return;
-        flown = true;
-        flyToBerlin();
-      };
-      baseLayer.once("load", trigger);
-      // Fallback in case tiles are cached and 'load' doesn't fire promptly
-      setTimeout(trigger, 1200);
       renderMarkers();
       renderHex();
+      // If reveal was triggered before the map finished initializing, dive now.
+      if (dive && !dovedRef.current) {
+        dovedRef.current = true;
+        runDive(map);
+      }
     })();
     return () => {
       cancelled = true;
