@@ -294,7 +294,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   function fireArrived() {
     if (arrivedFiredRef.current) return;
     arrivedFiredRef.current = true;
-    onArrived?.();
+    onArrivedRef.current?.();
   }
 
   function computeBounds(locs: Location[]): import("leaflet").LatLngBounds | null {
