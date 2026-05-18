@@ -162,6 +162,29 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
     });
   }
 
+  function runDive(map: import("leaflet").Map) {
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      map.setView([52.515, 13.405], 12);
+      return;
+    }
+    map.flyTo([52.515, 13.405], 12, {
+      duration: 2.6,
+      easeLinearity: 0.2,
+    });
+  }
+
+  // Kick off the dive when `dive` flips true after the map is ready
+  useEffect(() => {
+    if (!dive || dovedRef.current) return;
+    const map = mapRef.current;
+    if (!readyRef.current || !map) return;
+    dovedRef.current = true;
+    runDive(map);
+  }, [dive]);
+
   // Re-render markers when locations change
   useEffect(() => {
     if (readyRef.current) renderMarkers();
