@@ -192,15 +192,15 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
       paintData();
       return;
     }
-    // Target: fit all locations comfortably so several cities are visible at
-    // once. Padding keeps HUD chrome from covering markers.
-    const target = (map as unknown as { _getBoundsCenterZoom: (b: import("leaflet").LatLngBounds, o: unknown) => { center: import("leaflet").LatLng; zoom: number } })._getBoundsCenterZoom(bounds, { padding: [140, 140] });
+    const padded = bounds.pad(0.15);
+    const targetCenter = padded.getCenter();
+    const targetZoom = Math.min(map.getBoundsZoom(padded), 7);
     if (reduced) {
-      map.setView(target.center, target.zoom);
+      map.setView(targetCenter, targetZoom);
       paintData();
       return;
     }
-    map.flyTo(target.center, target.zoom, {
+    map.flyTo(targetCenter, targetZoom, {
       duration: 1.8,
       easeLinearity: 0.25,
     });
