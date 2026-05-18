@@ -8,11 +8,13 @@ import { Legend } from "./hud/Legend";
 import { StatBlock } from "./hud/StatBlock";
 import { HeatReplayButton } from "./hud/HeatReplayButton";
 import { ReplayTourPill } from "./hud/ReplayTourPill";
+import { CompetitorTogglePill } from "./hud/CompetitorTogglePill";
 import { TourInsightCard } from "./tour/TourInsightCard";
 import { TourOutroSummary } from "./tour/TourOutroSummary";
 import { useBlindSpotTour, type PulseMapHandle } from "./tour/useBlindSpotTour";
 import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
+import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
 import type { Assistant, Location, TimeRange } from "./types";
 
 interface Props {
