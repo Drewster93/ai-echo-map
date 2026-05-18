@@ -22,6 +22,7 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const readyRef = useRef(false);
   const dovedRef = useRef(false);
+  const dataRenderedRef = useRef(false);
 
   // Init map once
   useEffect(() => {
