@@ -8,7 +8,7 @@ export function CompetitorTogglePill({ active, onToggle }: Props) {
     <button
       onClick={onToggle}
       aria-pressed={active}
-      className={`glass absolute right-5 top-5 z-20 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] transition hover:translate-y-[-1px] ${
+      className={`glass absolute right-5 top-[72px] z-20 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] transition hover:translate-y-[-1px] ${
         active ? "text-aqua ring-1 ring-aqua/60" : "text-white/85"
       }`}
     >
