@@ -113,6 +113,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const dateLabels = useMemo(() => getDateLabels(), []);
 
   // HUD staggered reveal — starts ~60% through the dive
+  const EASE = [0.16, 1, 0.3, 1] as const;
   const hudVariants = {
     hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
     show: (i: number) => ({
@@ -122,10 +123,10 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
       transition: {
         delay: 1.1 + i * 0.09,
         duration: 0.6,
-        ease: [0.16, 1, 0.3, 1],
+        ease: EASE,
       },
     }),
-  };
+  } as const;
 
   return (
     <motion.div
