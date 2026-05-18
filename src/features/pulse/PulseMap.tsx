@@ -164,17 +164,32 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
     });
   }
 
+  function paintData() {
+    if (dataRenderedRef.current) return;
+    dataRenderedRef.current = true;
+    renderMarkers();
+    renderHex();
+  }
+
   function runDive(map: import("leaflet").Map) {
     const reduced =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
       map.setView([52.515, 13.405], 12);
+      paintData();
       return;
     }
+    // Short dive (z5 → z12) — fewer levels means smoother animation and
+    // far fewer satellite tiles to fetch mid-flight.
     map.flyTo([52.515, 13.405], 12, {
-      duration: 2.6,
-      easeLinearity: 0.2,
+      duration: 2.0,
+      easeLinearity: 0.25,
+    });
+    // Paint heavy hex/marker layers only after we arrive, so the flyTo stays
+    // fluid. `moveend` fires once the camera settles.
+    map.once("moveend", () => {
+      paintData();
     });
   }
 
@@ -187,19 +202,19 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
     runDive(map);
   }, [dive]);
 
-  // Re-render markers when locations change
+  // Re-render markers when locations change (only after first paint)
   useEffect(() => {
-    if (readyRef.current) renderMarkers();
+    if (readyRef.current && dataRenderedRef.current) renderMarkers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locations]);
 
-  // Re-render hex layer
+  // Re-render hex layer (only after first paint)
   const cellKey = useMemo(
     () => hexCells.map((c) => `${c.h3}:${c.intensity.toFixed(1)}`).join("|"),
     [hexCells],
   );
   useEffect(() => {
-    if (readyRef.current) renderHex();
+    if (readyRef.current && dataRenderedRef.current) renderHex();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellKey, selectedHex]);
 
