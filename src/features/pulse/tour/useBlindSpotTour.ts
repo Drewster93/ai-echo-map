@@ -21,9 +21,10 @@ interface Args {
   locations: Location[];
   scoreFor: (loc: Location) => number;
   reducedMotion: boolean;
+  competitorStats?: Map<string, CityCompetitorStats> | null;
 }
 
-export function useBlindSpotTour({ mapHandle, locations, scoreFor, reducedMotion }: Args) {
+export function useBlindSpotTour({ mapHandle, locations, scoreFor, reducedMotion, competitorStats = null }: Args) {
   const [phase, setPhase] = useState<TourPhase>("idle");
   const [currentStop, setCurrentStop] = useState<TourStop | null>(null);
   const [focus, setFocus] = useState<TourFocus | null>(null);
@@ -36,6 +37,8 @@ export function useBlindSpotTour({ mapHandle, locations, scoreFor, reducedMotion
 
   const scoreForRef = useRef(scoreFor);
   scoreForRef.current = scoreFor;
+  const competitorStatsRef = useRef(competitorStats);
+  competitorStatsRef.current = competitorStats;
   const locationsRef = useRef(locations);
   locationsRef.current = locations;
 
