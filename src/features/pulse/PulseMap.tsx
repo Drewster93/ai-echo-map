@@ -348,5 +348,14 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellKey, selectedHex, focusKey]);
 
+  const competitorKey = useMemo(
+    () => competitorMarkers.map((m) => `${m.lat},${m.lng},${m.name}`).join("|"),
+    [competitorMarkers],
+  );
+  useEffect(() => {
+    if (readyRef.current && dataRenderedRef.current) renderCompetitors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [competitorKey]);
+
   return <div ref={containerRef} className="absolute inset-0 z-0" />;
 });
