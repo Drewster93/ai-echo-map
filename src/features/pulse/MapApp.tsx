@@ -30,6 +30,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const [replayDay, setReplayDay] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [mapHandle, setMapHandle] = useState<PulseMapHandle | null>(null);
+  const [showCompetitors, setShowCompetitors] = useState(false);
 
   const locations: Location[] = MOCK_LOCATIONS;
 
