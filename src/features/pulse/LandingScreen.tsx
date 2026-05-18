@@ -22,7 +22,7 @@ export function LandingScreen({ onSubmit }: Props) {
   return (
     <motion.div
       key="landing"
-      className="landing-bg absolute inset-0 z-30 flex items-center justify-center overflow-hidden px-6"
+      className="landing-bg absolute inset-0 z-30 items-center justify-center overflow-hidden px-6 flex flex-col"
       initial={{ opacity: 1 }}
       exit={{
         opacity: 0,
