@@ -91,9 +91,6 @@ export function LandingScreen({ onSubmit }: Props) {
 
       </motion.div>
 
-      <div className="absolute bottom-6 right-8 text-[10px] uppercase tracking-[0.3em] text-white/30">
-        Internal product validation · v0.1
-      </div>
     </motion.div>
   );
 }
