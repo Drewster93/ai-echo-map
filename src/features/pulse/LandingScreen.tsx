@@ -8,29 +8,49 @@ interface Props {
 
 export function LandingScreen({ onSubmit }: Props) {
   const [value, setValue] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   function handle(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting) return;
     const v = value.trim() || "Lumen Coffee";
-    onSubmit(v);
+    setSubmitting(true);
+    // Tiny delay lets the input "pulse" feedback render before exit kicks in.
+    setTimeout(() => onSubmit(v), 120);
   }
 
   return (
     <motion.div
       key="landing"
-      className="landing-bg relative flex h-full w-full items-center justify-center overflow-hidden px-6"
+      className="landing-bg absolute inset-0 z-30 flex items-center justify-center overflow-hidden px-6"
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.08, filter: "blur(8px)" }}
-      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+      exit={{
+        opacity: 0,
+        scale: 1.25,
+        filter: "blur(14px)",
+      }}
+      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
     >
-      
       <div className="landing-grain" />
+
+      {/* Aperture flash that emanates from the input on exit */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-40"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(134,14,255,0.55), rgba(48,114,252,0.18) 35%, transparent 65%)",
+          mixBlendMode: "screen",
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0 }}
+        exit={{ opacity: [0, 0.9, 0] }}
+        transition={{ duration: 1.1, ease: "easeOut", times: [0, 0.35, 1] }}
+      />
 
       {/* Pulse arc behind input */}
       <div className="pointer-events-none absolute left-1/2 top-1/2 z-[1] -translate-x-1/2 -translate-y-[40%]">
         <PulseArc size={900} color="#FFFFFF" opacity={0.13} />
       </div>
-
 
       <motion.div
         className="relative z-10 mx-auto w-full max-w-3xl text-center"
@@ -54,7 +74,11 @@ export function LandingScreen({ onSubmit }: Props) {
         </p>
 
         <form onSubmit={handle} className="mx-auto mt-12 max-w-xl">
-          <div className="group relative">
+          <motion.div
+            className="group relative"
+            animate={submitting ? { scale: [1, 1.03, 0.98] } : { scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
             <div className="absolute -inset-1 rounded-full bg-ultraviolet opacity-40 blur-2xl transition duration-500 group-focus-within:opacity-80 group-focus-within:blur-3xl" />
             <div className="relative flex items-center gap-2 rounded-full border border-white/15 bg-dark-plum/80 p-2 pl-6 backdrop-blur-xl transition focus-within:border-ultraviolet/60">
               <svg
@@ -86,11 +110,9 @@ export function LandingScreen({ onSubmit }: Props) {
                 </span>
               </button>
             </div>
-          </div>
+          </motion.div>
         </form>
-
       </motion.div>
-
     </motion.div>
   );
 }
