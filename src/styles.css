@@ -291,7 +291,6 @@
 
 /* Landing background — deep, high-tech, premium */
 .landing-bg {
-  position: relative;
   background:
     radial-gradient(ellipse at 50% 0%, #100726 0%, #07030f 55%, #02010a 100%);
   isolation: isolate;
