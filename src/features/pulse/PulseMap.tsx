@@ -306,7 +306,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       fireArrived();
       return;
     }
-    map.flyTo(targetCenter, targetZoom, { duration: 1.8, easeLinearity: 0.25 });
+    map.flyTo(targetCenter, targetZoom, { duration: 3.6, easeLinearity: 0.1 });
     map.once("moveend", () => {
       paintData();
       fireArrived();
