@@ -227,6 +227,12 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
           <motion.div custom={4} variants={hudVariants} initial="hidden" animate="show">
             <HeatReplayButton playing={playing} progress={replayProgress} onClick={startReplay} />
           </motion.div>
+          <motion.div custom={5} variants={hudVariants} initial="hidden" animate="show">
+            <CompetitorTogglePill
+              active={showCompetitors}
+              onToggle={() => setShowCompetitors((v) => !v)}
+            />
+          </motion.div>
           {tour.phase === "done" && tour.summary && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
