@@ -55,6 +55,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   const LRef = useRef<LeafletNS | null>(null);
   const hexLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
+  const competitorLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const readyRef = useRef(false);
   const dovedRef = useRef(false);
   const dataRenderedRef = useRef(false);
