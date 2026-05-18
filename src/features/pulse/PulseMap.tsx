@@ -160,6 +160,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       const overlayPane = map.getPanes().overlayPane;
       if (overlayPane) overlayPane.classList.add("hex-overlay-pane");
       markerLayerRef.current = L.layerGroup().addTo(map);
+      competitorLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
 
       // User-interact listeners — cancel tour on real user input
