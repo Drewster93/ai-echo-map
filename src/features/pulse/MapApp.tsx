@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PulseMap } from "./PulseMap";
 import { DetailPanel } from "./DetailPanel";
@@ -7,6 +7,10 @@ import { FilterControls } from "./hud/FilterControls";
 import { Legend } from "./hud/Legend";
 import { StatBlock } from "./hud/StatBlock";
 import { HeatReplayButton } from "./hud/HeatReplayButton";
+import { ReplayTourPill } from "./hud/ReplayTourPill";
+import { TourInsightCard } from "./tour/TourInsightCard";
+import { TourOutroSummary } from "./tour/TourOutroSummary";
+import { useBlindSpotTour, type PulseMapHandle } from "./tour/useBlindSpotTour";
 import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
 import type { Assistant, Location, TimeRange } from "./types";
@@ -20,13 +24,13 @@ interface Props {
 export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const [assistant, setAssistant] = useState<Assistant>("all");
   const [range, setRange] = useState<TimeRange>("7d");
-  const [selectedHex, setSelectedHex] = useState<string | null>(null);
-  const [replayDay, setReplayDay] = useState<number | null>(null); // 0-6 if playing
+  const [selectedHex, setSelectedHexState] = useState<string | null>(null);
+  const [replayDay, setReplayDay] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [mapHandle, setMapHandle] = useState<PulseMapHandle | null>(null);
 
   const locations: Location[] = MOCK_LOCATIONS;
 
-  // Replace brand in cluster names for display flair
   const brandedLocations = useMemo<Location[]>(
     () =>
       locations.map((l) => ({
@@ -36,30 +40,27 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     [brand, locations],
   );
 
-  const scoreFor = (loc: Location): number => {
-    let base =
-      assistant === "all"
-        ? loc.visibilityScore
-        : loc.scoresByAssistant[assistant as Exclude<Assistant, "all">];
-    if (replayDay !== null) {
-      base = loc.history7d[replayDay];
-    } else if (range === "24h") {
-      base = loc.history7d[6];
-    } else if (range === "30d") {
-      base = (loc.history7d.reduce((a, b) => a + b, 0) / 7) * 0.95;
-    }
-    return base;
-  };
+  const scoreFor = useCallback(
+    (loc: Location): number => {
+      let base =
+        assistant === "all"
+          ? loc.visibilityScore
+          : loc.scoresByAssistant[assistant as Exclude<Assistant, "all">];
+      if (replayDay !== null) base = loc.history7d[replayDay];
+      else if (range === "24h") base = loc.history7d[6];
+      else if (range === "30d") base = (loc.history7d.reduce((a, b) => a + b, 0) / 7) * 0.95;
+      return base;
+    },
+    [assistant, range, replayDay],
+  );
 
   const hexCells = useMemo(
     () => buildHexCells(brandedLocations, scoreFor),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [brandedLocations, assistant, range, replayDay],
+    [brandedLocations, scoreFor],
   );
 
   const selected = selectedHex ? hexCells.find((c) => c.h3 === selectedHex) ?? null : null;
 
-  // Stats
   const totalLocations = brandedLocations.length;
   const avgScore =
     brandedLocations.reduce((sum, l) => sum + scoreFor(l), 0) / Math.max(1, totalLocations);
@@ -70,7 +71,44 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     return ((last - first) / Math.max(1, first)) * 100;
   }, [brandedLocations, totalLocations]);
 
-  // Replay loop
+  const reducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+
+  const tour = useBlindSpotTour({
+    mapHandle,
+    locations: brandedLocations,
+    scoreFor,
+    reducedMotion,
+  });
+
+  const setSelectedHex = useCallback(
+    (h3: string | null) => {
+      if (h3 !== null && tour.isActive) tour.cancel();
+      setSelectedHexState(h3);
+    },
+    [tour],
+  );
+
+  // Cancel tour on filter change while active
+  const tourActiveRef = useRef(tour.isActive);
+  tourActiveRef.current = tour.isActive;
+  const tourCancelRef = useRef(tour.cancel);
+  tourCancelRef.current = tour.cancel;
+  useEffect(() => {
+    if (tourActiveRef.current) tourCancelRef.current();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assistant, range]);
+
+  const handleArrived = useCallback(() => {
+    tour.start();
+  }, [tour]);
+
+  const handleUserInteract = useCallback(() => {
+    if (tour.isActive) tour.cancel();
+  }, [tour]);
+
+  // Replay loop (heat replay — separate from tour)
   const rafRef = useRef<number | null>(null);
   const startRef = useRef<number | null>(null);
   const DURATION = 6000;
@@ -90,9 +128,8 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
       setReplayProgress(p);
       const day = Math.min(6, Math.floor(p * 7));
       setReplayDay(day);
-      if (p < 1) {
-        rafRef.current = requestAnimationFrame(step);
-      } else {
+      if (p < 1) rafRef.current = requestAnimationFrame(step);
+      else {
         setPlaying(false);
         setTimeout(() => {
           setReplayDay(null);
@@ -112,7 +149,6 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
 
   const dateLabels = useMemo(() => getDateLabels(), []);
 
-  // HUD staggered reveal — starts ~60% through the dive
   const EASE = [0.16, 1, 0.3, 1] as const;
   const hudVariants = {
     hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
@@ -120,32 +156,28 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
       opacity: 1,
       y: 0,
       filter: "blur(0px)",
-      transition: {
-        delay: 1.1 + i * 0.09,
-        duration: 0.6,
-        ease: EASE,
-      },
+      transition: { delay: 1.1 + i * 0.09, duration: 0.6, ease: EASE },
     }),
   } as const;
 
   return (
     <motion.div
       className="relative h-full w-full"
-      animate={{
-        opacity: revealing ? 1 : 0.55,
-        scale: revealing ? 1 : 1.06,
-      }}
+      animate={{ opacity: revealing ? 1 : 0.55, scale: revealing ? 1 : 1.06 }}
       transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
     >
       <PulseMap
+        ref={setMapHandle}
         locations={brandedLocations}
         hexCells={hexCells}
         onHexSelect={setSelectedHex}
         selectedHex={selectedHex}
         dive={revealing}
+        focus={tour.focus}
+        onArrived={handleArrived}
+        onUserInteract={handleUserInteract}
       />
 
-      {/* vignette + scrim — intensifies as we land */}
       <motion.div
         className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(5,3,13,0.7)_100%)]"
         initial={{ opacity: 0 }}
@@ -180,8 +212,25 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
           <motion.div custom={4} variants={hudVariants} initial="hidden" animate="show">
             <HeatReplayButton playing={playing} progress={replayProgress} onClick={startReplay} />
           </motion.div>
+          {tour.phase === "done" && tour.summary && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: EASE }}
+            >
+              <ReplayTourPill onClick={tour.start} disabled={tour.isActive} />
+            </motion.div>
+          )}
         </>
       )}
+
+      {/* Tour insight card */}
+      <AnimatePresence mode="wait">
+        {tour.currentStop && <TourInsightCard stop={tour.currentStop} />}
+      </AnimatePresence>
+
+      {/* Outro summary — shows briefly when tour completes */}
+      <OutroSummaryFlash key={tour.phase === "done" ? "done" : "pending"} active={tour.phase === "done" && !!tour.summary} summary={tour.summary ?? ""} />
 
       {/* Replay date label */}
       <AnimatePresence>
@@ -194,9 +243,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
             className="absolute left-1/2 top-20 z-20 -translate-x-1/2"
           >
             <div className="glass rounded-full px-5 py-2">
-              <span className="font-display text-lg text-white">
-                {dateLabels[replayDay]}
-              </span>
+              <span className="font-display text-lg text-white">{dateLabels[replayDay]}</span>
             </div>
           </motion.div>
         )}
@@ -208,5 +255,18 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
         onClose={() => setSelectedHex(null)}
       />
     </motion.div>
+  );
+}
+
+function OutroSummaryFlash({ active, summary }: { active: boolean; summary: string }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (!active) return;
+    setShow(true);
+    const id = window.setTimeout(() => setShow(false), 3500);
+    return () => window.clearTimeout(id);
+  }, [active]);
+  return (
+    <AnimatePresence>{show && <TourOutroSummary summary={summary} />}</AnimatePresence>
   );
 }
