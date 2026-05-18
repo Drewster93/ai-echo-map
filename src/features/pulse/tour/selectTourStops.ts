@@ -1,4 +1,5 @@
 import type { Location } from "../types";
+import type { CityCompetitorStats } from "../competitorData";
 
 export type TourStopKind = "stronghold" | "blindspot" | "opportunity";
 
@@ -9,6 +10,8 @@ export interface TourStop {
   zoom: number;
   headline: string;
   insight: string;
+  /** Optional second line — populated when competitor reveal is on. */
+  comparison?: string;
 }
 
 interface CityAgg {
