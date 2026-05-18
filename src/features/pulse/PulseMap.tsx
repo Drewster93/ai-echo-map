@@ -7,18 +7,21 @@ interface Props {
   hexCells: HexCell[];
   onHexSelect: (h3: string | null) => void;
   selectedHex: string | null;
+  /** When true, dive from high-altitude into Berlin. */
+  dive?: boolean;
 }
 
 // Dynamically loaded leaflet (client only) to avoid SSR `window is not defined`.
 type LeafletNS = typeof import("leaflet");
 
-export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Props) {
+export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive = true }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const LRef = useRef<LeafletNS | null>(null);
   const hexLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const markerLayerRef = useRef<import("leaflet").LayerGroup | null>(null);
   const readyRef = useRef(false);
+  const dovedRef = useRef(false);
 
   // Init map once
   useEffect(() => {
@@ -37,7 +40,7 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
         fadeAnimation: true,
         zoomAnimation: true,
         markerZoomAnimation: true,
-      }).setView([48.5, 11.0], 4.5);
+      }).setView([30, 10], 2.5);
       // Realistic satellite basemap (Esri World Imagery) — same look as
       // Uber/Kepler.gl realistic mode.
       const baseLayer = L.tileLayer(
@@ -75,25 +78,13 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
       }
       markerLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
-      // Smooth single flyTo into Berlin once the base imagery has loaded so
-      // we don't fight tile-pop during the animation.
-      const flyToBerlin = () => {
-        map.flyTo([52.515, 13.405], 12, {
-          duration: 3.2,
-          easeLinearity: 0.25,
-        });
-      };
-      let flown = false;
-      const trigger = () => {
-        if (flown) return;
-        flown = true;
-        flyToBerlin();
-      };
-      baseLayer.once("load", trigger);
-      // Fallback in case tiles are cached and 'load' doesn't fire promptly
-      setTimeout(trigger, 1200);
       renderMarkers();
       renderHex();
+      // If reveal was triggered before the map finished initializing, dive now.
+      if (dive && !dovedRef.current) {
+        dovedRef.current = true;
+        runDive(map);
+      }
     })();
     return () => {
       cancelled = true;
@@ -170,6 +161,29 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex }: Prop
       });
     });
   }
+
+  function runDive(map: import("leaflet").Map) {
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      map.setView([52.515, 13.405], 12);
+      return;
+    }
+    map.flyTo([52.515, 13.405], 12, {
+      duration: 2.6,
+      easeLinearity: 0.2,
+    });
+  }
+
+  // Kick off the dive when `dive` flips true after the map is ready
+  useEffect(() => {
+    if (!dive || dovedRef.current) return;
+    const map = mapRef.current;
+    if (!readyRef.current || !map) return;
+    dovedRef.current = true;
+    runDive(map);
+  }, [dive]);
 
   // Re-render markers when locations change
   useEffect(() => {

@@ -14,9 +14,10 @@ import type { Assistant, Location, TimeRange } from "./types";
 interface Props {
   brand: string;
   onSwitchBrand: () => void;
+  revealing?: boolean;
 }
 
-export function MapApp({ brand, onSwitchBrand }: Props) {
+export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const [assistant, setAssistant] = useState<Assistant>("all");
   const [range, setRange] = useState<TimeRange>("7d");
   const [selectedHex, setSelectedHex] = useState<string | null>(null);
@@ -75,7 +76,6 @@ export function MapApp({ brand, onSwitchBrand }: Props) {
   const DURATION = 6000;
   function startReplay() {
     if (playing) {
-      // cancel
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       setPlaying(false);
       setReplayDay(null);
@@ -112,39 +112,76 @@ export function MapApp({ brand, onSwitchBrand }: Props) {
 
   const dateLabels = useMemo(() => getDateLabels(), []);
 
+  // HUD staggered reveal — starts ~60% through the dive
+  const EASE = [0.16, 1, 0.3, 1] as const;
+  const hudVariants = {
+    hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
+    show: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        delay: 1.1 + i * 0.09,
+        duration: 0.6,
+        ease: EASE,
+      },
+    }),
+  } as const;
+
   return (
     <motion.div
-      key="map"
       className="relative h-full w-full"
-      initial={{ opacity: 0, scale: 1.04 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+      animate={{
+        opacity: revealing ? 1 : 0.55,
+        scale: revealing ? 1 : 1.06,
+      }}
+      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
     >
       <PulseMap
         locations={brandedLocations}
         hexCells={hexCells}
         onHexSelect={setSelectedHex}
         selectedHex={selectedHex}
+        dive={revealing}
       />
 
-      {/* vignette + scrim for HUD legibility */}
-      <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(27,12,59,0.55)_100%)]" />
+      {/* vignette + scrim — intensifies as we land */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(5,3,13,0.7)_100%)]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: revealing ? 1 : 0.2 }}
+        transition={{ duration: 1.2, ease: "easeOut", delay: revealing ? 0.6 : 0 }}
+      />
 
-      <BrandPill brand={brand} onSwitch={onSwitchBrand} />
-      <FilterControls
-        assistant={assistant}
-        setAssistant={setAssistant}
-        range={range}
-        setRange={setRange}
-      />
-      <Legend />
-      <StatBlock
-        totalLocations={totalLocations}
-        avgScore={avgScore}
-        promptsTested={promptsTested}
-        trendPct={trendPct}
-      />
-      <HeatReplayButton playing={playing} progress={replayProgress} onClick={startReplay} />
+      {revealing && (
+        <>
+          <motion.div custom={0} variants={hudVariants} initial="hidden" animate="show">
+            <BrandPill brand={brand} onSwitch={onSwitchBrand} />
+          </motion.div>
+          <motion.div custom={1} variants={hudVariants} initial="hidden" animate="show">
+            <FilterControls
+              assistant={assistant}
+              setAssistant={setAssistant}
+              range={range}
+              setRange={setRange}
+            />
+          </motion.div>
+          <motion.div custom={2} variants={hudVariants} initial="hidden" animate="show">
+            <Legend />
+          </motion.div>
+          <motion.div custom={3} variants={hudVariants} initial="hidden" animate="show">
+            <StatBlock
+              totalLocations={totalLocations}
+              avgScore={avgScore}
+              promptsTested={promptsTested}
+              trendPct={trendPct}
+            />
+          </motion.div>
+          <motion.div custom={4} variants={hudVariants} initial="hidden" animate="show">
+            <HeatReplayButton playing={playing} progress={replayProgress} onClick={startReplay} />
+          </motion.div>
+        </>
+      )}
 
       {/* Replay date label */}
       <AnimatePresence>
