@@ -41,7 +41,7 @@ export function PulseMap({ locations, hexCells, onHexSelect, selectedHex, dive =
         fadeAnimation: true,
         zoomAnimation: true,
         markerZoomAnimation: true,
-      }).setView([30, 10], 2.5);
+      }).setView([52.515, 13.405], 5);
       // Realistic satellite basemap (Esri World Imagery) — same look as
       // Uber/Kepler.gl realistic mode.
       const baseLayer = L.tileLayer(
