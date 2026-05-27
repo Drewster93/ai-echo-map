@@ -139,21 +139,27 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       } else {
         map.setView([50, 5], 4);
       }
+      // Clean dark vector basemap — premium Kepler/Mapbox-style canvas
       L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
         {
-          attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics",
-          maxZoom: 19,
-          keepBuffer: 4,
+          attribution:
+            '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 20,
+          keepBuffer: 6,
+          className: "basemap-tiles",
         },
       ).addTo(map);
       L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 19, pane: "shadowPane", opacity: 0.9 },
-      ).addTo(map);
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 19, pane: "shadowPane", opacity: 0.85 },
+        "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+        {
+          subdomains: "abcd",
+          maxZoom: 20,
+          pane: "shadowPane",
+          opacity: 0.7,
+          className: "label-tiles",
+        },
       ).addTo(map);
       mapRef.current = map;
       hexLayerRef.current = L.layerGroup().addTo(map);
@@ -221,7 +227,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
         fillColor: style.fillColor,
         fillOpacity,
         color: isSelected ? "#7BFFFF" : style.color,
-        weight: isSelected ? 2 : style.weight,
+        weight: isSelected ? 1.5 : 0.6,
         opacity: isSelected ? 1 : strokeOpacity,
         lineJoin: "round",
         className: dim ? "hex-cell hex-dim" : "hex-fade-in hex-cell",
@@ -248,15 +254,13 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           return;
         }
         const t = Math.max(0, Math.min(1, cell.intensity / 100));
-        const inner = (2 + t * 6).toFixed(1);
-        const mid = (6 + t * 18).toFixed(1);
-        const wide = (12 + t * 38).toFixed(1);
+        const inner = (1.5 + t * 3).toFixed(1);
+        const mid = (4 + t * 10).toFixed(1);
         el.style.filter = [
           `drop-shadow(0 0 ${inner}px ${style.glow})`,
           `drop-shadow(0 0 ${mid}px ${style.glow})`,
-          `drop-shadow(0 0 ${wide}px ${style.glow})`,
         ].join(" ");
-        el.style.setProperty("opacity", String(0.85 + t * 0.15));
+        el.style.setProperty("opacity", String(0.88 + t * 0.12));
       });
     });
   }
