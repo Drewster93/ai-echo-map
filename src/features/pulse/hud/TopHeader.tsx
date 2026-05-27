@@ -17,21 +17,21 @@ export function TopHeader({ brand, onSwitch, markets, properties, quarterLabel =
           </div>
           <div>
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-ultraviolet">
-              <span className="text-white/40">◆</span>
+              <span className="text-[#1a0d3d]/40">◆</span>
               <span>AI Search Presence · {quarterLabel}</span>
             </div>
             <div className="mt-1 flex items-center gap-3">
-              <h1 className="font-display text-2xl leading-tight text-white">{brand}</h1>
+              <h1 className="font-display text-2xl leading-tight text-[#1a0d3d]">{brand}</h1>
               <button
                 onClick={onSwitch}
-                className="rounded-full border border-white/15 px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-white/60 transition hover:border-white/30 hover:text-white"
+                className="rounded-full border border-[#1a0d3d]/15 px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-[#1a0d3d]/60 transition hover:border-[#1a0d3d]/30 hover:text-[#1a0d3d]"
               >
                 switch
               </button>
               <Chip dotColor="#34c759" label={`${markets} markets`} />
               <Chip dotColor="#34c759" label={`${properties} properties`} />
             </div>
-            <p className="mt-1.5 text-xs text-white/55">
+            <p className="mt-1.5 text-xs text-[#1a0d3d]/55">
               Click any pin to inspect city metrics. Zoom in past level 9 to view individual properties.
             </p>
           </div>
@@ -45,7 +45,7 @@ export function TopHeader({ brand, onSwitch, markets, properties, quarterLabel =
 
 function Chip({ dotColor, label }: { dotColor: string; label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/85">
+    <span className="inline-flex items-center gap-2 rounded-full border border-[#1a0d3d]/10 bg-[#1a0d3d]/[0.04] px-3 py-1 text-xs font-medium text-[#1a0d3d]/85">
       <span
         className="h-2 w-2 rounded-full"
         style={{ background: dotColor, boxShadow: `0 0 8px ${dotColor}` }}
@@ -57,17 +57,17 @@ function Chip({ dotColor, label }: { dotColor: string; label: string }) {
 
 function MentionLegendChip() {
   return (
-    <div className="flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-4 py-2">
-      <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/55">
+    <div className="flex items-center gap-3 rounded-full border border-[#1a0d3d]/10 bg-[#1a0d3d]/[0.04] px-4 py-2">
+      <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#1a0d3d]/55">
         Mention %
       </span>
-      <span className="flex items-center gap-1.5 text-xs text-white">
+      <span className="flex items-center gap-1.5 text-xs text-[#1a0d3d]">
         <Dot color="#e53935" /> &lt;40
       </span>
-      <span className="flex items-center gap-1.5 text-xs text-white">
+      <span className="flex items-center gap-1.5 text-xs text-[#1a0d3d]">
         <Dot color="#f5c518" /> 40–60
       </span>
-      <span className="flex items-center gap-1.5 text-xs text-white">
+      <span className="flex items-center gap-1.5 text-xs text-[#1a0d3d]">
         <Dot color="#34c759" /> &gt;60
       </span>
     </div>
