@@ -1,30 +1,33 @@
-## Plan: Dynamic Company Logo in Sidebar
+## Plan: Wire "Improve visibility" to Location Manager view
+
+### Current behavior
+- In `DetailPanel.tsx`, clicking the bottom "Improve visibility →" button does nothing (no onClick).
+- The hex panel (`DetailPanel`) is opened for a hex cluster, which references one or more `locationIds`.
+- `MapApp.tsx` already supports a Location Manager view: when `role === "location"`, it renders `LocationReportView` for the location matching `locationId` state.
 
 ### Goal
-Replace the hardcoded logo in the left sidebar with the logo of the company currently being audited. If no company is selected (landing screen), hide the logo entirely.
+Clicking "Improve visibility" should:
+1. Switch role to `"location"`
+2. Set `locationId` to the location associated with that hex
+3. Close the hex detail panel
 
-### Current State
-- `SideNav.tsx` renders a hardcoded `<img src={logoUrl}>` at the top
-- `Index` route holds `brand` state that gets set when the user submits a company name on the landing screen
-- `SideNav` is rendered when `revealing` is true (i.e. `brand !== null`)
+### Changes
 
-### Changes Required
+#### 1. `src/features/pulse/DetailPanel.tsx`
+- Add prop `onImproveVisibility: (locationId: string) => void`
+- Pick the target location from the hex: `hexLocations[0]?.id` (the first store in the cluster)
+- Wire the button's `onClick` to call `onImproveVisibility(targetId)` when a location is available; disable / hide the button otherwise
 
-#### 1. `src/features/pulse/hud/SideNav.tsx`
-- Add optional `brand?: string` prop
-- Replace the static logo `<img>` block with conditional rendering:
-  - If `brand` is provided: display the company "logo" as a favicon fetched from `https://www.google.com/s2/favicons?domain=<brand>.com&sz=128`, falling back to a styled initial-letter avatar
-  - If `brand` is absent/empty: do not render any logo element at all (the `h-16` logo container is removed/conditional)
+#### 2. `src/features/pulse/MapApp.tsx`
+- Pass `onImproveVisibility` to `<DetailPanel>`:
+  ```
+  onImproveVisibility={(id) => {
+    setLocationId(id);
+    setRole("location");
+    setSelectedHex(null);
+  }}
+  ```
 
-#### 2. `src/routes/index.tsx`
-- Pass the `brand` value into `<SideNav brand={brand} />`
-
-### Acceptance Criteria
-- Sidebar shows a company identifier (favicon or initials) when a brand is being audited
-- Sidebar logo area is completely absent when on the landing screen (no blank placeholder)
-- No visual regressions in sidebar layout when logo is hidden
-
-### Technical Notes
-- Use a small inline helper to generate the favicon URL from the brand string
-- Handle spaces in brand names by stripping them for the domain guess
-- Keep the existing sidebar width (72px) and styling intact
+### Notes
+- A hex cluster can contain multiple stores. Defaulting to the first one keeps the click deterministic and matches what's currently shown in the panel header. No new UI is added.
+- No routing changes needed — the Location Manager view is rendered inline by `MapApp` based on `role`.

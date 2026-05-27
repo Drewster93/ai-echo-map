@@ -7,6 +7,7 @@ interface Props {
   hex: HexCell | null;
   locations: Location[];
   onClose: () => void;
+  onImproveVisibility?: (locationId: string) => void;
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -20,7 +21,7 @@ const STATUS_LABEL: Record<string, string> = {
   not_mentioned: "Not mentioned",
 };
 
-export function DetailPanel({ hex, locations, onClose }: Props) {
+export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Props) {
   const hexLocations = hex ? locations.filter((l) => hex.locationIds.includes(l.id)) : [];
   const score = hex ? Math.round(hex.intensity) : 0;
   const cluster = hex?.cluster ?? "";
@@ -151,7 +152,14 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
           </div>
 
           <div className="border-t border-white/5 p-4">
-            <button className="w-full rounded-xl bg-ultraviolet py-3 text-sm font-bold text-white shadow-[0_8px_30px_-8px_rgba(134,14,255,0.9)] transition hover:translate-y-[-1px]">
+            <button
+              onClick={() => {
+                const target = hexLocations[0]?.id;
+                if (target) onImproveVisibility?.(target);
+              }}
+              disabled={!hexLocations[0]}
+              className="w-full rounded-xl bg-ultraviolet py-3 text-sm font-bold text-white shadow-[0_8px_30px_-8px_rgba(134,14,255,0.9)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50"
+            >
               Improve visibility →
             </button>
           </div>
