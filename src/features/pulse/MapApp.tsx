@@ -361,7 +361,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     {revealing && (
       <ResultsSection
         brand={brand}
-        locations={brandedLocations}
+        locations={scopedLocations}
         assistant={assistant}
         avgScore={avgScore}
       />
