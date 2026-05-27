@@ -72,28 +72,28 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   );
 
   const hexCells = useMemo(
-    () => buildHexCells(brandedLocations, scoreFor),
-    [brandedLocations, scoreFor],
+    () => buildHexCells(scopedLocations, scoreFor),
+    [scopedLocations, scoreFor],
   );
 
   const selected = selectedHex ? hexCells.find((c) => c.h3 === selectedHex) ?? null : null;
 
-  const totalLocations = brandedLocations.length;
+  const totalLocations = scopedLocations.length;
   const avgScore =
-    brandedLocations.reduce((sum, l) => sum + scoreFor(l), 0) / Math.max(1, totalLocations);
-  const promptsTested = brandedLocations.reduce((s, l) => s + l.prompts.length, 0) * 14;
+    scopedLocations.reduce((sum, l) => sum + scoreFor(l), 0) / Math.max(1, totalLocations);
+  const promptsTested = scopedLocations.reduce((s, l) => s + l.prompts.length, 0) * 14;
 
   const reducedMotion =
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
   const competitorStats = useMemo(
-    () => getCityCompetitorStats(brandedLocations),
-    [brandedLocations],
+    () => getCityCompetitorStats(scopedLocations),
+    [scopedLocations],
   );
   const competitorMarkers = useMemo(
-    () => (showCompetitors ? buildCompetitorMarkers(brandedLocations) : []),
-    [brandedLocations, showCompetitors],
+    () => (showCompetitors ? buildCompetitorMarkers(scopedLocations) : []),
+    [scopedLocations, showCompetitors],
   );
 
   const tour = useBlindSpotTour({
