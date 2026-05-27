@@ -90,6 +90,9 @@
   .font-display {
     font-family: var(--font-display);
     font-weight: 700;
+    font-optical-sizing: auto;
+    font-variation-settings: "opsz" 144, "SOFT" 25;
+    letter-spacing: -0.015em;
   }
 }
 
