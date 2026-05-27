@@ -10,7 +10,7 @@ export function HeatReplayButton({ playing, progress, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className="glass absolute bottom-6 right-[170px] z-20 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white transition hover:translate-y-[-1px] hover:text-aqua"
+      className="glass absolute bottom-6 right-6 z-20 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white transition hover:translate-y-[-1px] hover:text-aqua"
     >
       <span className="relative grid h-[14px] w-[14px] place-items-center">
         <svg viewBox="0 0 18 18" className="absolute inset-0 -rotate-90">
