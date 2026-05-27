@@ -72,14 +72,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Local GEO Audit Tool" },
+      { name: "description", content: "AI Visibility Pulse visualizes brand mentions across AI assistants on a dynamic map." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Local GEO Audit Tool" },
+      { property: "og:description", content: "AI Visibility Pulse visualizes brand mentions across AI assistants on a dynamic map." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Local GEO Audit Tool" },
+      { name: "twitter:description", content: "AI Visibility Pulse visualizes brand mentions across AI assistants on a dynamic map." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a6bc16e2-bb5f-462e-9033-bb342594bebe/id-preview-5d59c367--da50e202-682f-46c1-9835-d318935fa91d.lovable.app-1779905971160.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a6bc16e2-bb5f-462e-9033-bb342594bebe/id-preview-5d59c367--da50e202-682f-46c1-9835-d318935fa91d.lovable.app-1779905971160.png" },
     ],
     links: [
       {
