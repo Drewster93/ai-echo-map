@@ -139,9 +139,9 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       } else {
         map.setView([50, 5], 4);
       }
-      // Clean dark vector basemap — premium Kepler/Mapbox-style canvas
+      // Light basemap — Google-Maps style standard view
       L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
         {
           attribution:
             '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
@@ -149,16 +149,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           maxZoom: 20,
           keepBuffer: 6,
           className: "basemap-tiles",
-        },
-      ).addTo(map);
-      L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-        {
-          subdomains: "abcd",
-          maxZoom: 20,
-          pane: "shadowPane",
-          opacity: 0.7,
-          className: "label-tiles",
         },
       ).addTo(map);
       mapRef.current = map;
