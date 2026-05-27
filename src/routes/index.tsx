@@ -32,6 +32,7 @@ function Index() {
           : "relative h-screen w-screen overflow-hidden bg-[#05030d] text-white"
       }
     >
+      {revealing && <SideNav />}
       {revealing && (
         <MapApp
           brand={brand ?? "Preview"}
