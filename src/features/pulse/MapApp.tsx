@@ -354,7 +354,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
 
       <DetailPanel
         hex={selected}
-        locations={brandedLocations}
+        locations={scopedLocations}
         onClose={() => setSelectedHex(null)}
       />
     </motion.div>
