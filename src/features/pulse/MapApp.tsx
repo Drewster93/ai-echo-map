@@ -35,6 +35,9 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const [playing, setPlaying] = useState(false);
   const [mapHandle, setMapHandle] = useState<PulseMapHandle | null>(null);
   const [showCompetitors, setShowCompetitors] = useState(false);
+  const [role, setRole] = useState<Role>("admin");
+  const [regionCity, setRegionCity] = useState<string | null>(null);
+  const [locationId, setLocationId] = useState<string | null>(null);
 
   const locations: Location[] = MOCK_LOCATIONS;
 
@@ -46,6 +49,13 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
       })),
     [brand, locations],
   );
+
+  const scopedLocations = useMemo<Location[]>(() => {
+    if (role === "regional" && regionCity) {
+      return brandedLocations.filter((l) => l.city === regionCity);
+    }
+    return brandedLocations;
+  }, [brandedLocations, role, regionCity]);
 
   const scoreFor = useCallback(
     (loc: Location): number => {
