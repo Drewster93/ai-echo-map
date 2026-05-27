@@ -69,11 +69,6 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const avgScore =
     brandedLocations.reduce((sum, l) => sum + scoreFor(l), 0) / Math.max(1, totalLocations);
   const promptsTested = brandedLocations.reduce((s, l) => s + l.prompts.length, 0) * 14;
-  const trendPct = useMemo(() => {
-    const first = brandedLocations.reduce((s, l) => s + l.history7d[0], 0) / totalLocations;
-    const last = brandedLocations.reduce((s, l) => s + l.history7d[6], 0) / totalLocations;
-    return ((last - first) / Math.max(1, first)) * 100;
-  }, [brandedLocations, totalLocations]);
 
   const reducedMotion =
     typeof window !== "undefined" &&
