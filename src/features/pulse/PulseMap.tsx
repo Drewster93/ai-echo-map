@@ -121,7 +121,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       if (cancelled || !containerRef.current || mapRef.current) return;
       LRef.current = L;
       const map = L.map(containerRef.current, {
-        zoomControl: false,
+        zoomControl: true,
         attributionControl: true,
         worldCopyJump: true,
         zoomSnap: 0.25,
