@@ -97,7 +97,7 @@ export function SideNav() {
       style={{ width: open ? 72 : 16 }}
     >
       <div
-        className={`relative h-full border-r border-white/10 backdrop-blur-xl transition-all bg-[#7515f5] ${
+        className={`relative h-full border-r border-black/5 backdrop-blur-xl transition-all bg-white ${
           open ? "w-[72px]" : "w-0 overflow-hidden"
         }`}
       >
