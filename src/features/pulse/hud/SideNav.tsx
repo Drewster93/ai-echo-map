@@ -70,10 +70,10 @@ export function SideNav() {
         title={item.label}
         className={`group relative flex h-11 w-11 items-center justify-center rounded-xl transition-all ${
           isActive
-            ? "bg-white shadow-[0_0_0_2px_rgba(255,255,255,0.9),0_8px_24px_-8px_rgba(0,0,0,0.3)]"
+            ? "bg-[#f5f3fe] shadow-[0_0_0_2px_rgba(117,21,245,0.9),0_8px_24px_-8px_rgba(117,21,245,0.5)]"
             : highlight
-              ? "bg-white/20"
-              : "hover:bg-white/20"
+              ? "bg-[#ece8ff]"
+              : "hover:bg-black/5"
         }`}
       >
         <Icon
