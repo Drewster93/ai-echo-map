@@ -111,28 +111,46 @@
   }
 }
 
-/* Map tinting — keep streets readable, add subtle brand tint */
+/* Map — premium dark canvas */
 .leaflet-container {
-  background: #0a0612 !important;
+  background: #07050f !important;
   font-family: var(--font-sans);
   outline: none;
 }
 .leaflet-tile-pane {
-  filter: saturate(0.85) brightness(0.95) contrast(1.05);
+  filter: saturate(1.05) brightness(1.02) contrast(1.02);
 }
-/* Brand-tint overlay sits above tiles but below data layers */
+/* Smooth tile load-in instead of pop-in flashing */
+.basemap-tiles,
+.label-tiles {
+  will-change: opacity;
+}
+.leaflet-tile {
+  transition: opacity 0.45s ease-out;
+}
+/* Subtle brand tint sits above tiles but below data layers */
 .leaflet-tile-pane::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(134, 14, 255, 0.10), transparent 70%),
-    rgba(27, 12, 59, 0.18);
-  mix-blend-mode: overlay;
+    radial-gradient(ellipse at 50% 40%, rgba(134, 14, 255, 0.18), transparent 65%),
+    radial-gradient(ellipse at 30% 90%, rgba(48, 114, 252, 0.12), transparent 60%),
+    linear-gradient(180deg, rgba(7, 5, 15, 0) 60%, rgba(7, 5, 15, 0.5));
+  mix-blend-mode: soft-light;
+}
+/* Vignette for cinematic framing */
+.leaflet-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  z-index: 400;
 }
 .leaflet-control-attribution {
-  background: rgba(27, 12, 59, 0.7) !important;
+  background: rgba(15, 8, 32, 0.7) !important;
   color: rgba(255, 255, 255, 0.4) !important;
   font-size: 10px !important;
   border: 1px solid rgba(134, 14, 255, 0.2);
