@@ -1,4 +1,29 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+
+function brandToDomain(brand: string): string {
+  const slug = brand.trim().toLowerCase().split(/\s+/)[0].replace(/[^a-z0-9-]/g, "");
+  return `${slug}.com`;
+}
+
+function BrandMark({ brand }: { brand: string }) {
+  const [errored, setErrored] = useState(false);
+  const initial = brand.trim().charAt(0).toUpperCase() || "?";
+  if (!brand || errored) {
+    return (
+      <div className="mt-1 grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-ultraviolet to-tech-blue text-sm font-bold text-white shadow-[0_0_24px_rgba(134,14,255,0.6)]">
+        {initial}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${brandToDomain(brand)}&sz=128`}
+      alt={`${brand} logo`}
+      className="mt-1 h-10 w-10 rounded-xl object-contain bg-white p-1 border border-[#1a0d3d]/10"
+      onError={() => setErrored(true)}
+    />
+  );
+}
 
 interface Props {
   brand: string;
@@ -23,10 +48,8 @@ export function TopHeader({
     <header className="absolute inset-x-4 top-4 z-30 rounded-2xl border border-white/40 bg-white/70 px-6 py-4 shadow-[0_8px_32px_rgba(15,8,40,0.12)] backdrop-blur-xl saturate-150">
       <div className="flex items-start justify-between gap-6">
         <div className="flex items-start gap-4">
-          {/* logo mark */}
-          <div className="mt-1 grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-ultraviolet to-tech-blue shadow-[0_0_24px_rgba(134,14,255,0.6)]">
-            <div className="h-4 w-4 rotate-45 bg-white/90" />
-          </div>
+          {/* brand logo */}
+          <BrandMark brand={brand} />
           <div>
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-ultraviolet">
               <span className="text-[#1a0d3d]/40">◆</span>
