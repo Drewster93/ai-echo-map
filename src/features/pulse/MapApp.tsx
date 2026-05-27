@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PulseMap } from "./PulseMap";
 import { DetailPanel } from "./DetailPanel";
-import { BrandPill } from "./hud/BrandPill";
+import { TopHeader } from "./hud/TopHeader";
+import { WorldwideOverview } from "./hud/WorldwideOverview";
+import { MentionRateLegend } from "./hud/MentionRateLegend";
 import { FilterControls } from "./hud/FilterControls";
-import { Legend } from "./hud/Legend";
-import { StatBlock } from "./hud/StatBlock";
 import { HeatReplayButton } from "./hud/HeatReplayButton";
 import { ReplayTourPill } from "./hud/ReplayTourPill";
 import { CompetitorTogglePill } from "./hud/CompetitorTogglePill";
@@ -69,11 +69,6 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const avgScore =
     brandedLocations.reduce((sum, l) => sum + scoreFor(l), 0) / Math.max(1, totalLocations);
   const promptsTested = brandedLocations.reduce((s, l) => s + l.prompts.length, 0) * 14;
-  const trendPct = useMemo(() => {
-    const first = brandedLocations.reduce((s, l) => s + l.history7d[0], 0) / totalLocations;
-    const last = brandedLocations.reduce((s, l) => s + l.history7d[6], 0) / totalLocations;
-    return ((last - first) / Math.max(1, first)) * 100;
-  }, [brandedLocations, totalLocations]);
 
   const reducedMotion =
     typeof window !== "undefined" &&
@@ -175,6 +170,19 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     }),
   } as const;
 
+  // Derived metrics for header / overview panel
+  const propertiesCount = totalLocations;
+  const marketsCount = useMemo(() => {
+    const cities = new Set(brandedLocations.map((l) => l.city ?? l.name));
+    return cities.size;
+  }, [brandedLocations]);
+  const competitorPct = Math.max(0, Math.min(100, avgScore * 0.68));
+  const avgCitation = Math.max(0, Math.min(100, avgScore * 0.44));
+  const avgPosition = Math.max(1, 3 - avgScore / 50);
+  const monthlySearches = Math.round(promptsTested * 70);
+  const valueCaptured = Math.max(0, Math.min(100, avgScore * 0.45));
+  const narrative = `${brand}'s strongest AI presence shows up in heritage and resort markets. Major urban markets underperform with competitor brands dominating share of voice.`;
+
   return (
     <>
     <motion.div
@@ -195,46 +203,55 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
         competitorMarkers={competitorMarkers}
       />
 
-      <motion.div
-        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(5,3,13,0.7)_100%)]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: revealing ? 1 : 0.2 }}
-        transition={{ duration: 1.2, ease: "easeOut", delay: revealing ? 0.6 : 0 }}
-      />
-
       {revealing && (
         <>
           <motion.div custom={0} variants={hudVariants} initial="hidden" animate="show">
-            <BrandPill brand={brand} onSwitch={onSwitchBrand} />
+            <TopHeader
+              brand={brand}
+              onSwitch={onSwitchBrand}
+              markets={marketsCount}
+              properties={propertiesCount}
+            />
           </motion.div>
+
           <motion.div custom={1} variants={hudVariants} initial="hidden" animate="show">
+            <WorldwideOverview
+              brand={brand.split(/\s+/)[0] || brand}
+              avgMention={avgScore}
+              competitorPct={competitorPct}
+              avgCitation={avgCitation}
+              avgPosition={avgPosition}
+              monthlySearches={monthlySearches}
+              valueCaptured={valueCaptured}
+              narrative={narrative}
+            />
+          </motion.div>
+
+          <motion.div custom={2} variants={hudVariants} initial="hidden" animate="show">
+            <MentionRateLegend />
+          </motion.div>
+
+          {/* Secondary controls stacked along bottom-left */}
+          <motion.div
+            custom={3}
+            variants={hudVariants}
+            initial="hidden"
+            animate="show"
+            className="absolute bottom-5 left-[365px] z-20 flex items-center gap-2"
+          >
             <FilterControls
               assistant={assistant}
               setAssistant={setAssistant}
               range={range}
               setRange={setRange}
             />
-          </motion.div>
-          <motion.div custom={2} variants={hudVariants} initial="hidden" animate="show">
-            <Legend />
-          </motion.div>
-          <motion.div custom={3} variants={hudVariants} initial="hidden" animate="show">
-            <StatBlock
-              totalLocations={totalLocations}
-              avgScore={avgScore}
-              promptsTested={promptsTested}
-              trendPct={trendPct}
-            />
-          </motion.div>
-          <motion.div custom={4} variants={hudVariants} initial="hidden" animate="show">
             <HeatReplayButton playing={playing} progress={replayProgress} onClick={startReplay} />
-          </motion.div>
-          <motion.div custom={5} variants={hudVariants} initial="hidden" animate="show">
             <CompetitorTogglePill
               active={showCompetitors}
               onToggle={() => setShowCompetitors((v) => !v)}
             />
           </motion.div>
+
           {tour.phase === "done" && tour.summary && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}

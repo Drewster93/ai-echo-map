@@ -114,52 +114,59 @@
   }
 }
 
-/* Map — premium dark canvas */
+/* Map — light premium canvas */
 .leaflet-container {
-  background: #07050f !important;
+  background: #e6e3df !important;
   font-family: var(--font-sans);
   outline: none;
 }
-.leaflet-tile-pane {
-  filter: saturate(1.05) brightness(1.02) contrast(1.02);
-}
-/* Smooth tile load-in instead of pop-in flashing */
-.basemap-tiles,
-.label-tiles {
+.basemap-tiles {
   will-change: opacity;
 }
 .leaflet-tile {
   transition: opacity 0.45s ease-out;
 }
-/* Subtle brand tint sits above tiles but below data layers */
-.leaflet-tile-pane::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba(134, 14, 255, 0.18), transparent 65%),
-    radial-gradient(ellipse at 30% 90%, rgba(48, 114, 252, 0.12), transparent 60%),
-    linear-gradient(180deg, rgba(7, 5, 15, 0) 60%, rgba(7, 5, 15, 0.5));
-  mix-blend-mode: soft-light;
-}
-/* Vignette for cinematic framing */
-.leaflet-container::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
-  z-index: 400;
-}
 .leaflet-control-attribution {
-  background: rgba(15, 8, 32, 0.7) !important;
-  color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: rgba(30, 20, 60, 0.55) !important;
   font-size: 10px !important;
-  border: 1px solid rgba(134, 14, 255, 0.2);
+  border: 1px solid rgba(15, 8, 40, 0.08);
 }
 .leaflet-control-attribution a {
-  color: rgba(123, 255, 255, 0.6) !important;
+  color: var(--color-ultraviolet) !important;
+}
+.leaflet-control-zoom {
+  margin-top: 160px !important;
+  margin-left: 20px !important;
+  border: none !important;
+  box-shadow: 0 8px 24px -8px rgba(15, 8, 40, 0.25) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+.leaflet-control-zoom a {
+  background: white !important;
+  color: #1a0d3d !important;
+  border: none !important;
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 18px !important;
+}
+.leaflet-control-zoom a:hover {
+  background: #f5f3ff !important;
+}
+
+/* Pin markers */
+.pulse-pin-wrap { background: transparent; border: none; }
+.pulse-pin {
+  transform-origin: bottom center;
+  transition: transform 0.2s ease;
+  animation: pin-drop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.pulse-pin:hover { transform: scale(1.12); }
+@keyframes pin-drop {
+  from { transform: translateY(-12px) scale(0.7); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 /* Mesh gradient for landing */

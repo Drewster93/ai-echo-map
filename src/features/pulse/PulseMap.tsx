@@ -121,7 +121,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       if (cancelled || !containerRef.current || mapRef.current) return;
       LRef.current = L;
       const map = L.map(containerRef.current, {
-        zoomControl: false,
+        zoomControl: true,
         attributionControl: true,
         worldCopyJump: true,
         zoomSnap: 0.25,
@@ -139,9 +139,9 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       } else {
         map.setView([50, 5], 4);
       }
-      // Clean dark vector basemap — premium Kepler/Mapbox-style canvas
+      // Light basemap — Google-Maps style standard view
       L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
         {
           attribution:
             '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
@@ -149,16 +149,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           maxZoom: 20,
           keepBuffer: 6,
           className: "basemap-tiles",
-        },
-      ).addTo(map);
-      L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-        {
-          subdomains: "abcd",
-          maxZoom: 20,
-          pane: "shadowPane",
-          opacity: 0.7,
-          className: "label-tiles",
         },
       ).addTo(map);
       mapRef.current = map;
@@ -190,79 +180,56 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function pinColorForScore(score: number): { fill: string; ring: string } {
+    if (score >= 60) return { fill: "#34c759", ring: "#1f8b3d" }; // green
+    if (score >= 40) return { fill: "#f5c518", ring: "#a8870b" }; // yellow
+    return { fill: "#e53935", ring: "#9b1c1c" }; // red
+  }
+
+  function pinSvg(fill: string, ring: string): string {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="38" viewBox="0 0 30 38">
+      <defs>
+        <filter id="ds" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.35"/>
+        </filter>
+      </defs>
+      <path filter="url(#ds)" d="M15 1 C7.3 1 1 7.3 1 15 c0 9.5 14 22 14 22 s14-12.5 14-22 C29 7.3 22.7 1 15 1 z" fill="${fill}" stroke="white" stroke-width="2.5"/>
+      <circle cx="15" cy="15" r="4.5" fill="white" stroke="${ring}" stroke-width="1"/>
+    </svg>`;
+  }
+
   function renderMarkers() {
     const L = LRef.current;
     const layer = markerLayerRef.current;
     if (!L || !layer) return;
     layer.clearLayers();
+    // Map each location to its current hex intensity so colors stay in sync with filters
+    const scoreByLoc = new Map<string, number>();
+    hexCells.forEach((c) => {
+      c.locationIds?.forEach((id: string) => scoreByLoc.set(id, c.intensity));
+    });
     locations.forEach((loc) => {
+      const score = scoreByLoc.get(loc.id) ?? loc.visibilityScore;
+      const { fill, ring } = pinColorForScore(score);
       const icon = L.divIcon({
-        className: "",
-        html: `<div class="sonar"><span class="sonar-ring"></span><span class="sonar-ring delay"></span><span class="sonar-dot"></span></div>`,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
+        className: "pulse-pin-wrap",
+        html: `<div class="pulse-pin">${pinSvg(fill, ring)}</div>`,
+        iconSize: [30, 38],
+        iconAnchor: [15, 36],
       });
-      L.marker([loc.lat, loc.lng], { icon, interactive: false }).addTo(layer);
+      const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true }).addTo(layer);
+      marker.on("click", () => {
+        // Find the hex cell containing this location and select it
+        const cell = hexCells.find((c) => c.locationIds?.includes(loc.id));
+        if (cell) onHexSelect(cell.h3);
+      });
     });
   }
 
   function renderHex() {
-    const L = LRef.current;
+    // Hexes intentionally not rendered — premium pin-marker layout
     const layer = hexLayerRef.current;
-    if (!L || !layer) return;
-    layer.clearLayers();
-    const activeFocus = focusRef.current;
-    hexCells.forEach((cell, idx) => {
-      const style = styleForIntensity(cell.intensity);
-      const isSelected = selectedHex === cell.h3;
-      let dim = false;
-      if (activeFocus) {
-        const c = cellCentroid(cell.boundary);
-        const dist = haversineKm(c, activeFocus.center);
-        dim = dist > activeFocus.radiusKm;
-      }
-      const fillOpacity = dim ? 0.08 : style.fillOpacity;
-      const strokeOpacity = dim ? 0.12 : 0.55;
-      const polygon = L.polygon(cell.boundary, {
-        fillColor: style.fillColor,
-        fillOpacity,
-        color: isSelected ? "#7BFFFF" : style.color,
-        weight: isSelected ? 1.5 : 0.6,
-        opacity: isSelected ? 1 : strokeOpacity,
-        lineJoin: "round",
-        className: dim ? "hex-cell hex-dim" : "hex-fade-in hex-cell",
-        interactive: true,
-        bubblingMouseEvents: false,
-      });
-      polygon.on("click", () => onHexSelect(cell.h3));
-      polygon.on("mouseover", () => {
-        polygon.setStyle({ weight: 2, color: "#7BFFFF", opacity: 1 });
-      });
-      polygon.on("mouseout", () => {
-        if (selectedHex !== cell.h3) {
-          polygon.setStyle({ weight: style.weight, color: style.color, opacity: strokeOpacity });
-        }
-      });
-      polygon.addTo(layer);
-      queueMicrotask(() => {
-        const el = (polygon as unknown as { _path?: SVGPathElement })._path;
-        if (!el) return;
-        el.style.setProperty("--delay", `${(idx % 40) * 35}ms`);
-        if (dim) {
-          el.style.filter = "none";
-          el.style.setProperty("opacity", "0.45");
-          return;
-        }
-        const t = Math.max(0, Math.min(1, cell.intensity / 100));
-        const inner = (1.5 + t * 3).toFixed(1);
-        const mid = (4 + t * 10).toFixed(1);
-        el.style.filter = [
-          `drop-shadow(0 0 ${inner}px ${style.glow})`,
-          `drop-shadow(0 0 ${mid}px ${style.glow})`,
-        ].join(" ");
-        el.style.setProperty("opacity", String(0.88 + t * 0.12));
-      });
-    });
+    layer?.clearLayers();
   }
 
   function renderCompetitors() {
@@ -348,7 +315,10 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   );
   const focusKey = focus ? `${focus.center[0]},${focus.center[1]},${focus.radiusKm}` : "none";
   useEffect(() => {
-    if (readyRef.current && dataRenderedRef.current) renderHex();
+    if (readyRef.current && dataRenderedRef.current) {
+      renderHex();
+      renderMarkers();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellKey, selectedHex, focusKey]);
 
