@@ -114,7 +114,7 @@ export function SideNav() {
         </div>
 
         {/* Spacer divider */}
-        <div className="mx-4 my-4 h-px bg-white/10" />
+        <div className="mx-4 my-4 h-px bg-black/5" />
 
         {/* Mid items */}
         <div className="flex flex-col items-center gap-1.5 px-2">
