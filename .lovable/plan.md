@@ -1,187 +1,138 @@
-# Blind-Spot Auto-Tour — Implementation Plan
+## Goal
 
-A 15-second guided camera + insight sequence that runs once after the map dive lands. Picks the user's strongest, weakest, and most-fixable city from the data, eases to each, dims the rest, and shows one line of copy per stop. Skippable, replayable.
+Add a **role switcher** in the TopHeader that scopes the Pulse experience to three audiences. The Admin and Regional views are lightweight scope filters on the existing map; the **Location Manager** view is a full, premium single-location report inspired by the AthenaHQ "Underperforming · Action required" layout you shared.
 
-## UX spec
+## The three roles
 
-### Lifecycle
+| Role | Scope | Surface |
+|---|---|---|
+| **Admin** (current default) | All locations, all cities | Map + existing WorldwideOverview (unchanged) |
+| **Regional Manager** | One city | Map fit to city bounds + new RegionalOverview sidebar |
+| **Location Manager** | One single property | Full-page report (map collapses to a small header strip) |
 
-```text
-Landing → Dive (1.8s flyTo) → moveend
-                              → paintData() (existing)
-                              → 700ms settle delay
-                              → Tour starts
-                              → Stop 1 → Stop 2 → Stop 3
-                              → Outro (ease back to bounds + summary)
-                              → "Replay tour" pill stays in HUD
-```
+Role + scope are picked from a segmented control in TopHeader, with a contextual dropdown (city for Regional, property for Location).
 
-### Stop structure (each ~3.8s)
+---
 
-| Beat     | Duration | What happens                                                                 |
-| -------- | -------- | ---------------------------------------------------------------------------- |
-| Ease     | 1200ms   | `map.flyTo([lat,lng], 11, { duration: 1.2, easeLinearity: 0.25 })`           |
-| Focus    | 300ms    | Non-target hex cells fade fillOpacity → 0.12, stroke opacity → 0.15. Target hex stays 100%, gains a 2px cyan ring. |
-| Insight  | 2000ms   | Insight card fades in (opacity + 6px y), anchored top-center under HUD       |
-| Handoff  | 300ms    | Insight card fades out, all hexes restore to baseline opacity                |
+## Location Manager report — section-by-section
 
-Total per stop: ~3800ms. Three stops: ~11.4s. Plus 700ms pre-roll + 1200ms outro = ~13.3s end-to-end.
+A scrollable, single-column report (max-width ~1100px, premium serif headings in Tiempos Headline, generous whitespace, light theme to match the new map style). Sections in order:
 
-### Outro
+### 1. Status banner
+Amber pill: **"Underperforming · Action required"** (color reflects computed health: amber = action, green = healthy, red = critical).
 
-- `map.flyToBounds(initialBounds, { padding: [120, 120], duration: 1.2 })`
-- Summary line fades in bottom-center for 3s: *"You're strong in 1 of 3 markets. Fix {weakestCity} first."* with secondary "Replay tour" pill that persists in HUD afterward.
+### 2. Property header
+- Display name (Tiempos Headline, large)
+- Sub-line: `{Brand/Group} · {Address}` (e.g. "A Fairmont Managed Hotel · Strand, London WC2R 0EZ")
+- One-paragraph narrative summarizing the branded-vs-unbranded story (auto-generated from the data: if branded mention ≫ unbranded mention, use the "wins on branded, loses on discovery" template; otherwise use a parallel template).
 
-### Skip / cancel behavior
+### 3. Performance overview — 4 metric tiles
+Grid of 4 cards. Each shows the metric, a small gap chip, and a one-line caption:
+- **Mention rate** — % with `±Xpp vs competitors (Y%)`
+- **Citation rate** — same pattern
+- **Unbranded mention** — % + caption "When guests don't say {Brand}"
+- **Branded mention** — % + caption "When guests ask for {Brand} specifically"
 
-The tour cancels immediately on any of these user events:
+The competitor set is named in a small caption above the grid: "How you compare in {City}. Each tile shows {Property}'s metric and the gap versus the competitive set ({…competitor list})."
 
-- `map` event: `mousedown`, `wheel`, `touchstart`, `dragstart`, `zoomstart` (user-initiated only — programmatic flyTo from the tour itself must not cancel)
-- Click on any hex (`onHexSelect` fires with non-null h3)
-- Filter change (`assistant` or `range` changes while playing)
-- Close detail panel via Escape
+### 4. Head-to-head — Share of voice
+Two horizontal bars (Property vs Competitors) with % labels at the end. Below: bold "Share of voice gap −Xpp" callout.
 
-On cancel:
-- Stop the current `flyTo` (`map.stop()`)
-- Cancel any pending `setTimeout` / `requestAnimationFrame` for the next stop
-- Restore all hex opacities to baseline (re-render with `selectedHex` state untouched)
-- Hide insight card
-- Show "Replay tour" pill in HUD
+### 5. Where the gap lives — Performance by guest intent
+List of intent categories. Each row:
+- Category name + `{n} prompt(s) · ${revenue}/mo at stake`
+- Two stacked bars: `{Brand} {x%}` and `Competitors {y%}`
+- Right-aligned `+Xpp` / `−Xpp` gap chip (red for positive gap = losing, green for negative = winning)
 
-To distinguish programmatic vs user motion: set `isProgrammaticMoveRef.current = true` before each tour `flyTo`, clear it on the `moveend` for that flight. Cancel handlers check this flag and ignore programmatic moves.
+Sorted by descending monthly value at stake. Categories with no revenue value show "—/mo at stake".
 
-### Replay
+### 6. Action list — Top opportunities table
+Compact table, max 7 rows, ranked by monthly value lost:
+| # | Prompt (+ category tag) | Brand % | Competitors % | Gap | Monthly value lost |
+Caption explains the formula: "Monthly value lost = (competitor mention gap %) × (estimated monthly search value)."
 
-- "Replay tour" pill sits next to `HeatReplayButton` in HUD
-- Clicking it re-runs the full sequence from Stop 1
-- Pill disabled while tour is running
+### 7. What's working
+2–3 cards highlighting prompts where the property holds its ground. Each card: prompt text, category tag, mention %, and one-line context ("vs competitors X% · AI cites {domain}").
 
-### Reduced motion
+### 8. Recommended next steps
+Three numbered cards (01 / 02 / 03), each with a category label (CONTENT / PR & CITATIONS / CATEGORY EXPANSION), bold action title, and a short paragraph. For the demo these are templated from the top opportunities (e.g. the #1 prompt drives the headline of card 01).
 
-`prefers-reduced-motion: reduce`:
-- Skip pre-roll delay
-- Each stop: `map.setView(target, 11)` instead of flyTo, hold insight card for 2200ms, no opacity dimming on hexes
-- No outro flyTo — just hold final bounds
+### 9. Data footer
+Small muted line: `Data: AthenaHQ AI Search Presence · {N} prompts monitored across ChatGPT, Claude, Gemini, Perplexity · Updated {date}`.
 
-## Insight selection logic
+---
 
-A pure function `selectTourStops(locations, scoreFor)` returns `TourStop[]` of length ≤ 3. Computed once at tour start so filter state at that moment is locked in.
+## Visual / design commitments
+
+- Light surface (`#fafaf7`), generous spacing (`py-16` between sections).
+- Tiempos Headline for section titles, body in the existing sans pairing.
+- Status banner, gap chips, and bars use a small semantic palette: brand (deep ultraviolet for Property), neutral gray for competitors, amber/red for losing gaps, green for winning gaps.
+- Bars are thin (6px) with rounded ends; subtle 1px hairlines between sections rather than heavy dividers.
+- Cards use very soft shadows (`shadow-[0_1px_3px_rgba(15,8,40,0.04)]`) and 1px borders — premium, not flashy.
+
+## Data model (frontend-only, no backend)
+
+Extend `mockData.ts` with a richer per-location shape used only by the Location view:
 
 ```ts
-interface TourStop {
-  kind: "stronghold" | "blindspot" | "opportunity";
-  city: "Berlin" | "Paris" | "London";
-  center: [number, number];        // avg lat/lng of city's locations
-  headline: string;                // e.g. "Berlin — your stronghold"
-  insight: string;                 // e.g. "You appear in 14/20 prompts. Top 3 in 9."
+interface IntentCategory {
+  name: string;            // "Luxury Hotels"
+  promptCount: number;
+  monthlyValueUsd: number; // 56500
+  brandPct: number;
+  competitorPct: number;
+}
+
+interface PromptRow {
+  prompt: string;
+  category: string;
+  brandPct: number;
+  competitorPct: number;
+  monthlyValueUsd: number;
+  citedDomain?: string;    // for "what's working"
+}
+
+interface LocationReport {
+  mentionRate: number;
+  competitorMentionRate: number;
+  citationRate: number;
+  competitorCitationRate: number;
+  unbrandedMentionPct: number;
+  brandedMentionPct: number;
+  competitorSet: string[];
+  intents: IntentCategory[];
+  prompts: PromptRow[];          // all monitored prompts
+  totalPromptsMonitored: number;
 }
 ```
 
-Aggregation: group locations by `city`. For each city compute:
-- `avgScore` = mean of `scoreFor(loc)` across its locations
-- `promptCount` = sum of `loc.prompts.length`
-- `mentionedCount` = sum of prompts where `status === "mentioned"`
-- `competitorHigherCount` = sum where `status === "competitor_higher"`
-- `notMentionedCount` = sum where `status === "not_mentioned"`
-- `center` = mean of lat/lng
+All numbers are derived deterministically from the existing seeded RNG, so each location has a stable report. The narrative paragraph is generated from a small template that picks the right phrasing based on `brandedMentionPct - unbrandedMentionPct`.
 
-Selection:
-1. **Stronghold** = city with highest `avgScore`. Insight: *"You appear in {mentioned}/{prompts} prompts. Top 3 in {topThreeApprox}."* (Use `mentioned` as proxy for top 3 since we don't have rank in mock data — phrase as "leading in" if needed.)
-2. **Blindspot** = city with lowest `avgScore` AND `notMentionedCount > mentionedCount`. Insight: *"High local intent — you're invisible in {notMentioned}/{prompts} prompts."*
-3. **Opportunity** = remaining city. Insight: *"Mentioned in {mentioned}/{prompts} — one content push from leading."*
+## File changes
 
-If fewer than 3 cities exist, drop stops in reverse priority (opportunity first, then blindspot). If a city has zero prompts, skip it.
+**New files**
+- `src/features/pulse/hud/RoleSwitcher.tsx` — segmented control + scope dropdowns
+- `src/features/pulse/hud/RegionalOverview.tsx` — sidebar variant scoped to one city
+- `src/features/pulse/location/LocationReport.tsx` — top-level report layout
+- `src/features/pulse/location/StatusBanner.tsx`
+- `src/features/pulse/location/PerformanceTiles.tsx`
+- `src/features/pulse/location/HeadToHeadBars.tsx`
+- `src/features/pulse/location/IntentBreakdown.tsx`
+- `src/features/pulse/location/ActionTable.tsx`
+- `src/features/pulse/location/WhatsWorking.tsx`
+- `src/features/pulse/location/NextSteps.tsx`
+- `src/features/pulse/location/reportData.ts` — derives `LocationReport` from a `Location`
 
-## Files & structure
+**Edits**
+- `src/features/pulse/MapApp.tsx` — add `role`, `regionCity`, `locationId` state; compute `scopedLocations`; swap sidebar / surface based on role.
+- `src/features/pulse/hud/TopHeader.tsx` — slot in `RoleSwitcher`; chips reflect active scope.
+- `src/features/pulse/PulseMap.tsx` — accept optional `fitTo` bounds/point and respond to scope changes.
 
-### New files
+## Out of scope (call out)
+- No real auth or role enforcement — this is a visual switcher for the demo. Real per-user gating would later use Lovable Cloud + a `user_roles` table.
+- No new external data; the report values are deterministically generated from existing seeded locations so each property has a stable, plausible story.
+- Hotel-specific intent categories (Luxury / Business / Spa / Weddings / …) are used as the demo set since your example is The Savoy. The category list is data-driven, so swapping to coffee-shop intents later is a one-file change.
 
-- `src/features/pulse/tour/useBlindSpotTour.ts` — hook that owns the state machine
-- `src/features/pulse/tour/selectTourStops.ts` — pure selection logic + unit-testable
-- `src/features/pulse/tour/TourInsightCard.tsx` — top-center insight card
-- `src/features/pulse/tour/TourOutroSummary.tsx` — bottom-center summary line + CTA pill
-- `src/features/pulse/hud/ReplayTourPill.tsx` — HUD button
+## One question before I build
 
-### Modified files
-
-- `src/features/pulse/PulseMap.tsx`
-  - Expose imperative handle via `forwardRef` with: `flyTo(center, zoom, opts)`, `flyToBounds(bounds, opts)`, `stop()`, `setHexFocus(targetCityCenter: [number,number] | null, radiusKm: number)`, `getInitialBounds()`
-  - `setHexFocus`: when a center is set, re-render hexes with non-focused cells at fillOpacity 0.12 / stroke 0.15 / no glow filter; focused cells full. When null, restore.
-  - Fire callback `onArrived()` once after the initial dive's `moveend` (replaces inline behavior; MapApp uses this to kick off the tour).
-  - Track `isProgrammaticMoveRef` and expose `onUserInteract` callback to MapApp.
-- `src/features/pulse/MapApp.tsx`
-  - Add `tour` state from `useBlindSpotTour({ mapRef, locations, scoreFor })`
-  - Mount `<TourInsightCard>` when `tour.currentStop`
-  - Mount `<TourOutroSummary>` when `tour.phase === "outro" | "done"` (first time only)
-  - Mount `<ReplayTourPill>` once `tour.phase === "done"`
-  - Cancel hooks: pass `tour.cancel` to map user-interact handler, to `setSelectedHex` (when value non-null and tour active), and to `useEffect` watching `[assistant, range]`.
-
-### Hook: `useBlindSpotTour`
-
-State machine:
-
-```text
-phase: "idle" | "preroll" | "stop" | "outro" | "done" | "cancelled"
-currentStopIndex: 0 | 1 | 2
-currentStop: TourStop | null   // null during preroll/outro/done
-```
-
-Transitions:
-- `start()` from `idle` or `done`: compute stops, set `phase=preroll`, schedule `phase=stop, idx=0` after 700ms.
-- On entering each stop: call `map.flyTo`, then `map.once("moveend")` schedule insight visible for 2000ms, then 300ms handoff, then next stop or `phase=outro`.
-- On `outro`: `map.flyToBounds(initialBounds)`, on `moveend` set `phase=done`.
-- On `cancel()`: clear all timers, `map.stop()`, set `phase=done` (so replay pill shows).
-
-All timers stored in a ref array; cleanup on unmount and on `cancel()`.
-
-### Insight card
-
-```tsx
-// TourInsightCard.tsx — absolute positioned, z-30
-<motion.div
-  key={stop.kind}                          // re-mount per stop = clean fade
-  initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-  exit={{ opacity: 0, y: -4, filter: "blur(4px)" }}
-  transition={{ duration: 0.45, ease: [0.16,1,0.3,1] }}
-  className="absolute left-1/2 top-28 z-30 -translate-x-1/2 max-w-md"
->
-  <div className="glass rounded-2xl px-6 py-4 text-center">
-    <div className="font-display text-xs uppercase tracking-widest text-cyan-300/80">
-      {stop.kind === "stronghold" ? "Your stronghold"
-       : stop.kind === "blindspot" ? "Your blind spot"
-       : "Your opportunity"}
-    </div>
-    <div className="mt-1 font-display text-2xl text-white">{stop.city}</div>
-    <div className="mt-2 text-sm text-white/80">{stop.insight}</div>
-  </div>
-</motion.div>
-```
-
-Wrapped in `AnimatePresence mode="wait"` in MapApp so successive stops cross-fade cleanly.
-
-### Hex dim during stop
-
-In `PulseMap.renderHex`, accept a `focus` argument: `{ center: [number,number], radiusKm: number } | null`. When set:
-- For each cell, compute distance from its centroid to focus center
-- If `> radiusKm`: fillOpacity `0.12`, stroke opacity `0.15`, drop the multi-pass glow filter
-- If `<= radiusKm`: render normally + add 2px `#7BFFFF` ring on the closest cluster
-
-`radiusKm` defaults to 40 (covers a metro area). Re-render happens via existing `useEffect` on `cellKey`/`selectedHex` — extend to also depend on `focusKey`.
-
-## Edge cases
-
-- **Tour starts before map fully ready**: hook waits for `onArrived` callback from PulseMap before transitioning out of `preroll`.
-- **Filters change mid-tour**: tour cancels, dim restores, replay pill appears. Insights are stale anyway.
-- **User clicks hex during tour**: tour cancels; detail panel opens normally.
-- **Single-city data**: only one stop runs, then outro skips the bounds zoom (already at the right view) and goes straight to summary.
-- **`prefers-reduced-motion`**: as specified above.
-- **Tour replay after detail panel was opened**: closing detail panel doesn't auto-replay; user must click pill.
-
-## Out of scope (explicit non-goals)
-
-- No tilted/3D camera
-- No pulsing animations on hexes (intensity-only baseline preserved)
-- No audio
-- No persistence across reloads — tour runs on every fresh landing
-- No A/B variants of insight copy
+Should the Location view **replace** the map (full-screen report, with a small "Back to map" pill) or **slide in over** the map (report panel from the right, map dimmed behind)? The first feels more like a printable report; the second keeps spatial context.
