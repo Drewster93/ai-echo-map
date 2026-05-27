@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
+import logoUrl from "@/assets/logo.png";
 
 type Item = {
   key: string;
