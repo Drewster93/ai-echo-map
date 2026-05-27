@@ -227,7 +227,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
         fillColor: style.fillColor,
         fillOpacity,
         color: isSelected ? "#7BFFFF" : style.color,
-        weight: isSelected ? 2 : style.weight,
+        weight: isSelected ? 1.5 : 0.6,
         opacity: isSelected ? 1 : strokeOpacity,
         lineJoin: "round",
         className: dim ? "hex-cell hex-dim" : "hex-fade-in hex-cell",
