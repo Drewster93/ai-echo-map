@@ -4,6 +4,7 @@ import { useState } from "react";
 import { IntroSequence } from "@/features/pulse/IntroSequence";
 import { LandingScreen } from "@/features/pulse/LandingScreen";
 import { MapApp } from "@/features/pulse/MapApp";
+import { SideNav } from "@/features/pulse/hud/SideNav";
 
 export const Route = createFileRoute("/")({
   component: Index,
