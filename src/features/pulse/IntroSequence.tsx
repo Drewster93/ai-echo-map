@@ -1,6 +1,8 @@
 import { motion, useAnimationFrame } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import uberallLogo from "@/assets/uberall-logo.png";
 import { PulseArc } from "./PulseArc";
+
 
 interface Props {
   onDone: () => void;
@@ -248,9 +250,11 @@ export function IntroSequence({ onDone }: Props) {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ultraviolet opacity-75" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ultraviolet" />
           </span>
-          <span className="text-[11px] font-bold uppercase tracking-[0.4em] text-white/70">
-            Uberall
-          </span>
+          <img
+            src={uberallLogo}
+            alt="Uberall"
+            className="h-6 w-auto opacity-90"
+          />
         </motion.div>
 
         <motion.div
