@@ -206,7 +206,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     // Map each location to its current hex intensity so colors stay in sync with filters
     const scoreByLoc = new Map<string, number>();
     hexCells.forEach((c) => {
-      c.locations?.forEach((id) => scoreByLoc.set(id, c.intensity));
+      c.locationIds?.forEach((id: string) => scoreByLoc.set(id, c.intensity));
     });
     locations.forEach((loc) => {
       const score = scoreByLoc.get(loc.id) ?? loc.visibilityScore;
@@ -220,7 +220,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true }).addTo(layer);
       marker.on("click", () => {
         // Find the hex cell containing this location and select it
-        const cell = hexCells.find((c) => c.locations?.includes(loc.id));
+        const cell = hexCells.find((c) => c.locationIds?.includes(loc.id));
         if (cell) onHexSelect(cell.h3);
       });
     });
