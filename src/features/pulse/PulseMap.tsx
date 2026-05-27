@@ -139,21 +139,27 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       } else {
         map.setView([50, 5], 4);
       }
+      // Clean dark vector basemap — premium Kepler/Mapbox-style canvas
       L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
         {
-          attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics",
-          maxZoom: 19,
-          keepBuffer: 4,
+          attribution:
+            '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 20,
+          keepBuffer: 6,
+          className: "basemap-tiles",
         },
       ).addTo(map);
       L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 19, pane: "shadowPane", opacity: 0.9 },
-      ).addTo(map);
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 19, pane: "shadowPane", opacity: 0.85 },
+        "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+        {
+          subdomains: "abcd",
+          maxZoom: 20,
+          pane: "shadowPane",
+          opacity: 0.7,
+          className: "label-tiles",
+        },
       ).addTo(map);
       mapRef.current = map;
       hexLayerRef.current = L.layerGroup().addTo(map);
