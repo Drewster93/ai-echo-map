@@ -1,4 +1,6 @@
 import type { Location } from "../types";
+import { PillSelect } from "./PillSelect";
+
 
 export type Role = "admin" | "regional" | "location";
 
@@ -56,32 +58,26 @@ export function RoleSwitcher({
       </div>
 
       {role === "regional" && (
-        <select
-          value={regionCity ?? ""}
-          onChange={(e) => setRegionCity(e.target.value || null)}
-          className="rounded-full border border-[#1a0d3d]/10 bg-white/60 px-3 py-1.5 text-xs font-medium text-[#1a0d3d] outline-none transition hover:border-[#1a0d3d]/25 focus:border-ultraviolet"
-        >
-          {cities.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        <PillSelect
+          ariaLabel="Region"
+          value={regionCity}
+          onChange={(v) => setRegionCity(v || null)}
+          options={cities.map((c) => ({ value: c, label: c }))}
+        />
       )}
 
       {role === "location" && (
-        <select
-          value={locationId ?? ""}
-          onChange={(e) => setLocationId(e.target.value || null)}
-          className="max-w-[220px] truncate rounded-full border border-[#1a0d3d]/10 bg-white/60 px-3 py-1.5 text-xs font-medium text-[#1a0d3d] outline-none transition hover:border-[#1a0d3d]/25 focus:border-ultraviolet"
-        >
-          {locations.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name} · {l.city}
-            </option>
-          ))}
-        </select>
+        <PillSelect
+          ariaLabel="Location"
+          value={locationId}
+          onChange={(v) => setLocationId(v || null)}
+          options={locations.map((l) => ({
+            value: l.id,
+            label: `${l.name} · ${l.city}`,
+          }))}
+        />
       )}
+
     </div>
   );
 }
