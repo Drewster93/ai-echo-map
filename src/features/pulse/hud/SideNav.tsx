@@ -19,7 +19,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { useState as useReactState } from "react";
+
 
 function brandToDomain(brand: string): string {
   const slug = brand.trim().toLowerCase().split(/\s+/)[0].replace(/[^a-z0-9-]/g, "");
@@ -27,7 +27,7 @@ function brandToDomain(brand: string): string {
 }
 
 function BrandLogo({ brand }: { brand: string }) {
-  const [errored, setErrored] = useReactState(false);
+  const [errored, setErrored] = useState(false);
   const initial = brand.trim().charAt(0).toUpperCase() || "?";
   if (errored) {
     return (
