@@ -82,7 +82,7 @@ export function SideNav() {
           }`}
         />
         {isAds && (
-          <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#ff3b5c] ring-2 ring-[#7515f5]" />
+          <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#ff3b5c] ring-2 ring-white" />
         )}
       </button>
     );
