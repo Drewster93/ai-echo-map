@@ -4,6 +4,8 @@ import { PulseMap } from "./PulseMap";
 import { DetailPanel } from "./DetailPanel";
 import { TopHeader } from "./hud/TopHeader";
 import { WorldwideOverview } from "./hud/WorldwideOverview";
+import { RegionalOverview } from "./hud/RegionalOverview";
+import { RoleSwitcher, type Role } from "./hud/RoleSwitcher";
 import { MentionRateLegend } from "./hud/MentionRateLegend";
 import { FilterControls } from "./hud/FilterControls";
 import { HeatReplayButton } from "./hud/HeatReplayButton";
@@ -16,6 +18,7 @@ import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
 import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
 import { ResultsSection } from "./ResultsSection";
+import { LocationReportView } from "./location/LocationReport";
 import type { Assistant, Location, TimeRange } from "./types";
 
 interface Props {
