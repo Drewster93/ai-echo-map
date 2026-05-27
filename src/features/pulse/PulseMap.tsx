@@ -254,15 +254,13 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           return;
         }
         const t = Math.max(0, Math.min(1, cell.intensity / 100));
-        const inner = (2 + t * 6).toFixed(1);
-        const mid = (6 + t * 18).toFixed(1);
-        const wide = (12 + t * 38).toFixed(1);
+        const inner = (1.5 + t * 3).toFixed(1);
+        const mid = (4 + t * 10).toFixed(1);
         el.style.filter = [
           `drop-shadow(0 0 ${inner}px ${style.glow})`,
           `drop-shadow(0 0 ${mid}px ${style.glow})`,
-          `drop-shadow(0 0 ${wide}px ${style.glow})`,
         ].join(" ");
-        el.style.setProperty("opacity", String(0.85 + t * 0.15));
+        el.style.setProperty("opacity", String(0.88 + t * 0.12));
       });
     });
   }
