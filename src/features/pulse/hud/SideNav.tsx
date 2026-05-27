@@ -123,7 +123,7 @@ export function SideNav() {
 
         {/* Bottom */}
         <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-1.5 px-2">
-          <div className="mb-2 h-px w-8 bg-white/20" />
+          <div className="mb-2 h-px w-8 bg-black/10" />
           {BOTTOM_ITEMS.map((i) => renderItem(i))}
         </div>
       </div>
