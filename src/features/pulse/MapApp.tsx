@@ -253,20 +253,41 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
               onSwitch={onSwitchBrand}
               markets={marketsCount}
               properties={propertiesCount}
+              scopeLabel={scopeLabel}
+              right={
+                <RoleSwitcher
+                  role={role}
+                  setRole={setRole}
+                  regionCity={regionCity}
+                  setRegionCity={setRegionCity}
+                  locationId={locationId}
+                  setLocationId={setLocationId}
+                  locations={brandedLocations}
+                />
+              }
             />
           </motion.div>
 
           <motion.div custom={1} variants={hudVariants} initial="hidden" animate="show">
-            <WorldwideOverview
-              brand={brand.split(/\s+/)[0] || brand}
-              avgMention={avgScore}
-              competitorPct={competitorPct}
-              avgCitation={avgCitation}
-              avgPosition={avgPosition}
-              monthlySearches={monthlySearches}
-              valueCaptured={valueCaptured}
-              narrative={narrative}
-            />
+            {role === "regional" && regionCity ? (
+              <RegionalOverview
+                brand={brand.split(/\s+/)[0] || brand}
+                city={regionCity}
+                locations={scopedLocations}
+                scoreFor={scoreFor}
+              />
+            ) : (
+              <WorldwideOverview
+                brand={brand.split(/\s+/)[0] || brand}
+                avgMention={avgScore}
+                competitorPct={competitorPct}
+                avgCitation={avgCitation}
+                avgPosition={avgPosition}
+                monthlySearches={monthlySearches}
+                valueCaptured={valueCaptured}
+                narrative={narrative}
+              />
+            )}
           </motion.div>
 
           <motion.div custom={2} variants={hudVariants} initial="hidden" animate="show">
