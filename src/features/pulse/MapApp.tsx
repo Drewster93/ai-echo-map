@@ -213,11 +213,13 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
             locations={brandedLocations}
           />
         </div>
-        <LocationReportView
-          location={activeLoc}
-          brand={brand}
-          onBack={() => setRole("admin")}
-        />
+        <div className="h-screen w-full overflow-y-auto">
+          <LocationReportView
+            location={activeLoc}
+            brand={brand}
+            onBack={() => setRole("admin")}
+          />
+        </div>
       </>
     );
   }
