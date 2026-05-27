@@ -34,11 +34,16 @@ function Index() {
     >
       {revealing && <SideNav />}
       {revealing && (
-        <MapApp
-          brand={brand ?? "Preview"}
-          onSwitchBrand={() => setBrand(null)}
-          revealing={revealing}
-        />
+        <div
+          className="relative"
+          style={{ marginLeft: 72, width: "calc(100vw - 72px)" }}
+        >
+          <MapApp
+            brand={brand ?? "Preview"}
+            onSwitchBrand={() => setBrand(null)}
+            revealing={revealing}
+          />
+        </div>
       )}
       <AnimatePresence mode="popLayout">
         {!revealing && introDone && (
