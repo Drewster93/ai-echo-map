@@ -103,21 +103,7 @@ export function SideNav() {
       >
         {/* Logo */}
         <div className="flex h-16 items-center justify-center">
-          <div className="flex h-9 w-9 items-center justify-center">
-            <svg viewBox="0 0 40 40" className="h-9 w-9">
-              <ellipse
-                cx="20"
-                cy="20"
-                rx="16"
-                ry="6"
-                fill="none"
-                stroke="#5b3bff"
-                strokeWidth="3"
-                transform="rotate(-25 20 20)"
-              />
-              <circle cx="20" cy="20" r="6" fill="#5b3bff" />
-            </svg>
-          </div>
+          <img src={logoUrl} alt="Logo" className="h-9 w-9 object-contain" />
         </div>
 
         {/* Top section */}
