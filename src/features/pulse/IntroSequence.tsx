@@ -1,6 +1,8 @@
 import { motion, useAnimationFrame } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import uberallLogo from "@/assets/uberall-logo.png";
 import { PulseArc } from "./PulseArc";
+
 
 interface Props {
   onDone: () => void;
