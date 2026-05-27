@@ -78,7 +78,7 @@ export function SideNav() {
       >
         <Icon
           className={`h-[22px] w-[22px] ${
-            isActive ? "text-[#7515f5]" : "text-white/90"
+            isActive ? "text-[#7515f5]" : "text-[#1a1a2e]/80"
           }`}
         />
         {isAds && (
