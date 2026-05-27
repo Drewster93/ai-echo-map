@@ -4,6 +4,8 @@ import { PulseMap } from "./PulseMap";
 import { DetailPanel } from "./DetailPanel";
 import { TopHeader } from "./hud/TopHeader";
 import { WorldwideOverview } from "./hud/WorldwideOverview";
+import { RegionalOverview } from "./hud/RegionalOverview";
+import { RoleSwitcher, type Role } from "./hud/RoleSwitcher";
 import { MentionRateLegend } from "./hud/MentionRateLegend";
 import { FilterControls } from "./hud/FilterControls";
 import { HeatReplayButton } from "./hud/HeatReplayButton";
@@ -16,6 +18,7 @@ import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
 import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
 import { ResultsSection } from "./ResultsSection";
+import { LocationReportView } from "./location/LocationReport";
 import type { Assistant, Location, TimeRange } from "./types";
 
 interface Props {
@@ -32,6 +35,9 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const [playing, setPlaying] = useState(false);
   const [mapHandle, setMapHandle] = useState<PulseMapHandle | null>(null);
   const [showCompetitors, setShowCompetitors] = useState(false);
+  const [role, setRole] = useState<Role>("admin");
+  const [regionCity, setRegionCity] = useState<string | null>(null);
+  const [locationId, setLocationId] = useState<string | null>(null);
 
   const locations: Location[] = MOCK_LOCATIONS;
 
@@ -43,6 +49,13 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
       })),
     [brand, locations],
   );
+
+  const scopedLocations = useMemo<Location[]>(() => {
+    if (role === "regional" && regionCity) {
+      return brandedLocations.filter((l) => l.city === regionCity);
+    }
+    return brandedLocations;
+  }, [brandedLocations, role, regionCity]);
 
   const scoreFor = useCallback(
     (loc: Location): number => {
@@ -59,28 +72,28 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   );
 
   const hexCells = useMemo(
-    () => buildHexCells(brandedLocations, scoreFor),
-    [brandedLocations, scoreFor],
+    () => buildHexCells(scopedLocations, scoreFor),
+    [scopedLocations, scoreFor],
   );
 
   const selected = selectedHex ? hexCells.find((c) => c.h3 === selectedHex) ?? null : null;
 
-  const totalLocations = brandedLocations.length;
+  const totalLocations = scopedLocations.length;
   const avgScore =
-    brandedLocations.reduce((sum, l) => sum + scoreFor(l), 0) / Math.max(1, totalLocations);
-  const promptsTested = brandedLocations.reduce((s, l) => s + l.prompts.length, 0) * 14;
+    scopedLocations.reduce((sum, l) => sum + scoreFor(l), 0) / Math.max(1, totalLocations);
+  const promptsTested = scopedLocations.reduce((s, l) => s + l.prompts.length, 0) * 14;
 
   const reducedMotion =
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
   const competitorStats = useMemo(
-    () => getCityCompetitorStats(brandedLocations),
-    [brandedLocations],
+    () => getCityCompetitorStats(scopedLocations),
+    [scopedLocations],
   );
   const competitorMarkers = useMemo(
-    () => (showCompetitors ? buildCompetitorMarkers(brandedLocations) : []),
-    [brandedLocations, showCompetitors],
+    () => (showCompetitors ? buildCompetitorMarkers(scopedLocations) : []),
+    [scopedLocations, showCompetitors],
   );
 
   const tour = useBlindSpotTour({
@@ -173,15 +186,44 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   // Derived metrics for header / overview panel
   const propertiesCount = totalLocations;
   const marketsCount = useMemo(() => {
-    const cities = new Set(brandedLocations.map((l) => l.city ?? l.name));
+    const cities = new Set(scopedLocations.map((l) => l.city ?? l.name));
     return cities.size;
-  }, [brandedLocations]);
+  }, [scopedLocations]);
   const competitorPct = Math.max(0, Math.min(100, avgScore * 0.68));
   const avgCitation = Math.max(0, Math.min(100, avgScore * 0.44));
   const avgPosition = Math.max(1, 3 - avgScore / 50);
   const monthlySearches = Math.round(promptsTested * 70);
   const valueCaptured = Math.max(0, Math.min(100, avgScore * 0.45));
   const narrative = `${brand}'s strongest AI presence shows up in heritage and resort markets. Major urban markets underperform with competitor brands dominating share of voice.`;
+
+  // Location Manager full-page report — short-circuits the map UI
+  if (role === "location") {
+    const activeLoc =
+      brandedLocations.find((l) => l.id === locationId) ?? brandedLocations[0];
+    return (
+      <>
+        <div className="fixed left-4 top-4 z-40">
+          <RoleSwitcher
+            role={role}
+            setRole={setRole}
+            regionCity={regionCity}
+            setRegionCity={setRegionCity}
+            locationId={locationId}
+            setLocationId={setLocationId}
+            locations={brandedLocations}
+          />
+        </div>
+        <LocationReportView
+          location={activeLoc}
+          brand={brand}
+          onBack={() => setRole("admin")}
+        />
+      </>
+    );
+  }
+
+  const scopeLabel =
+    role === "regional" && regionCity ? `${regionCity} region` : "Worldwide";
 
   return (
     <>
@@ -192,7 +234,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     >
       <PulseMap
         ref={setMapHandle}
-        locations={brandedLocations}
+        locations={scopedLocations}
         hexCells={hexCells}
         onHexSelect={setSelectedHex}
         selectedHex={selectedHex}
@@ -211,20 +253,41 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
               onSwitch={onSwitchBrand}
               markets={marketsCount}
               properties={propertiesCount}
+              scopeLabel={scopeLabel}
+              right={
+                <RoleSwitcher
+                  role={role}
+                  setRole={setRole}
+                  regionCity={regionCity}
+                  setRegionCity={setRegionCity}
+                  locationId={locationId}
+                  setLocationId={setLocationId}
+                  locations={brandedLocations}
+                />
+              }
             />
           </motion.div>
 
           <motion.div custom={1} variants={hudVariants} initial="hidden" animate="show">
-            <WorldwideOverview
-              brand={brand.split(/\s+/)[0] || brand}
-              avgMention={avgScore}
-              competitorPct={competitorPct}
-              avgCitation={avgCitation}
-              avgPosition={avgPosition}
-              monthlySearches={monthlySearches}
-              valueCaptured={valueCaptured}
-              narrative={narrative}
-            />
+            {role === "regional" && regionCity ? (
+              <RegionalOverview
+                brand={brand.split(/\s+/)[0] || brand}
+                city={regionCity}
+                locations={scopedLocations}
+                scoreFor={scoreFor}
+              />
+            ) : (
+              <WorldwideOverview
+                brand={brand.split(/\s+/)[0] || brand}
+                avgMention={avgScore}
+                competitorPct={competitorPct}
+                avgCitation={avgCitation}
+                avgPosition={avgPosition}
+                monthlySearches={monthlySearches}
+                valueCaptured={valueCaptured}
+                narrative={narrative}
+              />
+            )}
           </motion.div>
 
           <motion.div custom={2} variants={hudVariants} initial="hidden" animate="show">
@@ -291,14 +354,14 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
 
       <DetailPanel
         hex={selected}
-        locations={brandedLocations}
+        locations={scopedLocations}
         onClose={() => setSelectedHex(null)}
       />
     </motion.div>
     {revealing && (
       <ResultsSection
         brand={brand}
-        locations={brandedLocations}
+        locations={scopedLocations}
         assistant={assistant}
         avgScore={avgScore}
       />

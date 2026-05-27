@@ -1,12 +1,24 @@
+import type { ReactNode } from "react";
+
 interface Props {
   brand: string;
   onSwitch: () => void;
   markets: number;
   properties: number;
   quarterLabel?: string;
+  scopeLabel?: string;
+  right?: ReactNode;
 }
 
-export function TopHeader({ brand, onSwitch, markets, properties, quarterLabel = "Q2 2026" }: Props) {
+export function TopHeader({
+  brand,
+  onSwitch,
+  markets,
+  properties,
+  quarterLabel = "Q2 2026",
+  scopeLabel,
+  right,
+}: Props) {
   return (
     <header className="absolute inset-x-4 top-4 z-30 rounded-2xl border border-white/40 bg-white/70 px-6 py-4 shadow-[0_8px_32px_rgba(15,8,40,0.12)] backdrop-blur-xl saturate-150">
       <div className="flex items-start justify-between gap-6">
@@ -18,7 +30,7 @@ export function TopHeader({ brand, onSwitch, markets, properties, quarterLabel =
           <div>
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-ultraviolet">
               <span className="text-[#1a0d3d]/40">◆</span>
-              <span>AI Search Presence · {quarterLabel}</span>
+              <span>AI Search Presence · {quarterLabel}{scopeLabel ? ` · ${scopeLabel}` : ""}</span>
             </div>
             <div className="mt-1 flex items-center gap-3">
               <h1 className="font-display text-2xl leading-tight text-[#1a0d3d]">{brand}</h1>
@@ -28,8 +40,8 @@ export function TopHeader({ brand, onSwitch, markets, properties, quarterLabel =
               >
                 switch
               </button>
-              <Chip dotColor="#34c759" label={`${markets} markets`} />
-              <Chip dotColor="#34c759" label={`${properties} properties`} />
+              <Chip dotColor="#34c759" label={`${markets} ${markets === 1 ? "market" : "markets"}`} />
+              <Chip dotColor="#34c759" label={`${properties} ${properties === 1 ? "property" : "properties"}`} />
             </div>
             <p className="mt-1.5 text-xs text-[#1a0d3d]/55">
               Click any pin to inspect city metrics. Zoom in past level 9 to view individual properties.
@@ -37,7 +49,10 @@ export function TopHeader({ brand, onSwitch, markets, properties, quarterLabel =
           </div>
         </div>
 
-        <MentionLegendChip />
+        <div className="flex items-center gap-3">
+          {right}
+          <MentionLegendChip />
+        </div>
       </div>
     </header>
   );
