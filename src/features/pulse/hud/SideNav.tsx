@@ -70,19 +70,19 @@ export function SideNav() {
         title={item.label}
         className={`group relative flex h-11 w-11 items-center justify-center rounded-xl transition-all ${
           isActive
-            ? "bg-white shadow-[0_0_0_2px_rgba(255,255,255,0.9),0_8px_24px_-8px_rgba(0,0,0,0.3)]"
+            ? "bg-[#f5f3fe] shadow-[0_0_0_2px_rgba(117,21,245,0.9),0_8px_24px_-8px_rgba(117,21,245,0.5)]"
             : highlight
-              ? "bg-white/20"
-              : "hover:bg-white/20"
+              ? "bg-[#ece8ff]"
+              : "hover:bg-black/5"
         }`}
       >
         <Icon
           className={`h-[22px] w-[22px] ${
-            isActive ? "text-[#7515f5]" : "text-white/90"
+            isActive ? "text-[#7515f5]" : "text-[#1a1a2e]/80"
           }`}
         />
         {isAds && (
-          <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#ff3b5c] ring-2 ring-[#7515f5]" />
+          <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#ff3b5c] ring-2 ring-white" />
         )}
       </button>
     );
@@ -97,7 +97,7 @@ export function SideNav() {
       style={{ width: open ? 72 : 16 }}
     >
       <div
-        className={`relative h-full border-r border-white/10 backdrop-blur-xl transition-all bg-[#7515f5] ${
+        className={`relative h-full border-r border-black/5 backdrop-blur-xl transition-all bg-white ${
           open ? "w-[72px]" : "w-0 overflow-hidden"
         }`}
       >
@@ -114,7 +114,7 @@ export function SideNav() {
         </div>
 
         {/* Spacer divider */}
-        <div className="mx-4 my-4 h-px bg-white/10" />
+        <div className="mx-4 my-4 h-px bg-black/5" />
 
         {/* Mid items */}
         <div className="flex flex-col items-center gap-1.5 px-2">
@@ -123,7 +123,7 @@ export function SideNav() {
 
         {/* Bottom */}
         <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-1.5 px-2">
-          <div className="mb-2 h-px w-8 bg-white/20" />
+          <div className="mb-2 h-px w-8 bg-black/10" />
           {BOTTOM_ITEMS.map((i) => renderItem(i))}
         </div>
       </div>
