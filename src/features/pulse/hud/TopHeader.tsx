@@ -8,7 +8,7 @@ interface Props {
 
 export function TopHeader({ brand, onSwitch, markets, properties, quarterLabel = "Q2 2026" }: Props) {
   return (
-    <header className="absolute inset-x-0 top-0 z-30 border-b border-white/5 bg-[#1a0d3d]/95 px-6 py-4 backdrop-blur-xl">
+    <header className="absolute inset-x-4 top-4 z-30 rounded-2xl border border-white/40 bg-white/70 px-6 py-4 shadow-[0_8px_32px_rgba(15,8,40,0.12)] backdrop-blur-xl saturate-150">
       <div className="flex items-start justify-between gap-6">
         <div className="flex items-start gap-4">
           {/* logo mark */}
