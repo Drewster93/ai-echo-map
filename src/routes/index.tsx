@@ -32,7 +32,7 @@ function Index() {
           : "relative h-screen w-screen overflow-hidden bg-[#05030d] text-white"
       }
     >
-      {revealing && <SideNav />}
+      {revealing && <SideNav brand={brand} />}
       {revealing && (
         <div
           className="relative"

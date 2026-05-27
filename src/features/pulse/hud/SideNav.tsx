@@ -19,7 +19,32 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import logoUrl from "@/assets/logo.png";
+
+
+function brandToDomain(brand: string): string {
+  const slug = brand.trim().toLowerCase().split(/\s+/)[0].replace(/[^a-z0-9-]/g, "");
+  return `${slug}.com`;
+}
+
+function BrandLogo({ brand }: { brand: string }) {
+  const [errored, setErrored] = useState(false);
+  const initial = brand.trim().charAt(0).toUpperCase() || "?";
+  if (errored) {
+    return (
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#7515f5] text-sm font-bold text-white">
+        {initial}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${brandToDomain(brand)}&sz=128`}
+      alt={`${brand} logo`}
+      className="h-9 w-9 rounded-lg object-contain"
+      onError={() => setErrored(true)}
+    />
+  );
+}
 
 type Item = {
   key: string;
@@ -53,7 +78,7 @@ const BOTTOM_ITEMS: Item[] = [
 
 const ACTIVE_KEY = "analytics";
 
-export function SideNav() {
+export function SideNav({ brand }: { brand?: string | null }) {
   const [open, setOpen] = useState(true);
   const [active, setActive] = useState<string>(ACTIVE_KEY);
   const [mobileActive] = useState<string>("mobile");
@@ -101,10 +126,11 @@ export function SideNav() {
           open ? "w-[72px]" : "w-0 overflow-hidden"
         }`}
       >
-        {/* Logo */}
-        <div className="flex h-16 items-center justify-center">
-          <img src={logoUrl} alt="Logo" className="h-9 w-9 object-contain" />
-        </div>
+        {brand && (
+          <div className="flex h-16 items-center justify-center">
+            <BrandLogo brand={brand} />
+          </div>
+        )}
 
         {/* Top section */}
         <div className="flex flex-col items-center gap-1.5 px-2">
