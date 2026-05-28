@@ -118,11 +118,11 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
               {/* Properties grouped by city */}
               {hexLocations.length > 0 && (
                 <div className="mt-5">
-                  <div className="flex items-center gap-2 border-b border-[#260e5a]/10 pb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#260e5a]">
+                  <div className="flex items-center gap-2 border-b border-white/15 pb-2">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-white">
                       Properties
                     </span>
-                    <span className="rounded-md bg-[#260e5a]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#260e5a]">
+                    <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-bold text-white">
                       {hexLocations.length}
                     </span>
                   </div>
@@ -136,10 +136,10 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                     ).map(([city, locs]) => (
                       <div key={city}>
                         <div className="mb-2 flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#260e5a]/65">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/65">
                             {city}
                           </span>
-                          <span className="text-[10px] text-[#260e5a]/45">
+                          <span className="text-[10px] text-white/45">
                             {locs.length} {locs.length === 1 ? "property" : "properties"}
                           </span>
                         </div>
