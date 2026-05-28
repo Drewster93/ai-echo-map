@@ -10,9 +10,14 @@ export function buildHexCells(
 ): HexCell[] {
   const map = new Map<string, { intensity: number; weight: number; locs: string[]; cluster: string }>();
 
+  // At coarse resolutions (city-scale) each cell already spans many km,
+  // so blurring into neighboring cells produces a giant smear. Only use
+  // the neighbor-ring bloom for fine-grained (location-scale) views.
+  const useRing = res >= 7;
+
   for (const loc of locations) {
     const center = latLngToCell(loc.lat, loc.lng, res);
-    const ring = gridDisk(center, 1); // center + 6 neighbors
+    const ring = useRing ? gridDisk(center, 1) : [center];
     const score = scoreFor(loc);
     ring.forEach((h, i) => {
       const w = i === 0 ? 1 : 0.45; // center weighted higher
