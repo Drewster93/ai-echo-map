@@ -431,9 +431,8 @@ export const GLOBAL_REGIONS: { label: string; rect: Rect }[] = [
   { label: 'OCEANIA',    rect: { low: { latitude: -50.0, longitude: 110.0  }, high: { latitude: 0.0,   longitude: 179.0  } } },
 ];
 
-}
+export function filterByDominantDomain(places: PlaceWithId[]): PlaceWithId[] {
 
-function filterByDominantDomain(places: PlaceWithId[]): PlaceWithId[] {
   const getDomain = (url: string | null | undefined): string | null => {
     if (!url) return null;
     try {
