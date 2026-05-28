@@ -155,6 +155,10 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       hexLayerRef.current = L.layerGroup().addTo(map);
       const overlayPane = map.getPanes().overlayPane;
       if (overlayPane) overlayPane.classList.add("hex-overlay-pane");
+      // Dedicated high-z pane for pins so they always sit above tiles/overlays.
+      const pinPane = map.createPane("pulse-pins");
+      pinPane.style.zIndex = "650";
+      pinPane.style.pointerEvents = "auto";
       markerLayerRef.current = L.layerGroup().addTo(map);
       competitorLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
@@ -166,20 +170,18 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       container.addEventListener("wheel", fireInteract, { passive: true });
       container.addEventListener("touchstart", fireInteract, { passive: true });
 
-      // Re-render markers when crossing the city/property zoom threshold
-      let lastBucket = map.getZoom() < 9 ? "city" : "props";
+      // Always re-render markers on any zoom change so pins survive zooms.
       map.on("zoomend", () => {
-        const b = map.getZoom() < 9 ? "city" : "props";
-        if (b !== lastBucket) {
-          lastBucket = b;
-          renderMarkers();
-        }
+        renderMarkers();
       });
 
 
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
         runDive(map);
+      } else {
+        // No dive — paint immediately so pins appear without waiting on a moveend.
+        paintData();
       }
     })();
     return () => {
@@ -190,6 +192,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   function pinColorForScore(score: number): { fill: string; ring: string } {
     if (score >= 60) return { fill: "#34c759", ring: "#1f8b3d" }; // green
