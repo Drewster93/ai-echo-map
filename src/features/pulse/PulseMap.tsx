@@ -410,10 +410,9 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   );
   const focusKey = focus ? `${focus.center[0]},${focus.center[1]},${focus.radiusKm}` : "none";
   useEffect(() => {
-    if (readyRef.current && dataRenderedRef.current) {
-      renderHex();
-      renderMarkers();
-    }
+    if (!readyRef.current) return;
+    renderHex();
+    renderMarkers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellKey, selectedHex, focusKey]);
 
@@ -422,9 +421,10 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     [competitorMarkers],
   );
   useEffect(() => {
-    if (readyRef.current && dataRenderedRef.current) renderCompetitors();
+    if (readyRef.current) renderCompetitors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [competitorKey]);
+
 
   return <div ref={containerRef} className="absolute inset-0 z-0" />;
 });
