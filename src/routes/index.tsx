@@ -41,7 +41,7 @@ function Index() {
     [demoLocations, places, brand],
   );
 
-  function applyDemoFallback(value: string, toastId: string | number) {
+  function applyDemoFallback(value: string, toastId?: string | number) {
     const mapped = MOCK_LOCATIONS.map((l) => ({ ...l, brand: value }));
     setDemoLocations(mapped);
     toast.success(`Demo mode · ${mapped.length} sample locations for ${value}`, {
@@ -49,10 +49,14 @@ function Index() {
     });
   }
 
-  async function handleBrand(value: string) {
+  async function handleBrand(value: string, opts?: { demo?: boolean }) {
     setBrand(value);
     setPlaces(null);
     setDemoLocations(null);
+    if (opts?.demo) {
+      applyDemoFallback(value);
+      return;
+    }
     const toastId = toast.loading(`Searching Google Places for "${value}"…`);
     try {
       const res = await fetchLocations({
@@ -70,6 +74,18 @@ function Index() {
       applyDemoFallback(value, toastId);
     }
   }
+
+  // Demo URL flag: ?demo=1 skips the Google Places API and uses mock data,
+  // so screen recordings always land on a real, populated map.
+  const isDemo =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("demo") === "1";
+
+  // Wrapper that respects the demo flag for user-triggered submits.
+  function onLandingSubmit(value: string) {
+    return handleBrand(value, { demo: isDemo });
+  }
+
 
 
   return (
@@ -100,7 +116,8 @@ function Index() {
       )}
       <AnimatePresence mode="popLayout">
         {!revealing && introDone && (
-          <LandingScreen key="landing" onSubmit={handleBrand} />
+          <LandingScreen key="landing" onSubmit={onLandingSubmit} />
+
         )}
         {!introDone && (
           <IntroSequence key="intro" onDone={() => setIntroDone(true)} />
