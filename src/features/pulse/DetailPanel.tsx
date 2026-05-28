@@ -56,7 +56,7 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-[72px] right-0 bottom-0 z-30 rounded-t-3xl border-t border-[#260e5a]/10 bg-white px-6 pb-8 pt-6 text-[#260e5a] shadow-[0_-30px_80px_-20px_rgba(0,0,0,0.25)]"
+            className="fixed left-[72px] right-0 bottom-0 z-30 rounded-t-3xl border-t border-white/15 bg-[#260e5a] px-6 pb-8 pt-6 text-white shadow-[0_-30px_80px_-20px_rgba(0,0,0,0.25)]"
           >
             <div className="w-full">
 
