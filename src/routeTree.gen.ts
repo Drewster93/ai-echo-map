@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicBrandCoverageRouteImport } from './routes/api/public/brand-coverage'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBrandCoverageRoute = ApiPublicBrandCoverageRouteImport.update({
+  id: '/api/public/brand-coverage',
+  path: '/api/public/brand-coverage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/brand-coverage': typeof ApiPublicBrandCoverageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/brand-coverage': typeof ApiPublicBrandCoverageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/brand-coverage': typeof ApiPublicBrandCoverageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/brand-coverage'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/brand-coverage'
+  id: '__root__' | '/' | '/api/public/brand-coverage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicBrandCoverageRoute: typeof ApiPublicBrandCoverageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/brand-coverage': {
+      id: '/api/public/brand-coverage'
+      path: '/api/public/brand-coverage'
+      fullPath: '/api/public/brand-coverage'
+      preLoaderRoute: typeof ApiPublicBrandCoverageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicBrandCoverageRoute: ApiPublicBrandCoverageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -108,7 +108,7 @@ const COUNTRY_NAMES: Record<string, string[]> = {
   BE: ['Belgium', 'Belgique', 'België'],
 };
 
-const COUNTRY_BOUNDS: Record<string, { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } }> = {
+export const COUNTRY_BOUNDS: Record<string, { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } }> = {
   US: { low: { latitude: 24.396, longitude: -125.0 }, high: { latitude: 49.384, longitude: -66.934 } },
   DE: { low: { latitude: 47.27, longitude: 5.87 }, high: { latitude: 55.06, longitude: 15.04 } },
   GB: { low: { latitude: 49.96, longitude: -8.17 }, high: { latitude: 60.86, longitude: 1.75 } },
@@ -125,9 +125,9 @@ const COUNTRY_BOUNDS: Record<string, { low: { latitude: number; longitude: numbe
   BE: { low: { latitude: 49.5, longitude: 2.55 }, high: { latitude: 51.5, longitude: 6.4 } },
 };
 
-type Rect = { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } };
+export type Rect = { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } };
 
-const COUNTRY_SUB_REGIONS: Record<string, { label: string; rect: Rect }[]> = {
+export const COUNTRY_SUB_REGIONS: Record<string, { label: string; rect: Rect }[]> = {
   US: [
     { label: 'PACIFIC_NW',  rect: { low: { latitude: 42.0, longitude: -125.0 }, high: { latitude: 49.0, longitude: -116.0 } } },
     { label: 'WEST_COAST',  rect: { low: { latitude: 32.5, longitude: -125.0 }, high: { latitude: 42.0, longitude: -114.0 } } },
@@ -209,11 +209,11 @@ const COUNTRY_SUB_REGIONS: Record<string, { label: string; rect: Rect }[]> = {
 };
 
 
-interface PlaceWithId extends GooglePlacesLocation {
+export interface PlaceWithId extends GooglePlacesLocation {
   _placeId?: string;
 }
 
-async function searchRegion(
+export async function searchRegion(
   brand: string,
   googleApiKey: string,
   language: string,
@@ -370,43 +370,69 @@ export async function searchGooglePlaces(
     return interleaved.map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
   }
 
-  const regions: { label: string; bias: Record<string, unknown> }[] = [
-    { label: 'NA_WEST',    bias: { locationBias: { rectangle: { low: { latitude: 15.0,  longitude: -170.0 }, high: { latitude: 72.0,  longitude: -100.0 } } } } },
-    { label: 'NA_EAST',    bias: { locationBias: { rectangle: { low: { latitude: 15.0,  longitude: -100.0 }, high: { latitude: 72.0,  longitude: -50.0  } } } } },
-    { label: 'S_AMERICA',  bias: { locationBias: { rectangle: { low: { latitude: -60.0, longitude: -90.0  }, high: { latitude: 15.0,  longitude: -30.0  } } } } },
-    { label: 'EU_WEST',    bias: { locationBias: { rectangle: { low: { latitude: 35.0,  longitude: -15.0  }, high: { latitude: 72.0,  longitude: 20.0   } } } } },
-    { label: 'EU_EAST',    bias: { locationBias: { rectangle: { low: { latitude: 35.0,  longitude: 20.0   }, high: { latitude: 72.0,  longitude: 60.0   } } } } },
-    { label: 'AFRICA_ME',  bias: { locationBias: { rectangle: { low: { latitude: -40.0, longitude: -20.0  }, high: { latitude: 40.0,  longitude: 60.0   } } } } },
-    { label: 'ASIA',       bias: { locationBias: { rectangle: { low: { latitude: 0.0,   longitude: 60.0   }, high: { latitude: 72.0,  longitude: 150.0  } } } } },
-    { label: 'OCEANIA',    bias: { locationBias: { rectangle: { low: { latitude: -50.0, longitude: 110.0  }, high: { latitude: 0.0,   longitude: 179.0  } } } } },
-  ];
+  const regions = GLOBAL_REGIONS;
 
-  const results = await Promise.all(
-    regions.map(r => searchRegion(brand, googleApiKey, language, 60, r.bias, null, r.label))
+  const regionResults = await Promise.all(
+    regions.map(r =>
+      searchRegion(brand, googleApiKey, language, 60, { locationRestriction: { rectangle: r.rect } }, null, r.label),
+    ),
   );
 
+  // Per-bucket dedupe + name filter
   const seen = new Set<string>();
-  const nameFiltered: PlaceWithId[] = [];
-  const flat: PlaceWithId[] = ([] as PlaceWithId[]).concat(...results);
-  let nameFilterRejects = 0;
-  for (const place of flat) {
-    const id = place._placeId || place.name + '|' + place.address;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    if (!nameFilter(place)) { nameFilterRejects++; continue; }
-    nameFiltered.push(place);
+  const buckets: PlaceWithId[][] = regionResults.map(list => {
+    const out: PlaceWithId[] = [];
+    for (const p of list) {
+      const id = p._placeId || p.name + '|' + p.address;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      if (!nameFilter(p)) continue;
+      out.push(p);
+    }
+    return out;
+  });
+
+  // Domain filter across all
+  const flat = ([] as PlaceWithId[]).concat(...buckets);
+  const domainSet = new Set(filterByDominantDomain(flat).map(p => p._placeId || p.name + '|' + p.address));
+  const filteredBuckets = buckets.map(b => b.filter(p => domainSet.has(p._placeId || p.name + '|' + p.address)));
+
+  // Round-robin interleave so every continent is represented
+  const interleaved: PlaceWithId[] = [];
+  const cursors = filteredBuckets.map(() => 0);
+  let added = true;
+  while (added && interleaved.length < maxLocations) {
+    added = false;
+    for (let i = 0; i < filteredBuckets.length; i++) {
+      if (interleaved.length >= maxLocations) break;
+      const bucket = filteredBuckets[i];
+      if (cursors[i] < bucket.length) {
+        interleaved.push(bucket[cursors[i]++]);
+        added = true;
+      }
+    }
   }
 
-  const domainFiltered = filterByDominantDomain(nameFiltered);
+  const merged: GooglePlacesLocation[] = interleaved.map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
 
-  const merged: GooglePlacesLocation[] = domainFiltered.slice(0, maxLocations).map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
-
-  const counts = regions.map((r, i) => `${r.label}:${results[i].length}`).join(', ');
-  console.log(`[Google Places GLOBAL] ${counts} → Name-filtered: ${nameFiltered.length} (rejected: ${nameFilterRejects}) → Domain-filtered: ${domainFiltered.length} → Final: ${merged.length}`);
+  const counts = regions.map((r, i) => `${r.label}:${filteredBuckets[i].length}`).join(', ');
+  console.log(`[Google Places GLOBAL] ${counts} → Final: ${merged.length}`);
   return merged;
 }
 
-function filterByDominantDomain(places: PlaceWithId[]): PlaceWithId[] {
+export const GLOBAL_REGIONS: { label: string; rect: Rect }[] = [
+  { label: 'NA_WEST',    rect: { low: { latitude: 15.0,  longitude: -170.0 }, high: { latitude: 72.0,  longitude: -100.0 } } },
+  { label: 'NA_EAST',    rect: { low: { latitude: 15.0,  longitude: -100.0 }, high: { latitude: 72.0,  longitude: -50.0  } } },
+  { label: 'S_AMERICA',  rect: { low: { latitude: -60.0, longitude: -90.0  }, high: { latitude: 15.0,  longitude: -30.0  } } },
+  { label: 'EU_WEST',    rect: { low: { latitude: 35.0,  longitude: -15.0  }, high: { latitude: 72.0,  longitude: 20.0   } } },
+  { label: 'EU_EAST',    rect: { low: { latitude: 35.0,  longitude: 20.0   }, high: { latitude: 72.0,  longitude: 60.0   } } },
+  { label: 'AFRICA_ME',  rect: { low: { latitude: -40.0, longitude: -20.0  }, high: { latitude: 40.0,  longitude: 60.0   } } },
+  { label: 'ASIA',       rect: { low: { latitude: 0.0,   longitude: 60.0   }, high: { latitude: 72.0,  longitude: 150.0  } } },
+  { label: 'OCEANIA',    rect: { low: { latitude: -50.0, longitude: 110.0  }, high: { latitude: 0.0,   longitude: 179.0  } } },
+];
+
+export function filterByDominantDomain(places: PlaceWithId[]): PlaceWithId[] {
+
   const getDomain = (url: string | null | undefined): string | null => {
     if (!url) return null;
     try {
