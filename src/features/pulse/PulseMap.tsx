@@ -216,6 +216,16 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     const layer = markerLayerRef.current;
     if (!L || !layer || !map) return;
     layer.clearLayers();
+
+    // Only render locations with valid coordinates so nothing silently disappears.
+    const validLocations = locations.filter(
+      (l) =>
+        Number.isFinite(l.lat) &&
+        Number.isFinite(l.lng) &&
+        !(l.lat === 0 && l.lng === 0),
+    );
+    if (validLocations.length === 0) return;
+
     // Map each location to its current hex intensity so colors stay in sync with filters
     const scoreByLoc = new Map<string, number>();
     hexCells.forEach((c) => {
@@ -225,17 +235,20 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     const zoom = map.getZoom();
 
     if (zoom < CITY_ZOOM_THRESHOLD) {
-      // Aggregate per city
+      // Aggregate per city — every group ALWAYS produces a visible pin,
+      // including groups with a single location.
       const cityGroups = new Map<string, Location[]>();
-      locations.forEach((loc) => {
-        const key = loc.city ?? loc.name;
+      validLocations.forEach((loc) => {
+        const key = loc.city?.trim() || loc.cluster?.trim() || loc.name?.trim() || loc.id;
         const arr = cityGroups.get(key) ?? [];
         arr.push(loc);
         cityGroups.set(key, arr);
       });
       cityGroups.forEach((locs, cityKey) => {
+        if (locs.length === 0) return;
         const lat = locs.reduce((s, l) => s + l.lat, 0) / locs.length;
         const lng = locs.reduce((s, l) => s + l.lng, 0) / locs.length;
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
         const avg =
           locs.reduce((s, l) => s + (scoreByLoc.get(l.id) ?? l.visibilityScore), 0) /
           locs.length;
@@ -257,7 +270,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           const cell = hexCells.find((c) => c.locationIds?.some((id) => locIds.has(id)));
           if (cell) onHexSelect(cell.h3);
           else {
-            // Zoom in so individual pins appear
             mapRef.current?.flyTo([lat, lng], CITY_ZOOM_THRESHOLD + 0.5, { duration: 0.8 });
           }
           void cityKey;
@@ -266,7 +278,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       return;
     }
 
-    locations.forEach((loc) => {
+    validLocations.forEach((loc) => {
       const score = scoreByLoc.get(loc.id) ?? loc.visibilityScore;
       const { fill, ring } = pinColorForScore(score);
       const icon = L.divIcon({
@@ -282,6 +294,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       });
     });
   }
+
 
 
   function renderHex() {
