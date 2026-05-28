@@ -34,11 +34,15 @@ export const Shot6a: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  const logoOp = interpolate(frame, [108, 130], [0, 1], {
+  const logoOp = interpolate(frame, [96, 112, 130], [0, 0.45, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const logoScale = interpolate(frame, [108, 130], [0.55, 1], {
+  const logoScale = interpolate(frame, [96, 130], [0.35, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const logoCoreOp = interpolate(frame, [88, 104, 130], [0, 0.35, 0.9], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
