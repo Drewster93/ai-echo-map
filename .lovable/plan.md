@@ -1,33 +1,27 @@
-## Plan: Wire "Improve visibility" to Location Manager view
+## Problem
 
-### Current behavior
-- In `DetailPanel.tsx`, clicking the bottom "Improve visibility →" button does nothing (no onClick).
-- The hex panel (`DetailPanel`) is opened for a hex cluster, which references one or more `locationIds`.
-- `MapApp.tsx` already supports a Location Manager view: when `role === "location"`, it renders `LocationReportView` for the location matching `locationId` state.
+When a user clicks a hex pin, `DetailPanel` currently renders inline beneath the map as a full-width section (`relative z-10 w-full border-t ...`). Because it sits in normal document flow after `MapApp`'s `h-screen` map, the page scrolls and the panel feels like a takeover of the section rather than a contextual modal over the map.
 
-### Goal
-Clicking "Improve visibility" should:
-1. Switch role to `"location"`
-2. Set `locationId` to the location associated with that hex
-3. Close the hex detail panel
+## Fix
 
-### Changes
+Convert `DetailPanel` into a fixed bottom overlay that covers roughly the lower 45% of the viewport, while the map remains fully visible above it. Click-outside / close button dismisses.
 
-#### 1. `src/features/pulse/DetailPanel.tsx`
-- Add prop `onImproveVisibility: (locationId: string) => void`
-- Pick the target location from the hex: `hexLocations[0]?.id` (the first store in the cluster)
-- Wire the button's `onClick` to call `onImproveVisibility(targetId)` when a location is available; disable / hide the button otherwise
+### Changes to `src/features/pulse/DetailPanel.tsx`
 
-#### 2. `src/features/pulse/MapApp.tsx`
-- Pass `onImproveVisibility` to `<DetailPanel>`:
-  ```
-  onImproveVisibility={(id) => {
-    setLocationId(id);
-    setRole("location");
-    setSelectedHex(null);
-  }}
-  ```
+- Replace section classes with a fixed bottom overlay:
+  - `fixed inset-x-0 bottom-0 z-30 max-h-[45vh] overflow-y-auto`
+  - Add rounded top corners, top border, backdrop blur, and a strong drop shadow so it reads as a floating sheet over the map.
+  - Constrain inner content width (e.g. `mx-auto max-w-7xl`) and keep the existing header + 4-up metrics grid.
+- Animate from `y: 40, opacity: 0` → `y: 0, opacity: 1` (slide-up sheet), exit reverse.
+- Remove the `scrollIntoView` effect (no longer needed — overlay appears in place).
+- Keep close button and Improve-visibility CTA unchanged.
 
-### Notes
-- A hex cluster can contain multiple stores. Defaulting to the first one keeps the click deterministic and matches what's currently shown in the panel header. No new UI is added.
-- No routing changes needed — the Location Manager view is rendered inline by `MapApp` based on `role`.
+### Changes to `src/features/pulse/MapApp.tsx`
+
+- No structural change required; `DetailPanel` is already rendered as a sibling of the map. It will simply float over the map once it's `fixed`.
+- Optional: add a subtle backdrop dimmer (`fixed inset-0 z-20 bg-black/20`) behind the panel when `selected` is set, dismissing on click. (Will include this for polish.)
+
+### Out of scope
+
+- No changes to data, hex selection logic, ResultsSection, or routing.
+- No viewport / route layout changes in `src/routes/index.tsx`.
