@@ -49,7 +49,7 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             onClick={onClose}
-            className="fixed inset-0 z-20 bg-black/30 backdrop-blur-[1px]"
+            className="fixed inset-y-0 left-[72px] right-0 z-20 bg-black/30 backdrop-blur-[1px]"
           />
           <motion.section
             key={hex.h3}
