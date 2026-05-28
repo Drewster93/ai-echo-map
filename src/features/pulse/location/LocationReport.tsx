@@ -14,6 +14,18 @@ export function LocationReportView({ location, brand, onBack }: Props) {
   const report = useMemo(() => buildLocationReport(location, brand), [location, brand]);
   const brandFirst = brand.split(/\s+/)[0] || brand;
 
+  const navItems = [
+    { id: "overview", label: "Overview" },
+    { id: "head-to-head", label: "Head-to-Head" },
+    { id: "by-topic", label: "By Topic" },
+    { id: "top-wins", label: "Top Wins" },
+  ];
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -21,18 +33,62 @@ export function LocationReportView({ location, brand, onBack }: Props) {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="min-h-screen w-full bg-[#fafaf7] text-[#1a0d3d]"
     >
-      <div className="mx-auto max-w-[1080px] px-8 py-12">
-        <button
-          onClick={onBack}
-          className="mb-10 inline-flex items-center gap-2 rounded-full border border-[#1a0d3d]/10 bg-white px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-[#1a0d3d]/70 transition hover:border-[#1a0d3d]/25 hover:text-[#1a0d3d]"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to map
-        </button>
+      {/* Dark top nav bar */}
+      <div className="sticky top-0 z-30 w-full border-b border-white/5 bg-[#1a0d3d] text-white">
+        <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-8 py-5">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onBack}
+              aria-label="Back to map"
+              className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#6b46c1] to-[#3b1e7a] shadow-[0_0_24px_rgba(139,92,246,0.4)] transition hover:scale-105"
+            >
+              <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
+            </button>
+            <div>
+              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] text-white/55">
+                <span className="text-[#a78bfa]">◆</span> Property Dashboard
+                <span className="text-white/30">·</span>
+                <span className="text-white/55">Q2 2026</span>
+              </p>
+              <h1 className="mt-1 font-display text-lg font-bold leading-tight text-white">
+                {brand} AI Search Presence · {report.property.name}
+              </h1>
+            </div>
+          </div>
+          <nav className="hidden items-center gap-7 md:flex">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => scrollTo(item.id)}
+                className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/65 transition hover:text-white"
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
 
-        <StatusBanner status={report.status} />
-        <PropertyHeader report={report} />
+      <div className="mx-auto max-w-[1080px] px-8 py-12">
+        {/* Dark hero card */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a0d3d] via-[#22114d] to-[#0f0628] px-10 py-10 text-white shadow-[0_20px_60px_-20px_rgba(15,8,40,0.4)]">
+          <div className="pointer-events-none absolute right-0 top-1/2 h-[420px] w-[420px] -translate-y-1/2 translate-x-1/4 rounded-full bg-[#22c55e]/15 blur-[100px]" />
+          <div className="relative">
+            <StatusBanner status={report.status} />
+            <h1 className="mt-5 font-display text-5xl font-bold leading-[1.05] text-white">
+              {report.property.name}
+            </h1>
+            <p className="mt-3 text-sm text-white/55">
+              {report.property.address} · {report.property.group}
+            </p>
+            <p className="mt-7 max-w-2xl text-base leading-relaxed text-white/85">
+              {report.narrative}
+            </p>
+          </div>
+        </div>
+
         <Section
+          id="overview"
           eyebrow="Performance overview"
           title={`How you compare to competitors in ${report.property.city}`}
           caption={
@@ -46,6 +102,7 @@ export function LocationReportView({ location, brand, onBack }: Props) {
         </Section>
 
         <Section
+          id="head-to-head"
           eyebrow="Head-to-head"
           title="Share of voice in AI answers"
           caption={
@@ -60,6 +117,7 @@ export function LocationReportView({ location, brand, onBack }: Props) {
         </Section>
 
         <Section
+          id="by-topic"
           eyebrow="Where the gap lives"
           title="Performance by guest intent"
           caption={
@@ -88,6 +146,7 @@ export function LocationReportView({ location, brand, onBack }: Props) {
         </Section>
 
         <Section
+          id="top-wins"
           eyebrow="What's working"
           title={`Prompts where ${report.property.name} holds its ground`}
           caption={
@@ -120,18 +179,20 @@ export function LocationReportView({ location, brand, onBack }: Props) {
 /* ---------------- Section wrapper ---------------- */
 
 function Section({
+  id,
   eyebrow,
   title,
   caption,
   children,
 }: {
+  id?: string;
   eyebrow: string;
   title: string;
   caption?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-16">
+    <section id={id} className="mt-16 scroll-mt-28">
       <div className="mb-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] text-ultraviolet">
         <span className="h-1.5 w-1.5 rounded-full bg-ultraviolet" />
         {eyebrow}
@@ -144,6 +205,7 @@ function Section({
     </section>
   );
 }
+
 
 /* ---------------- Status banner ---------------- */
 
