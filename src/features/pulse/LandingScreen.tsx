@@ -64,7 +64,7 @@ export function LandingScreen({ onSubmit }: Props) {
         <img
           src={uberallLogo}
           alt="Uberall"
-          className="mx-auto mb-4 h-8 w-auto object-contain md:h-10"
+          className="mx-auto mb-4 h-12 w-auto object-contain md:h-16"
         />
         <p className="mb-6 text-xs font-bold uppercase tracking-[0.3em] text-white/50">
           Discover your local GEO presence
