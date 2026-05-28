@@ -61,14 +61,14 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
             <div className="w-full">
 
               {/* Header bar */}
-              <div className="flex items-center justify-between rounded-2xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-6 py-4">
+              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#1a0d3d] px-6 py-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#260e5a]/70">
-                    <span className="mr-2 inline-block h-2 w-2 rounded-sm bg-[#260e5a] align-middle" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#22c55e]">
+                    <span className="mr-2 inline-block h-2 w-2 rounded-sm bg-[#22c55e] align-middle" />
                     Market overview
                   </p>
-                  <h3 className="mt-1 font-display text-2xl leading-tight text-[#260e5a]">{cluster}</h3>
-                  <p className="mt-1 text-sm text-[#260e5a]/65">
+                  <h3 className="mt-1 font-display text-2xl leading-tight text-white">{cluster}</h3>
+                  <p className="mt-1 text-sm text-white/65">
                     {hexLocations.length} {hexLocations.length === 1 ? "property" : "properties"} ·{" "}
                     {(hexLocations.length * 1400).toLocaleString()} monthly searches ·{" "}
                     {Math.round(hexLocations.length * 880).toLocaleString()} estimated impressions
@@ -77,13 +77,14 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={onClose}
-                    className="rounded-md border border-[#260e5a]/20 px-2.5 py-1 text-sm text-[#260e5a]/70 hover:border-[#260e5a] hover:text-[#260e5a]"
+                    className="rounded-md border border-white/15 px-2.5 py-1 text-sm text-white/70 hover:border-white/40 hover:text-white"
                     aria-label="Close panel"
                   >
                     ✕
                   </button>
                 </div>
               </div>
+
 
               {/* 4-up metrics row */}
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
