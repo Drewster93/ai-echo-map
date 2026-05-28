@@ -125,6 +125,90 @@ const COUNTRY_BOUNDS: Record<string, { low: { latitude: number; longitude: numbe
   BE: { low: { latitude: 49.5, longitude: 2.55 }, high: { latitude: 51.5, longitude: 6.4 } },
 };
 
+type Rect = { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } };
+
+const COUNTRY_SUB_REGIONS: Record<string, { label: string; rect: Rect }[]> = {
+  US: [
+    { label: 'PACIFIC_NW',  rect: { low: { latitude: 42.0, longitude: -125.0 }, high: { latitude: 49.0, longitude: -116.0 } } },
+    { label: 'WEST_COAST',  rect: { low: { latitude: 32.5, longitude: -125.0 }, high: { latitude: 42.0, longitude: -114.0 } } },
+    { label: 'MOUNTAIN',    rect: { low: { latitude: 31.3, longitude: -116.0 }, high: { latitude: 49.0, longitude: -102.0 } } },
+    { label: 'TEXAS',       rect: { low: { latitude: 25.8, longitude: -106.7 }, high: { latitude: 36.5, longitude: -93.5  } } },
+    { label: 'MIDWEST',     rect: { low: { latitude: 36.0, longitude: -102.0 }, high: { latitude: 49.0, longitude: -82.0  } } },
+    { label: 'SOUTH',       rect: { low: { latitude: 24.4, longitude: -93.5  }, high: { latitude: 36.5, longitude: -75.5  } } },
+    { label: 'FLORIDA',     rect: { low: { latitude: 24.4, longitude: -87.6  }, high: { latitude: 31.0, longitude: -80.0  } } },
+    { label: 'NORTHEAST',   rect: { low: { latitude: 36.5, longitude: -82.0  }, high: { latitude: 47.5, longitude: -66.9  } } },
+  ],
+  DE: [
+    { label: 'NORTH',  rect: { low: { latitude: 52.5, longitude: 6.5  }, high: { latitude: 55.1, longitude: 14.0 } } },
+    { label: 'WEST',   rect: { low: { latitude: 49.5, longitude: 5.87 }, high: { latitude: 52.5, longitude: 9.0  } } },
+    { label: 'EAST',   rect: { low: { latitude: 50.2, longitude: 11.0 }, high: { latitude: 53.7, longitude: 15.0 } } },
+    { label: 'SOUTH',  rect: { low: { latitude: 47.3, longitude: 7.5  }, high: { latitude: 50.5, longitude: 13.8 } } },
+  ],
+  GB: [
+    { label: 'SCOTLAND', rect: { low: { latitude: 54.6, longitude: -8.0 }, high: { latitude: 60.9, longitude: -0.5 } } },
+    { label: 'N_ENG',    rect: { low: { latitude: 52.8, longitude: -3.5 }, high: { latitude: 55.0, longitude: 0.5  } } },
+    { label: 'MIDLANDS', rect: { low: { latitude: 51.6, longitude: -3.5 }, high: { latitude: 53.0, longitude: 1.7  } } },
+    { label: 'SOUTH',    rect: { low: { latitude: 49.9, longitude: -6.0 }, high: { latitude: 51.8, longitude: 1.7  } } },
+    { label: 'WALES',    rect: { low: { latitude: 51.3, longitude: -5.5 }, high: { latitude: 53.5, longitude: -2.6 } } },
+  ],
+  FR: [
+    { label: 'IDF',         rect: { low: { latitude: 48.1, longitude: 1.4  }, high: { latitude: 49.2, longitude: 3.6  } } },
+    { label: 'NORTH',       rect: { low: { latitude: 49.0, longitude: -1.0 }, high: { latitude: 51.1, longitude: 5.5  } } },
+    { label: 'WEST',        rect: { low: { latitude: 45.5, longitude: -5.1 }, high: { latitude: 49.0, longitude: 1.5  } } },
+    { label: 'SOUTH_WEST',  rect: { low: { latitude: 41.4, longitude: -2.0 }, high: { latitude: 45.5, longitude: 3.5  } } },
+    { label: 'SOUTH_EAST',  rect: { low: { latitude: 41.4, longitude: 3.5  }, high: { latitude: 47.5, longitude: 9.6  } } },
+  ],
+  NO: [
+    { label: 'SOUTH', rect: { low: { latitude: 58.0, longitude: 4.6  }, high: { latitude: 62.5, longitude: 12.5 } } },
+    { label: 'MID',   rect: { low: { latitude: 62.5, longitude: 4.6  }, high: { latitude: 66.5, longitude: 17.0 } } },
+    { label: 'NORTH', rect: { low: { latitude: 66.5, longitude: 12.0 }, high: { latitude: 71.2, longitude: 31.2 } } },
+  ],
+  NL: [
+    { label: 'NORTH', rect: { low: { latitude: 52.3, longitude: 4.5 }, high: { latitude: 53.5, longitude: 7.2 } } },
+    { label: 'WEST',  rect: { low: { latitude: 51.7, longitude: 3.4 }, high: { latitude: 52.6, longitude: 5.2 } } },
+    { label: 'SOUTH', rect: { low: { latitude: 50.7, longitude: 3.4 }, high: { latitude: 52.0, longitude: 7.2 } } },
+  ],
+  AT: [
+    { label: 'WEST', rect: { low: { latitude: 46.4, longitude: 9.5  }, high: { latitude: 49.0, longitude: 13.0 } } },
+    { label: 'EAST', rect: { low: { latitude: 46.4, longitude: 13.0 }, high: { latitude: 49.0, longitude: 17.2 } } },
+  ],
+  CH: [
+    { label: 'WEST', rect: { low: { latitude: 45.8, longitude: 5.96 }, high: { latitude: 47.8, longitude: 8.2  } } },
+    { label: 'EAST', rect: { low: { latitude: 45.8, longitude: 8.2  }, high: { latitude: 47.8, longitude: 10.5 } } },
+  ],
+  ES: [
+    { label: 'NORTH',  rect: { low: { latitude: 41.5, longitude: -9.3 }, high: { latitude: 43.8, longitude: 3.4  } } },
+    { label: 'CENTER', rect: { low: { latitude: 38.5, longitude: -7.5 }, high: { latitude: 41.5, longitude: 0.5  } } },
+    { label: 'EAST',   rect: { low: { latitude: 37.0, longitude: 0.0  }, high: { latitude: 41.5, longitude: 3.4  } } },
+    { label: 'SOUTH',  rect: { low: { latitude: 35.9, longitude: -7.5 }, high: { latitude: 38.5, longitude: 0.0  } } },
+  ],
+  IT: [
+    { label: 'NORTH',  rect: { low: { latitude: 43.7, longitude: 6.6  }, high: { latitude: 47.1, longitude: 14.0 } } },
+    { label: 'CENTER', rect: { low: { latitude: 41.0, longitude: 9.5  }, high: { latitude: 43.7, longitude: 14.5 } } },
+    { label: 'SOUTH',  rect: { low: { latitude: 36.6, longitude: 12.0 }, high: { latitude: 41.0, longitude: 18.5 } } },
+    { label: 'ISLES',  rect: { low: { latitude: 36.6, longitude: 7.5  }, high: { latitude: 41.3, longitude: 12.0 } } },
+  ],
+  SE: [
+    { label: 'SOUTH', rect: { low: { latitude: 55.3, longitude: 11.1 }, high: { latitude: 59.5, longitude: 19.0 } } },
+    { label: 'MID',   rect: { low: { latitude: 59.5, longitude: 11.1 }, high: { latitude: 64.0, longitude: 20.5 } } },
+    { label: 'NORTH', rect: { low: { latitude: 64.0, longitude: 12.0 }, high: { latitude: 69.1, longitude: 24.2 } } },
+  ],
+  DK: [
+    { label: 'WEST', rect: { low: { latitude: 54.5, longitude: 8.0  }, high: { latitude: 57.8, longitude: 11.0 } } },
+    { label: 'EAST', rect: { low: { latitude: 54.5, longitude: 11.0 }, high: { latitude: 57.8, longitude: 15.2 } } },
+  ],
+  PL: [
+    { label: 'NORTH', rect: { low: { latitude: 52.0, longitude: 14.1 }, high: { latitude: 54.9, longitude: 24.2 } } },
+    { label: 'WEST',  rect: { low: { latitude: 49.0, longitude: 14.1 }, high: { latitude: 52.0, longitude: 19.0 } } },
+    { label: 'EAST',  rect: { low: { latitude: 49.0, longitude: 19.0 }, high: { latitude: 52.0, longitude: 24.2 } } },
+  ],
+  BE: [
+    { label: 'NORTH', rect: { low: { latitude: 50.7, longitude: 2.55 }, high: { latitude: 51.5, longitude: 6.4 } } },
+    { label: 'SOUTH', rect: { low: { latitude: 49.5, longitude: 2.55 }, high: { latitude: 50.7, longitude: 6.4 } } },
+  ],
+};
+
+
 interface PlaceWithId extends GooglePlacesLocation {
   _placeId?: string;
 }
@@ -219,12 +303,71 @@ export async function searchGooglePlaces(
   };
 
   if (country && country.toLowerCase() !== 'global') {
+    const subRegions = COUNTRY_SUB_REGIONS[upperCountry];
     const bounds = COUNTRY_BOUNDS[upperCountry];
-    const locationParam = bounds ? { locationRestriction: { rectangle: bounds } } : {};
-    const results = await searchRegion(brand, googleApiKey, language, maxLocations, locationParam, countryNames, upperCountry);
-    return results
-      .filter(nameFilter)
-      .map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
+
+    if (!subRegions || subRegions.length === 0) {
+      const locationParam = bounds ? { locationRestriction: { rectangle: bounds } } : {};
+      const results = await searchRegion(brand, googleApiKey, language, maxLocations, locationParam, countryNames, upperCountry);
+      return results
+        .filter(nameFilter)
+        .map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
+    }
+
+    const perRegion = Math.max(10, Math.ceil(maxLocations / Math.max(1, Math.ceil(subRegions.length / 2))));
+    const regionResults = await Promise.all(
+      subRegions.map(r =>
+        searchRegion(
+          brand,
+          googleApiKey,
+          language,
+          perRegion,
+          { locationRestriction: { rectangle: r.rect } },
+          countryNames,
+          `${upperCountry}_${r.label}`,
+        ),
+      ),
+    );
+
+    // Dedupe + name filter, preserve per-region buckets for interleaving
+    const seen = new Set<string>();
+    const buckets: PlaceWithId[][] = regionResults.map(list => {
+      const out: PlaceWithId[] = [];
+      for (const p of list) {
+        const id = p._placeId || p.name + '|' + p.address;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        if (!nameFilter(p)) continue;
+        out.push(p);
+      }
+      return out;
+    });
+
+    // Domain filter across all
+    const flat = ([] as PlaceWithId[]).concat(...buckets);
+    const domainFiltered = new Set(filterByDominantDomain(flat).map(p => p._placeId || p.name + '|' + p.address));
+    const filteredBuckets = buckets.map(b => b.filter(p => domainFiltered.has(p._placeId || p.name + '|' + p.address)));
+
+    // Round-robin interleave so every sub-region is represented
+    const interleaved: PlaceWithId[] = [];
+    const cursors = filteredBuckets.map(() => 0);
+    let added = true;
+    while (added && interleaved.length < maxLocations) {
+      added = false;
+      for (let i = 0; i < filteredBuckets.length; i++) {
+        if (interleaved.length >= maxLocations) break;
+        const bucket = filteredBuckets[i];
+        if (cursors[i] < bucket.length) {
+          interleaved.push(bucket[cursors[i]++]);
+          added = true;
+        }
+      }
+    }
+
+    const counts = subRegions.map((r, i) => `${r.label}:${filteredBuckets[i].length}`).join(', ');
+    console.log(`[Google Places ${upperCountry}] ${counts} → Final: ${interleaved.length}`);
+
+    return interleaved.map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
   }
 
   const regions: { label: string; bias: Record<string, unknown> }[] = [
