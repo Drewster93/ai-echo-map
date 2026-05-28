@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { toast } from "sonner";
 import { IntroSequence } from "@/features/pulse/IntroSequence";
 import { LandingScreen } from "@/features/pulse/LandingScreen";
 import { MapApp } from "@/features/pulse/MapApp";
 import { SideNav } from "@/features/pulse/hud/SideNav";
+import { searchBrandLocations } from "@/lib/googlePlaces/search.functions";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -24,6 +27,27 @@ function Index() {
   const [introDone, setIntroDone] = useState(false);
   const [brand, setBrand] = useState<string | null>(null);
   const revealing = brand !== null;
+  const fetchLocations = useServerFn(searchBrandLocations);
+
+  async function handleBrand(value: string) {
+    setBrand(value);
+    const toastId = toast.loading(`Searching Google Places for "${value}"…`);
+    try {
+      const res = await fetchLocations({
+        data: { brand: value, country: "global", maxLocations: 40 },
+      });
+      if (res.error) {
+        toast.error(`Google Places: ${res.error}`, { id: toastId });
+        return;
+      }
+      console.log("[Google Places] locations:", res.locations);
+      toast.success(`Found ${res.locations.length} locations for ${value}`, { id: toastId });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to reach Google Places", { id: toastId });
+    }
+  }
+
   return (
     <main
       className={
@@ -47,7 +71,7 @@ function Index() {
       )}
       <AnimatePresence mode="popLayout">
         {!revealing && introDone && (
-          <LandingScreen key="landing" onSubmit={setBrand} />
+          <LandingScreen key="landing" onSubmit={handleBrand} />
         )}
         {!introDone && (
           <IntroSequence key="intro" onDone={() => setIntroDone(true)} />
@@ -56,5 +80,6 @@ function Index() {
     </main>
   );
 }
+
 
 
