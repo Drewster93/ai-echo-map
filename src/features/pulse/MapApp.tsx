@@ -133,8 +133,11 @@ export function MapApp({ brand, onSwitchBrand, revealing = true, locations: loca
   }, [assistant, range]);
 
   const handleArrived = useCallback(() => {
+    // Only auto-start the tour once real fetched locations are available.
+    if (!usingRealData) return;
     tour.start();
-  }, [tour]);
+  }, [tour, usingRealData]);
+
 
   const handleUserInteract = useCallback(() => {
     if (tour.isActive) tour.cancel();
