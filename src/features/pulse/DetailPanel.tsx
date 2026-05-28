@@ -7,10 +7,9 @@ interface Props {
   hex: HexCell | null;
   locations: Location[];
   onClose: () => void;
-  onImproveVisibility?: (locationId: string) => void;
 }
 
-export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Props) {
+export function DetailPanel({ hex, locations, onClose }: Props) {
   const hexLocations = hex ? locations.filter((l) => hex.locationIds.includes(l.id)) : [];
   const score = hex ? Math.round(hex.intensity) : 0;
   const cluster = hex?.cluster ?? "";
@@ -76,14 +75,6 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {hexLocations[0] && (
-                    <button
-                      onClick={() => onImproveVisibility?.(hexLocations[0].id)}
-                      className="rounded-xl bg-ultraviolet px-5 py-2.5 text-sm font-bold text-white shadow-[0_8px_30px_-8px_rgba(134,14,255,0.9)] transition hover:translate-y-[-1px]"
-                    >
-                      Improve visibility →
-                    </button>
-                  )}
                   <button
                     onClick={onClose}
                     className="rounded-md border border-white/15 px-2.5 py-1 text-sm text-white/60 hover:border-ultraviolet hover:text-white"

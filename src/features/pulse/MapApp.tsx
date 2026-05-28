@@ -362,11 +362,6 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
       hex={selected}
       locations={scopedLocations}
       onClose={() => setSelectedHex(null)}
-      onImproveVisibility={(id) => {
-        setLocationId(id);
-        setRole("location");
-        setSelectedHex(null);
-      }}
     />
     {revealing && (
       <ResultsSection
