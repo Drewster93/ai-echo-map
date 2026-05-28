@@ -114,6 +114,80 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                   footer={<span className="text-[11px] text-white/50">Where brand is mentioned</span>}
                 />
               </div>
+
+              {/* Properties grouped by city */}
+              {hexLocations.length > 0 && (
+                <div className="mt-5">
+                  <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-ultraviolet">
+                      Properties
+                    </span>
+                    <span className="rounded-md bg-ultraviolet/15 px-1.5 py-0.5 text-[10px] font-bold text-ultraviolet">
+                      {hexLocations.length}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 max-h-[260px] space-y-4 overflow-y-auto pr-1">
+                    {Object.entries(
+                      hexLocations.reduce<Record<string, Location[]>>((acc, loc) => {
+                        (acc[loc.city] ??= []).push(loc);
+                        return acc;
+                      }, {}),
+                    ).map(([city, locs]) => (
+                      <div key={city}>
+                        <div className="mb-2 flex items-center gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
+                            {city}
+                          </span>
+                          <span className="text-[10px] text-white/35">
+                            {locs.length} {locs.length === 1 ? "property" : "properties"}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                          {locs.map((loc) => {
+                            const mention =
+                              (loc.prompts.filter((p) => p.status === "mentioned").length /
+                                Math.max(1, loc.prompts.length)) *
+                              100;
+                            const confidence =
+                              loc.prompts.length >= 8
+                                ? { label: "High confidence", cls: "bg-soft-green/20 text-soft-green" }
+                                : loc.prompts.length >= 4
+                                  ? { label: "Medium", cls: "bg-yellow-400/15 text-yellow-300" }
+                                  : { label: "Low", cls: "bg-orange-uberall/20 text-orange-uberall" };
+                            return (
+                              <div
+                                key={loc.id}
+                                className="rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5"
+                              >
+                                <div className="truncate text-sm font-semibold text-white">
+                                  {loc.name}
+                                </div>
+                                <div className="mt-0.5 truncate text-[11px] text-white/50">
+                                  {loc.cluster}
+                                </div>
+                                <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/5 pt-2">
+                                  <span className="text-[11px] text-white/60">
+                                    Mention{" "}
+                                    <span className="font-bold text-white">
+                                      {mention.toFixed(1)}%
+                                    </span>
+                                  </span>
+                                  <span
+                                    className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${confidence.cls}`}
+                                  >
+                                    {confidence.label}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </motion.section>
         </>
