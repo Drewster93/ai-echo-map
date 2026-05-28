@@ -8,6 +8,7 @@ import { LandingScreen } from "@/features/pulse/LandingScreen";
 import { MapApp } from "@/features/pulse/MapApp";
 import { SideNav } from "@/features/pulse/hud/SideNav";
 import { buildLocationsFromPlaces } from "@/features/pulse/buildFromPlaces";
+import { MOCK_LOCATIONS } from "@/features/pulse/mockData";
 import { searchBrandLocations } from "@/lib/googlePlaces/search.functions";
 import type { GooglePlacesLocation } from "@/lib/googlePlaces/types";
 
@@ -29,24 +30,36 @@ function Index() {
   const [introDone, setIntroDone] = useState(false);
   const [brand, setBrand] = useState<string | null>(null);
   const [places, setPlaces] = useState<GooglePlacesLocation[] | null>(null);
+  const [demoLocations, setDemoLocations] = useState<ReturnType<typeof buildLocationsFromPlaces> | null>(null);
   const revealing = brand !== null;
   const fetchLocations = useServerFn(searchBrandLocations);
 
   const locations = useMemo(
-    () => (places && brand ? buildLocationsFromPlaces(places, brand) : null),
-    [places, brand],
+    () =>
+      demoLocations ??
+      (places && brand ? buildLocationsFromPlaces(places, brand) : null),
+    [demoLocations, places, brand],
   );
+
+  function useDemoFallback(value: string, toastId: string | number) {
+    const mapped = MOCK_LOCATIONS.map((l) => ({ ...l, brand: value }));
+    setDemoLocations(mapped);
+    toast.success(`Demo mode · ${mapped.length} sample locations for ${value}`, {
+      id: toastId,
+    });
+  }
 
   async function handleBrand(value: string) {
     setBrand(value);
     setPlaces(null);
+    setDemoLocations(null);
     const toastId = toast.loading(`Searching Google Places for "${value}"…`);
     try {
       const res = await fetchLocations({
         data: { brand: value, country: "global", maxLocations: 20 },
       });
-      if (res.error) {
-        toast.error(`Google Places: ${res.error}`, { id: toastId });
+      if (res.error || res.locations.length === 0) {
+        useDemoFallback(value, toastId);
         return;
       }
       setPlaces(res.locations);
@@ -54,10 +67,9 @@ function Index() {
       toast.success(`Found ${mapped.length} locations for ${value}`, { id: toastId });
     } catch (err) {
       console.error(err);
-      toast.error("Failed to reach Google Places", { id: toastId });
+      useDemoFallback(value, toastId);
     }
   }
-
 
   return (
     <main
