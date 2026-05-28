@@ -98,7 +98,6 @@
     letter-spacing: -0.015em;
   }
 }
-
 @layer utilities {
   .glass {
     backdrop-filter: blur(24px);
@@ -115,6 +114,12 @@
   .text-balance {
     text-wrap: balance;
   }
+  .font-numbers {
+    font-family: var(--font-numbers);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+}
 }
 
 /* Map — light premium canvas */
