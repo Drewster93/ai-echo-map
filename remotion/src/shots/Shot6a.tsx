@@ -131,6 +131,18 @@ export const Shot6a: React.FC = () => {
       <div
         style={{
           position: "absolute",
+          width: 320,
+          height: 320,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${COLORS.aquaBright} 0%, ${COLORS.ultraviolet}55 28%, transparent 72%)`,
+          opacity: logoCoreOp,
+          filter: "blur(20px)",
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
           opacity: logoOp,
           transform: `scale(${logoScale})`,
           width: 220,
