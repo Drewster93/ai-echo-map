@@ -1,64 +1,96 @@
-## Your concern is correct — Playwright is the wrong substrate
+## Goal
 
-Playwright/CDP screencast caps at JPEG-compressed frames, drops frames under load, and you fight the browser's render loop the whole time. The result looks like a screen recording, not a launch film. We need something better.
+A 45–55s launch film that **feels indistinguishable from the Lovable 2.0 video** — same rhythm, same kinetic-type grammar, same dark canvas + single UV accent — but the on-screen product is **AI Performance Pulse** and the narrative is **"see where AI mentions your brand."**
 
-## The pivot: render the real app *inside* Remotion
+## Why prior attempts failed (and what changes)
 
-The app and Remotion are both **React + Tailwind**. We can import the actual app components — `<PulseScore>`, `<LocationCard>`, `<QueryResultList>`, `<CompareBars>`, etc. — directly into Remotion scenes and feed them frame-deterministic props. Three wins stacked:
+- **Playwright captures** = JPEG-compressed, dropped frames, browser jank.
+- **Real app mounted in Remotion** = Leaflet maps and Framer Motion are non-deterministic per frame.
+- **Static PNG screenshots** = look like a slideshow. The Lovable video's energy comes from UI elements *moving inside the frame*, not just camera pushes over flat images.
 
-1. **Lossless 1920×1080.** Every frame is rendered by Remotion's pipeline at full quality. Zero compression artifacts, zero dropped frames, zero browser jank.
-2. **Frame-perfect choreography.** Numbers tick, bars race, lists populate, the cursor lands on a button — all bound to `useCurrentFrame()` so the cut lands on the exact pixel we planned.
-3. **It is the real UI.** Same components, same Tailwind classes, same shadcn primitives, same typography. When the product evolves, re-render and the film updates.
+**New approach:** Rebuild ~6 Pulse surfaces as **purpose-built Remotion components** (pure React + Tailwind, every value driven by `useCurrentFrame()`). They use the real design tokens (Deep Plum `#05030d`, UV `#860eff`, Fraunces + IBM Plex Sans, real shadcn primitives copied in) so they ARE the app visually — but they're frame-deterministic, lossless 1920×1080, and can be choreographed shot-by-shot.
 
-This is **strictly better than Playwright** for a launch piece. It's the move studios use when they have access to the source.
+A small number of legitimately complex surfaces (the Leaflet world map) stay as pre-captured PNGs and are animated with push-ins / hex blooms layered on top.
 
-### How it works, concretely
+## Visual system (locked, matches Lovable)
 
-- `remotion/src/v4/app-bridge/AppStyles.tsx` imports the project's `src/styles.css` so Tailwind tokens resolve identically.
-- `remotion/src/v4/app-bridge/MockProviders.tsx` stubs the contexts the components depend on: TanStack Router (`createMemoryHistory`), TanStack Query (preloaded `QueryClient` with fixture data), Supabase client (no-op auth + cached query responses), Theme provider.
-- `remotion/vite.config.ts` (the Remotion bundler hook in `render-remotion.mjs`) adds an `@/` alias to `../src/` so the same import paths the app uses keep working.
-- Each scene imports the real components and wraps them: e.g.
-  `<PulseScore value={useCountUp(0, 74, { from: 6, to: 36 })} />` —
-  the component is unchanged, the prop is frame-derived.
-- Components that hit live data (route loaders, suspense queries) get a thin Remotion adapter that takes the fixture as a prop and bypasses the loader.
+- Canvas `#05030d` · Accent UV `#860eff` · Text `#FFFFFF` / `#A8A4B8`
+- Display: Fraunces 600 (huge kinetic words). Body: IBM Plex Sans 500.
+- **Hero type smash:** 12-frame ease-out scale 1.06→1.00 + opacity 0→1, hold 18f, exit 6f fade. Single word per cut. Letterforms can letterbox the UI to lower 60% or overlay full-frame.
+- **Cuts:** hard cuts only. Avg shot length 1.4s. No fades between scenes (except final).
+- **Camera moves:** push-in (1.0→1.08 over 24f), snap-zoom (1.0→2.5 in 8f for detail reveals), occasional whip-pan via 4-frame UV bar.
+- **Cursor:** scripted UV dot that lands on real interactive targets.
+- **No grain, no vignette, no chromatic aberration, no anamorphic bars.** Same restraint as Lovable.
 
-### Risk + remedy
+## Narrative (8 beats, ~48s)
 
-- *Some component is router-bound and can't take props directly.* Remedy: a 1-screen-per-scene approach — render the route's `component` function inside a `<MemoryRouterProvider initialEntries={["/dashboard"]}>` with preloaded query cache. Works because the components are pure functions of props/context.
-- *A component imports a browser-only API.* Remedy: stub at the alias level (`vite.config` resolve alias swap for `@/integrations/supabase/client` → a `client.mock.ts`).
-- *Tailwind v4 token mismatch.* Remedy: copy `src/styles.css` and the `index.css` exactly; Tailwind scans the Remotion src + the project src.
+```text
+1. Cold open      0.0–2.5s   Wordmark "PULSE" smashes onto black, UV underline draws
+2. The question   2.5–7.0s   Hero type "WHERE DOES AI SEND PEOPLE?" over dim world map
+3. The map        7.0–13s    Push into city → hex grid blooms → score badges pop in
+4. Drill in       13–20s     Snap-zoom to one hex → location report card slides up
+5. The queries    20–28s     Query list types itself, AI answers stream, rank chips land
+6. The benchmark  28–36s     Competitor bars race, hero type "BENCHMARK" smashes
+7. The pulse      36–44s     7-day sparkline draws, alert toast lands, "MONITORED DAILY"
+8. Sign-off       44–48s     Wordmark + tagline + UV pill "Available now" → cut to black
+```
 
-### Live-screen fallback (only if you want it)
+Each beat = 2–4 cuts (~28 cuts total), matching Lovable's pacing.
 
-If a specific shot demands true live behavior (e.g., a 3D map we don't want to recreate), we can deterministically capture *that one shot* via Chrome DevTools `HeadlessExperimental.beginFrame` — which steps the page frame-by-frame and emits lossless PNGs at any fps. Slow (minutes per clip) but pixel-perfect. We use it surgically, not for the whole film.
+## What gets built as Remotion components vs. captured
 
-## What the film looks like (unchanged from last plan)
+| Surface | Source | Why |
+|---|---|---|
+| Wordmark, hero type, lower-thirds, cursor, whip accents | Native Remotion | Pure motion |
+| Hex grid + score badges | Native Remotion (SVG, frame-driven) | Choreographable bloom |
+| Location report card | Native Remotion (copy of real card markup + tokens) | Frame-perfect entrance |
+| Query list + streaming AI answers | Native Remotion (typewriter + stream sim) | Critical to feel "live" |
+| Competitor comparison bars | Native Remotion (frame-driven width) | Bar race must be deterministic |
+| 7-day sparkline + alert toast | Native Remotion (SVG path draw) | Stroke-dashoffset animation |
+| World map base layer | Pre-captured PNG (already in `remotion/public/captures/`) | Leaflet can't render deterministically |
 
-Same 50s, 1500f, ~28 cuts, Lovable-2.0-energy structure: cold open → 4 acts (Location-level, Query coverage, Benchmark, Monitored daily) → sign-off. Hero feature nouns smash over the live UI, scripted UV cursor, push-ins, snap-to-detail zooms, 3 surgical whip transitions, hard cuts elsewhere. Geist sans only. `#0A0A0B` canvas, single UV `#860eff` accent.
+This is the same technique top motion studios use: **the UI you see in the film is a film-grade rebuild of the product UI**, not a live recording. It will look identical to viewers because the design tokens are identical.
 
-The dynamism doesn't come from the substrate — it comes from cut rhythm, kinetic type weight, and choreographed UI motion. All three are now under our direct control because the UI is in our render loop.
+## File structure
 
-## Files (revised)
+```text
+remotion/src/
+  Root.tsx                     edit: register "pulse-launch"
+  PulseLaunch.tsx              new: 1440-frame TransitionSeries, 8 beats
+  theme.ts                     edit: lock palette + type
+  motion/
+    HeroType.tsx               new: kinetic smash text
+    Cursor.tsx                 new: scripted UV dot
+    Whip.tsx                   new: 4-frame accent bar
+    PushIn.tsx                 new: camera push wrapper
+    SnapZoom.tsx               new: detail zoom wrapper
+  shots/
+    01-Wordmark.tsx
+    02-Question.tsx
+    03-MapBloom.tsx            uses public/captures/world-map.png
+    04-HexDrill.tsx
+    05-LocationCard.tsx
+    06-QueryStream.tsx
+    07-BenchmarkBars.tsx
+    08-Sparkline.tsx
+    09-Signoff.tsx
+  ui/                          new: film-grade rebuilds of Pulse UI
+    HexGrid.tsx
+    ScoreBadge.tsx
+    LocationReportCard.tsx
+    QueryRow.tsx
+    AnswerStream.tsx
+    CompetitorBar.tsx
+    Sparkline.tsx
+    AlertToast.tsx
+```
 
-**New**
-- `remotion/src/v4/app-bridge/AppStyles.tsx` — mounts `src/styles.css`.
-- `remotion/src/v4/app-bridge/MockProviders.tsx` — Router + Query + Supabase + Theme stubs.
-- `remotion/src/v4/app-bridge/fixtures/` — JSON fixtures per scene (locations, queries, scores).
-- `remotion/src/v4/hooks/useCountUp.ts`, `useScripted.ts`, `useReveal.ts` — frame-derived primitives.
-- `remotion/src/v4/scenes/01_Open.tsx` … `12_SignOff.tsx` — scene per beat.
-- `remotion/src/v4/overlay/HeroType.tsx`, `Callout.tsx`, `Cursor.tsx`, `Whip.tsx`.
-- `remotion/src/v4/MainV4.tsx`, `Stage.tsx`, `theme.ts`.
+All v3/v4 cinematic primitives stay on disk untouched. New composition id: `pulse-launch`. Renders to `/mnt/documents/ai-performance-pulse-launch-v4.mp4`.
 
-**Edited**
-- `remotion/src/Root.tsx` — register `main-v4` (1920×1080, 1500f, 30fps).
-- `remotion/scripts/render-remotion.mjs` — add `@/` alias + include `../src` in the webpack scan so Tailwind picks up real components.
+## Honest answer to "is this possible?"
 
-**Not used**
-- No Playwright. No `capture-app.mjs`. No `public/captures/`.
-- v3 cinematic primitives stay on disk, unmounted.
+**Yes, very close to identical.** The Lovable video's signature is (a) kinetic typography rhythm, (b) restrained palette + type, (c) UI elements that animate *inside* the frame, (d) hard cuts at 1–2s intervals. All four are reproducible with this approach. The one thing we won't match perfectly is shots of complex live interactions (map pan/zoom in Lovable's editor) — for our equivalent (Leaflet world map) we'll fake the push-in with a captured PNG, which reads as identical at video resolution.
 
-## One thing to confirm before I build
+## Open question
 
-To bridge the real components in cleanly, the **6 app surfaces** I'll mount need to exist in `src/`. From the route tree we have, I'll target: landing hero, dashboard pulse score, location grid, single-location drill, query results, competitor comparison, daily trend. If any of those don't have a real component yet (or live entirely in a route loader I can't bypass with a fixture), I'll flag it the moment I hit it and either (a) build a frame-perfect equivalent using the same primitives or (b) use the surgical CDP fallback for just that shot.
-
-Approve this and I'll wire it up — bridge first, scene 1 next, render a 10s proof cut so you can sanity-check the look before I commit to the full 50s.
+Confirm the **8-beat narrative above** matches the story you want to tell. If you'd rather lead with "competitor benchmark" or "daily monitoring" instead of "the map," I'll reorder the beats before scaffolding.
