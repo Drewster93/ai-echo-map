@@ -362,10 +362,18 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   }
 
   function computeBounds(locs: Location[]): import("leaflet").LatLngBounds | null {
-    const L = LRef.current;
-    if (!L || locs.length === 0) return null;
-    return L.latLngBounds(locs.map((l) => [l.lat, l.lng] as [number, number]));
-  }
+  useEffect(() => {
+    if (!readyRef.current) return;
+    if (dataRenderedRef.current) {
+      renderMarkers();
+    } else if (locations.length > 0) {
+      // Data arrived after init but before dive finished — render immediately
+      // so retrieved locations are visible even at the overview zoom.
+      paintData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locations]);
+
 
   useEffect(() => {
     if (!dive || dovedRef.current) return;
