@@ -67,7 +67,7 @@ export function LandingScreen({ onSubmit }: Props) {
           className="mx-auto mb-4 h-12 w-auto object-contain md:h-16"
         />
         <p className="mb-6 text-xs font-bold uppercase tracking-[0.3em] text-white/50">
-          Discover your local GEO presence
+          Discover your AI Performance presence
         </p>
         <h1 className="font-display text-balance text-5xl leading-[1.05] text-white md:text-7xl">
           Enter your brand to see{" "}
