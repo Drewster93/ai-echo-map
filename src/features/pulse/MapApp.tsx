@@ -14,7 +14,7 @@ import { CompetitorTogglePill } from "./hud/CompetitorTogglePill";
 import { TourInsightCard } from "./tour/TourInsightCard";
 import { TourOutroSummary } from "./tour/TourOutroSummary";
 import { useBlindSpotTour, type PulseMapHandle } from "./tour/useBlindSpotTour";
-import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
+import { getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
 import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
 import { ResultsSection } from "./ResultsSection";
@@ -40,20 +40,15 @@ export function MapApp({ brand, onSwitchBrand, revealing = true, locations: loca
   const [regionCity, setRegionCity] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
 
-  const locations: Location[] =
-    locationsProp && locationsProp.length > 0 ? locationsProp : MOCK_LOCATIONS;
+  const isLoading = locationsProp === null;
+  const isEmpty = locationsProp !== null && locationsProp.length === 0;
   const usingRealData = !!(locationsProp && locationsProp.length > 0);
 
   const brandedLocations = useMemo<Location[]>(
-    () =>
-      usingRealData
-        ? locations
-        : locations.map((l) => ({
-            ...l,
-            name: l.name.replace("Lumen", brand.split(/\s+/)[0] || "Lumen"),
-          })),
-    [brand, locations, usingRealData],
+    () => locationsProp ?? [],
+    [locationsProp],
   );
+
 
 
   const scopedLocations = useMemo<Location[]>(() => {
@@ -275,6 +270,48 @@ export function MapApp({ brand, onSwitchBrand, revealing = true, locations: loca
         onUserInteract={handleUserInteract}
         competitorMarkers={competitorMarkers}
       />
+
+      <AnimatePresence>
+        {(isLoading || isEmpty) && (
+          <motion.div
+            key={isLoading ? "loading" : "empty"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            className="absolute inset-0 z-30 flex items-center justify-center bg-[#05030d]/85 backdrop-blur-sm"
+          >
+            <div className="flex flex-col items-center gap-4 text-center">
+              {isLoading ? (
+                <>
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+                  <p className="font-display text-lg text-white/90">
+                    Searching Google Places for {brand}…
+                  </p>
+                  <p className="text-sm text-white/50">
+                    Pulling live business locations to map your AI footprint.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-display text-xl text-white">
+                    No locations found for {brand}
+                  </p>
+                  <p className="text-sm text-white/60">
+                    We couldn't find any matching Google Business Profile listings.
+                  </p>
+                  <button
+                    onClick={onSwitchBrand}
+                    className="rounded-full border border-white/20 px-4 py-2 text-sm text-white transition hover:bg-white/10"
+                  >
+                    Try another brand
+                  </button>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {revealing && (
         <>
