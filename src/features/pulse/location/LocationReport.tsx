@@ -2,15 +2,18 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import type { Location } from "../types";
+import { PillSelect } from "../hud/PillSelect";
 import { buildLocationReport, formatUsd, type LocationReport, type PromptRow } from "./reportData";
 
 interface Props {
   location: Location;
   brand: string;
   onBack: () => void;
+  allLocations?: Location[];
+  onSelectLocation?: (id: string) => void;
 }
 
-export function LocationReportView({ location, brand, onBack }: Props) {
+export function LocationReportView({ location, brand, onBack, allLocations, onSelectLocation }: Props) {
   const report = useMemo(() => buildLocationReport(location, brand), [location, brand]);
   const brandFirst = brand.split(/\s+/)[0] || brand;
 
@@ -70,6 +73,22 @@ export function LocationReportView({ location, brand, onBack }: Props) {
       </div>
 
       <div className="mx-auto max-w-[1080px] px-8 py-12">
+        {allLocations && onSelectLocation && allLocations.length > 1 && (
+          <div className="mb-6 flex items-center gap-3">
+            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#1a0d3d]/55">
+              Viewing property
+            </span>
+            <PillSelect
+              ariaLabel="Switch property"
+              value={location.id}
+              onChange={onSelectLocation}
+              options={allLocations.map((l) => ({
+                value: l.id,
+                label: `${l.name} · ${l.city}`,
+              }))}
+            />
+          </div>
+        )}
         {/* Dark hero card */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a0d3d] via-[#22114d] to-[#0f0628] px-10 py-10 text-white shadow-[0_20px_60px_-20px_rgba(15,8,40,0.4)]">
           <div className="pointer-events-none absolute right-0 top-1/2 h-[420px] w-[420px] -translate-y-1/2 translate-x-1/4 rounded-full bg-[#22c55e]/15 blur-[100px]" />

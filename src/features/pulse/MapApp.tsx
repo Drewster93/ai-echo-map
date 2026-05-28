@@ -222,6 +222,8 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
             location={activeLoc}
             brand={brand}
             onBack={() => setRole("admin")}
+            allLocations={brandedLocations}
+            onSelectLocation={setLocationId}
           />
         </div>
       </>
