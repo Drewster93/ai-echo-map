@@ -14,7 +14,7 @@ import { CompetitorTogglePill } from "./hud/CompetitorTogglePill";
 import { TourInsightCard } from "./tour/TourInsightCard";
 import { TourOutroSummary } from "./tour/TourOutroSummary";
 import { useBlindSpotTour, type PulseMapHandle } from "./tour/useBlindSpotTour";
-import { MOCK_LOCATIONS, getDateLabels } from "./mockData";
+import { getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
 import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
 import { ResultsSection } from "./ResultsSection";
@@ -40,20 +40,15 @@ export function MapApp({ brand, onSwitchBrand, revealing = true, locations: loca
   const [regionCity, setRegionCity] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
 
-  const locations: Location[] =
-    locationsProp && locationsProp.length > 0 ? locationsProp : MOCK_LOCATIONS;
+  const isLoading = locationsProp === null;
+  const isEmpty = locationsProp !== null && locationsProp.length === 0;
   const usingRealData = !!(locationsProp && locationsProp.length > 0);
 
   const brandedLocations = useMemo<Location[]>(
-    () =>
-      usingRealData
-        ? locations
-        : locations.map((l) => ({
-            ...l,
-            name: l.name.replace("Lumen", brand.split(/\s+/)[0] || "Lumen"),
-          })),
-    [brand, locations, usingRealData],
+    () => locationsProp ?? [],
+    [locationsProp],
   );
+
 
 
   const scopedLocations = useMemo<Location[]>(() => {
