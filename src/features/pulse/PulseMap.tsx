@@ -305,9 +305,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     });
   }
 
-      });
-    });
-  }
+
 
 
 
