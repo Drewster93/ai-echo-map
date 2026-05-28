@@ -1,11 +1,12 @@
 import { latLngToCell, cellToBoundary, gridDisk } from "h3-js";
 import type { HexCell, Location } from "./types";
 
-const HEX_RES = 8;
+const HEX_RES_DEFAULT = 8;
 
 export function buildHexCells(
   locations: Location[],
   scoreFor: (loc: Location) => number,
+  res: number = HEX_RES_DEFAULT,
 ): HexCell[] {
   const map = new Map<string, { intensity: number; weight: number; locs: string[]; cluster: string }>();
 
