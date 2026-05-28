@@ -58,11 +58,7 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
       {hex && (
         <motion.section
           key={hex.h3}
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 40, opacity: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="pointer-events-auto fixed inset-x-4 bottom-4 z-30 max-h-[42vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#05030d]/95 px-6 pb-5 pt-4 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)] backdrop-blur-xl"
+          className="relative z-10 w-full border-t border-white/10 bg-[#05030d] px-6 pb-8 pt-6"
         >
           {/* Header bar */}
           <div className="glass flex items-center justify-between rounded-2xl border border-white/5 px-6 py-4 shadow-[0_20px_60px_-30px_rgba(134,14,255,0.6)]">
