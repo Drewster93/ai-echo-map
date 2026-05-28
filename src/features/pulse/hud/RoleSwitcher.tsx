@@ -35,13 +35,25 @@ export function RoleSwitcher({
           <button
             key={r}
             onClick={() => {
+  const cities = Array.from(new Set(locations.map((l) => l.city)));
+  const filteredLocs = regionCity
+    ? locations.filter((l) => l.city === regionCity)
+    : locations;
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="inline-flex items-center rounded-full border border-[#1a0d3d]/10 bg-white/60 p-0.5 text-xs font-medium">
+        {(["admin", "regional", "location"] as Role[]).map((r) => (
+          <button
+            key={r}
+            onClick={() => {
               setRole(r);
               if (r === "admin") {
                 setRegionCity(null);
                 setLocationId(null);
               } else if (r === "regional") {
                 if (!regionCity) setRegionCity(cities[0] ?? null);
-                setLocationId(null);
+                if (!locationId) setLocationId(filteredLocs[0]?.id ?? locations[0]?.id ?? null);
               } else if (r === "location") {
                 if (!locationId) setLocationId(filteredLocs[0]?.id ?? locations[0]?.id ?? null);
               }
@@ -59,17 +71,15 @@ export function RoleSwitcher({
 
       {role === "regional" && (
         <PillSelect
-          ariaLabel="Region"
-          value={regionCity}
-          onChange={(v) => setRegionCity(v || null)}
+          ariaLabel="Location"
+          value={locationId}
+          onChange={(v) => setLocationId(v || null)}
           options={locations.map((l) => ({
-            value: l.city,
+            value: l.id,
             label: `${l.name} · ${l.city}`,
           }))}
         />
       )}
-
-      {role === "location" && (
         <PillSelect
           ariaLabel="Location"
           value={locationId}
