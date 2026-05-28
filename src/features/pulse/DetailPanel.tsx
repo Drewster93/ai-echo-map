@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { HexCell, Location } from "./types";
 import { COMPETITORS } from "./mockData";
@@ -23,6 +23,12 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Props) {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (hex && sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [hex?.h3]);
   const hexLocations = hex ? locations.filter((l) => hex.locationIds.includes(l.id)) : [];
   const score = hex ? Math.round(hex.intensity) : 0;
   const cluster = hex?.cluster ?? "";
@@ -62,6 +68,7 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
     <AnimatePresence initial={false}>
       {hex && (
         <motion.section
+          ref={sectionRef}
           key={hex.h3}
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
