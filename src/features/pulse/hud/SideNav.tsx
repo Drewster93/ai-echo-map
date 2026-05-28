@@ -116,23 +116,15 @@ export function SideNav({ brand }: { brand?: string | null }) {
           open ? "w-[72px]" : "w-0 overflow-hidden"
         }`}
       >
-        {brand && (
-          <div className="flex h-16 items-center justify-center">
-            <BrandLogo brand={brand} />
-          </div>
-        )}
+        <div className="flex h-16 items-center justify-center">
+          <BrandLogo />
+        </div>
 
         {/* Top section */}
         <div className="flex flex-col items-center gap-1.5 px-2">
           {TOP_ITEMS.map((i) =>
             renderItem(i, { highlight: i.key === ACTIVE_KEY ? false : false }),
-        <div className="flex h-16 items-center justify-center">
-          <BrandLogo />
-        </div>
-
-        {/* Mid items */}
-        <div className="flex flex-col items-center gap-1.5 px-2">
-          {MID_ITEMS.map((i) => renderItem(i))}
+          )}
         </div>
 
         {/* Bottom */}
