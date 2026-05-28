@@ -354,17 +354,17 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
         )}
       </AnimatePresence>
 
-      <DetailPanel
-        hex={selected}
-        locations={scopedLocations}
-        onClose={() => setSelectedHex(null)}
-        onImproveVisibility={(id) => {
-          setLocationId(id);
-          setRole("location");
-          setSelectedHex(null);
-        }}
-      />
     </motion.div>
+    <DetailPanel
+      hex={selected}
+      locations={scopedLocations}
+      onClose={() => setSelectedHex(null)}
+      onImproveVisibility={(id) => {
+        setLocationId(id);
+        setRole("location");
+        setSelectedHex(null);
+      }}
+    />
     {revealing && (
       <ResultsSection
         brand={brand}
@@ -374,6 +374,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
       />
     )}
     </>
+
   );
 }
 
