@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { HexCell, Location } from "./types";
 import { COMPETITORS } from "./mockData";
