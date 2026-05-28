@@ -67,6 +67,9 @@ export function LocationReportView({ location, brand, onBack, allLocations, onSe
       </div>
 
       <div className="mx-auto max-w-[1080px] px-8 py-12">
+        {roleSwitcher && (
+          <div className="mb-4">{roleSwitcher}</div>
+        )}
         {allLocations && onSelectLocation && allLocations.length > 1 && (
           <div className="mb-6 flex items-center gap-3">
             <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#1a0d3d]/55">
