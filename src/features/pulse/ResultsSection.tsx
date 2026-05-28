@@ -264,7 +264,7 @@ function Kpi({
     </div>
   );
 }
-}
+
 function Panel({
   title,
   children,
