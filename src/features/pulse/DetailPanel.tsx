@@ -56,19 +56,19 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-[72px] right-0 bottom-0 z-30 rounded-t-3xl border-t border-white/15 bg-[#260e5a] px-6 pb-8 pt-6 text-white shadow-[0_-30px_80px_-20px_rgba(0,0,0,0.25)]"
+            className="fixed left-[72px] right-0 bottom-0 z-30 rounded-t-3xl border-t border-[#260e5a]/10 bg-white px-6 pb-8 pt-6 text-[#260e5a] shadow-[0_-30px_80px_-20px_rgba(0,0,0,0.25)]"
           >
             <div className="w-full">
 
               {/* Header bar */}
-              <div className="flex items-center justify-between rounded-2xl border border-white/15 bg-white/10 px-6 py-4">
+              <div className="flex items-center justify-between rounded-2xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-6 py-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/70">
-                    <span className="mr-2 inline-block h-2 w-2 rounded-sm bg-white align-middle" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#260e5a]/70">
+                    <span className="mr-2 inline-block h-2 w-2 rounded-sm bg-[#260e5a] align-middle" />
                     Market overview
                   </p>
-                  <h3 className="mt-1 font-display text-2xl leading-tight text-white">{cluster}</h3>
-                  <p className="mt-1 text-sm text-white/65">
+                  <h3 className="mt-1 font-display text-2xl leading-tight text-[#260e5a]">{cluster}</h3>
+                  <p className="mt-1 text-sm text-[#260e5a]/65">
                     {hexLocations.length} {hexLocations.length === 1 ? "property" : "properties"} ·{" "}
                     {(hexLocations.length * 1400).toLocaleString()} monthly searches ·{" "}
                     {Math.round(hexLocations.length * 880).toLocaleString()} estimated impressions
@@ -77,7 +77,7 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={onClose}
-                    className="rounded-md border border-white/25 px-2.5 py-1 text-sm text-white/70 hover:border-white hover:text-white"
+                    className="rounded-md border border-[#260e5a]/20 px-2.5 py-1 text-sm text-[#260e5a]/70 hover:border-[#260e5a] hover:text-[#260e5a]"
                     aria-label="Close panel"
                   >
                     ✕
@@ -96,7 +96,7 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                   label="Competitor Mention"
                   value={`${competitorPct.toFixed(1)}%`}
                   footer={
-                    <span className="text-[11px] text-white/65">
+                    <span className="text-[11px] text-[#260e5a]/65">
                       Gap: <span className={`rounded px-1.5 py-0.5 text-[11px] font-bold ${gapPp >= 0 ? "bg-[#22c55e]/25 text-[#15803d]" : "bg-[#f97316]/25 text-[#c2410c]"}`}>
                         {gapPp >= 0 ? "+" : ""}{gapPp.toFixed(1)}pp
                       </span>
@@ -106,23 +106,23 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                 <Metric
                   label="Citation Rate"
                   value={`${citationPct.toFixed(1)}%`}
-                  footer={<span className="text-[11px] text-white/55">Prompts citing brand</span>}
+                  footer={<span className="text-[11px] text-[#260e5a]/55">Prompts citing brand</span>}
                 />
                 <Metric
                   label="Avg Position"
                   value={avgPosition}
-                  footer={<span className="text-[11px] text-white/55">Where brand is mentioned</span>}
+                  footer={<span className="text-[11px] text-[#260e5a]/55">Where brand is mentioned</span>}
                 />
               </div>
 
               {/* Properties grouped by city */}
               {hexLocations.length > 0 && (
                 <div className="mt-5">
-                  <div className="flex items-center gap-2 border-b border-white/15 pb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-white">
+                  <div className="flex items-center gap-2 border-b border-[#260e5a]/10 pb-2">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#260e5a]">
                       Properties
                     </span>
-                    <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                    <span className="rounded-md bg-[#260e5a]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#260e5a]">
                       {hexLocations.length}
                     </span>
                   </div>
@@ -136,10 +136,10 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                     ).map(([city, locs]) => (
                       <div key={city}>
                         <div className="mb-2 flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/65">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#260e5a]/65">
                             {city}
                           </span>
-                          <span className="text-[10px] text-white/45">
+                          <span className="text-[10px] text-[#260e5a]/45">
                             {locs.length} {locs.length === 1 ? "property" : "properties"}
                           </span>
                         </div>
@@ -158,18 +158,18 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                             return (
                               <div
                                 key={loc.id}
-                                className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5"
+                                className="rounded-xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-3 py-2.5"
                               >
-                                <div className="truncate text-sm font-semibold text-white">
+                                <div className="truncate text-sm font-semibold text-[#260e5a]">
                                   {loc.name}
                                 </div>
-                                <div className="mt-0.5 truncate text-[11px] text-white/60">
+                                <div className="mt-0.5 truncate text-[11px] text-[#260e5a]/60">
                                   {loc.cluster}
                                 </div>
-                                <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/15 pt-2">
-                                  <span className="text-[11px] text-white/70">
+                                <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#260e5a]/10 pt-2">
+                                  <span className="text-[11px] text-[#260e5a]/70">
                                     Mention{" "}
-                                    <span className="font-bold text-white">
+                                    <span className="font-bold text-[#260e5a]">
                                       {mention.toFixed(1)}%
                                     </span>
                                   </span>
@@ -210,11 +210,11 @@ function Metric({
   footer?: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5">
-      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/55">
+    <div className="rounded-xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-3 py-2.5">
+      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#260e5a]/55">
         {label}
       </div>
-      <div className="mt-1 font-display text-2xl leading-none text-white">{value}</div>
+      <div className="mt-1 font-display text-2xl leading-none text-[#260e5a]">{value}</div>
       {footer && <div className="mt-1.5">{footer}</div>}
     </div>
   );
