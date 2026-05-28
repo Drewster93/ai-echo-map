@@ -14,10 +14,6 @@ export function LocationReportView({ location, brand, onBack }: Props) {
   const report = useMemo(() => buildLocationReport(location, brand), [location, brand]);
   const brandFirst = brand.split(/\s+/)[0] || brand;
 
-export function LocationReportView({ location, brand, onBack }: Props) {
-  const report = useMemo(() => buildLocationReport(location, brand), [location, brand]);
-  const brandFirst = brand.split(/\s+/)[0] || brand;
-
   const navItems = [
     { id: "overview", label: "Overview" },
     { id: "head-to-head", label: "Head-to-Head" },
