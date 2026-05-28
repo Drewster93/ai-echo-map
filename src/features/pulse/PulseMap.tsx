@@ -63,6 +63,12 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   const arrivedFiredRef = useRef(false);
   const focusRef = useRef<TourFocus | null>(focus);
   focusRef.current = focus;
+  const locationsRef = useRef<Location[]>(locations);
+  locationsRef.current = locations;
+  const hexCellsRef = useRef<HexCell[]>(hexCells);
+  hexCellsRef.current = hexCells;
+  const onHexSelectRef = useRef(onHexSelect);
+  onHexSelectRef.current = onHexSelect;
   const onUserInteractRef = useRef(onUserInteract);
   onUserInteractRef.current = onUserInteract;
   const onArrivedRef = useRef(onArrived);
@@ -170,10 +176,12 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       container.addEventListener("wheel", fireInteract, { passive: true });
       container.addEventListener("touchstart", fireInteract, { passive: true });
 
-      // Always re-render markers on any zoom change so pins survive zooms.
-      map.on("zoomend", () => {
+      // Always re-render markers after map transforms so pins survive zooms and pans.
+      const repaintMarkers = () => {
         renderMarkers();
-      });
+        requestAnimationFrame(renderMarkers);
+      };
+      map.on("zoomend moveend viewreset", repaintMarkers);
 
 
       if (dive && !dovedRef.current) {
@@ -223,7 +231,9 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     layer.clearLayers();
 
     // Only render locations with valid coordinates so nothing silently disappears.
-    const validLocations = locations.filter(
+    const currentLocations = locationsRef.current;
+    const currentHexCells = hexCellsRef.current;
+    const validLocations = currentLocations.filter(
       (l) =>
         Number.isFinite(l.lat) &&
         Number.isFinite(l.lng) &&
@@ -233,7 +243,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
 
     // Map each location to its current hex intensity so colors stay in sync with filters
     const scoreByLoc = new Map<string, number>();
-    hexCells.forEach((c) => {
+    currentHexCells.forEach((c) => {
       c.locationIds?.forEach((id: string) => scoreByLoc.set(id, c.intensity));
     });
 
@@ -282,8 +292,8 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
         const marker = L.marker([lat, lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
         marker.on("click", () => {
           const locIds = new Set(locs.map((l) => l.id));
-          const cell = hexCells.find((c) => c.locationIds?.some((id) => locIds.has(id)));
-          if (cell) onHexSelect(cell.h3);
+          const cell = hexCellsRef.current.find((c) => c.locationIds?.some((id) => locIds.has(id)));
+          if (cell) onHexSelectRef.current(cell.h3);
           else {
             mapRef.current?.flyTo([lat, lng], CITY_ZOOM_THRESHOLD + 0.5, { duration: 0.8 });
           }
@@ -303,8 +313,8 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       });
       const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
       marker.on("click", () => {
-        const cell = hexCells.find((c) => c.locationIds?.includes(loc.id));
-        if (cell) onHexSelect(cell.h3);
+        const cell = hexCellsRef.current.find((c) => c.locationIds?.includes(loc.id));
+        if (cell) onHexSelectRef.current(cell.h3);
       });
     });
   }
