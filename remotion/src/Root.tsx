@@ -33,7 +33,3 @@ export const RemotionRoot: React.FC = () => {
     </>
   );
 };
-
-    </>
-  );
-};
