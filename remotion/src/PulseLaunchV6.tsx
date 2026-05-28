@@ -18,7 +18,8 @@ const C = {
 
 // Scene timing (all in frames @30fps)
 // 0     COLD OPEN          0  → 60   (2.0s)  brand reveal + hex bloom
-// 60    STING "FIND…"      60 → 105  (1.5s)
+export const PULSE_V6_TOTAL = 1140;
+const VIDEO_SRC = "captures/full-flow-allkey.mp4";
 // 105   QUERY              105→ 285  (6.0s)  typing capture, punch-zoom
 // 285   STING "IN NOISE."  285→ 330  (1.5s)
 // 330   MAP BLOOM          330→ 510  (6.0s)
@@ -79,9 +80,8 @@ export const PulseLaunchV6: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: C.plum }}>
       {/* persistent base video with per-shot camera moves */}
-      {videoVisible && (
-        <div style={{ opacity: videoOpacity, position: "absolute", inset: 0 }}>
           <ParallaxVideo
+            src={VIDEO_SRC}
             startFromFrame={0}
             moves={moves}
             origin={{ x: 0.5, y: 0.45 }}
