@@ -201,7 +201,6 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
 
 
 function Metric({
-function Metric({
   label,
   value,
   footer,
