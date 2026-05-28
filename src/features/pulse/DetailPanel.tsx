@@ -218,3 +218,23 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
     </AnimatePresence>
   );
 }
+
+function Metric({
+  label,
+  value,
+  footer,
+}: {
+  label: string;
+  value: string;
+  footer?: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
+      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/45">
+        {label}
+      </div>
+      <div className="mt-1 font-display text-2xl leading-none text-white">{value}</div>
+      {footer && <div className="mt-1.5">{footer}</div>}
+    </div>
+  );
+}
