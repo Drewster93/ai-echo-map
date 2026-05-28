@@ -11,9 +11,10 @@ interface Props {
   onBack: () => void;
   allLocations?: Location[];
   onSelectLocation?: (id: string) => void;
+  roleSwitcher?: React.ReactNode;
 }
 
-export function LocationReportView({ location, brand, onBack, allLocations, onSelectLocation }: Props) {
+export function LocationReportView({ location, brand, onBack, allLocations, onSelectLocation, roleSwitcher }: Props) {
   const report = useMemo(() => buildLocationReport(location, brand), [location, brand]);
   const brandFirst = brand.split(/\s+/)[0] || brand;
 
@@ -66,20 +67,25 @@ export function LocationReportView({ location, brand, onBack, allLocations, onSe
       </div>
 
       <div className="mx-auto max-w-[1080px] px-8 py-12">
-        {allLocations && onSelectLocation && allLocations.length > 1 && (
-          <div className="mb-6 flex items-center gap-3">
-            <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#1a0d3d]/55">
-              Viewing property
-            </span>
-            <PillSelect
-              ariaLabel="Switch property"
-              value={location.id}
-              onChange={onSelectLocation}
-              options={allLocations.map((l) => ({
-                value: l.id,
-                label: `${l.name} · ${l.city}`,
-              }))}
-            />
+        {(roleSwitcher || (allLocations && onSelectLocation && allLocations.length > 1)) && (
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            {roleSwitcher}
+            {allLocations && onSelectLocation && allLocations.length > 1 && (
+              <>
+                <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#1a0d3d]/55">
+                  Viewing property
+                </span>
+                <PillSelect
+                  ariaLabel="Switch property"
+                  value={location.id}
+                  onChange={onSelectLocation}
+                  options={allLocations.map((l) => ({
+                    value: l.id,
+                    label: `${l.name} · ${l.city}`,
+                  }))}
+                />
+              </>
+            )}
           </div>
         )}
         {/* Dark hero card */}
