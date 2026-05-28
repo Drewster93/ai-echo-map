@@ -26,22 +26,12 @@ function brandToDomain(brand: string): string {
   return `${slug}.com`;
 }
 
-function BrandLogo({ brand }: { brand: string }) {
-  const [errored, setErrored] = useState(false);
-  const initial = brand.trim().charAt(0).toUpperCase() || "?";
-  if (errored) {
-    return (
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#7515f5] text-sm font-bold text-white">
-        {initial}
-      </div>
-    );
-  }
+function BrandLogo() {
   return (
     <img
-      src={`https://www.google.com/s2/favicons?domain=${brandToDomain(brand)}&sz=128`}
-      alt={`${brand} logo`}
+      src="https://www.google.com/s2/favicons?domain=uberall.com&sz=128"
+      alt="Uberall logo"
       className="h-9 w-9 rounded-lg object-contain"
-      onError={() => setErrored(true)}
     />
   );
 }
