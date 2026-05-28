@@ -70,7 +70,7 @@ function Index() {
       applyDemoFallback(value, toastId);
     }
   }
-  }
+
 
   return (
     <main
