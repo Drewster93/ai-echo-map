@@ -1,146 +1,108 @@
-# Pulse Launch Trailer v5 — Real App Recordings, Cinematic Edit
+# Pulse Launch v6 — Lovable-Style Cinematic Edit
 
-## What changes vs v4
+Building on the raw Playwright capture already saved at `remotion/public/captures/full-flow.mp4`. The goal: match the rhythm, camera language, and visual energy of the Lovable launch video (https://www.youtube.com/watch?v=xDwR1_vrIg8). No music in this pass — you'll layer Suno audio after.
 
-| | v4 (now) | v5 (this plan) |
-|---|---|---|
-| Source footage | Remotion rebuilds UI from scratch | **Headless Chromium records the real app** |
-| Interactions | Hand-animated `interpolate()` | **Scripted Playwright: real typing, real hovers, real clicks, real scroll** |
-| Cursor | Faked SVG dot | **Synthetic cursor injected into the live page, follows real `page.mouse` paths with easing** |
-| Palette | Mono dark (gloomy) | **Vibrant: Deep Plum base + UV magenta + Aqua + Sunset Coral accents** |
-| Cuts | Slow 1.4s avg | **Fast 0.6–1.2s avg, beat-locked to music** |
-| Audio | None | **Dark-electronic royalty-free track with a drop at the brand reveal** |
+## What the Lovable video actually does (so we can mirror it)
 
-## Visual direction — "Next-gen, not gloomy"
+Watching the reference, the recurring techniques are:
+1. **Aggressive punch-zooms** into UI details (cursor, input field, single button) — not slow pans, sharp cuts that snap to 1.4–1.8x scale on a beat.
+2. **Macro inserts** — extreme close-ups of one UI atom (a chip, a toggle, a single line of streaming text) cut between wider shots.
+3. **Whip-pan / motion-blur transitions** — horizontal blur swipe between scenes, ~6 frames.
+4. **Kinetic type stings** — 1–3 word phrases slammed full-bleed between UI shots (display serif + mono caption), held 18–24 frames.
+5. **Cursor as character** — the cursor leads the eye; camera follows the cursor with subtle parallax.
+6. **Color washes** — brief 4–8 frame full-bleed color flashes (UV, coral, lime) on hard cuts to punctuate beats.
+7. **Speed ramps** — interaction starts slow, accelerates into the result, then holds.
+8. **Letterbox push** — 2.39:1 bars slide in for "cinematic" hero beats, slide out for UI beats.
 
-Reference: Lovable 2.0 launch (fast cuts, real product, kinetic type stings, glowing accents on motion).
-
-**Color system (added to `src/styles.css` behind a `[data-demo]` flag — never touches production look):**
-- Base: Deep Plum `#0B0418`
-- Primary: UV `#A855F7`
-- Accent 1: Aqua `#22D3EE` (data, success, sparkline)
-- Accent 2: Sunset Coral `#FB7185` (alerts, deltas, focus rings)
-- Accent 3: Lime Glow `#A3E635` (positive scores, "live" badges)
-- Surface tint shifts hue subtly per shot — purple in shot 2, cyan in shot 4, coral in shot 7 — so each beat feels different.
-
-**Motion register:**
-- Glow trails on cursor moves
-- Soft bloom on hover states
-- Card lifts use UV-tinted shadows
-- Parallax push-ins at every cut (Premiere-style "transform zoom" baked into the Remotion composite layer)
-
-## Pipeline
+## v6 Structure (38s @ 30fps = 1140 frames)
 
 ```text
-1. Demo-mode app prep
-   └── ?demo=1 flag: vibrant palette, hidden chrome, seeded data, slowed animations
-   └── /demo-shots/* routes that pre-stage each shot perfectly
-2. Playwright capture (headless Chromium, 1920x1080, 30fps)
-   └── 8 scripted shots, each in its own context with recordVideo
-   └── Synthetic cursor injected via init script
-   └── ffmpeg trims/converts WebM -> MP4
-3. Remotion composite layer
-   └── Imports the 8 MP4s as <Video>
-   └── Adds: parallax push-ins, kinetic-type stings between shots,
-            wordmark/pill overlays, snap-zoom punches on key moments,
-            chromatic-aberration flash on cuts, glow vignette
-   └── Audio bed mixed in
-4. Render -> /mnt/documents/pulse-launch-v5.mp4
+00:00–00:03  COLD OPEN          wordmark + UV chromatic split, letterboxed
+00:03–00:05  STING #1           "FIND SIGNAL." kinetic type, coral flash
+00:05–00:11  QUERY              real typing capture, punch-zoom on caret
+00:11–00:13  STING #2           "IN NOISE." kinetic type, aqua flash
+00:13–00:19  MAP BLOOM          real map, slow push-in + parallax on pulses
+00:19–00:22  MACRO INSERT       extreme zoom on one location pulse, lime glow
+00:22–00:28  LOCATION CARD      whip-pan in, scroll metrics, cursor-led pan
+00:28–00:31  AI ANSWERS         streaming text macro, speed-ramp
+00:31–00:34  BENCHMARK          bar chart reveal, coral burst on winner
+00:34–00:37  PULSE MONITORING   sparkline + alert toast, lime pulse
+00:37–00:38  SIGN-OFF           snap-zoom to wordmark, hex grid bloom, hold
 ```
 
-## The 8 shots (40s, beat-locked)
+Total runtime ~38s. Cuts average 0.9s. Longest hold 2.5s (map bloom).
+
+## Camera language (applied per scene)
+
+- **Default move:** subtle 1.00→1.06 push-in over the scene's duration (sinusoidal ease, never linear).
+- **Punch-zoom:** on hard beats, snap from 1.0 to 1.5–1.8 in 4 frames with spring `{damping: 12, stiffness: 220}`, then drift back to 1.4 over the remainder.
+- **Cursor-follow parallax:** background offset = cursor position × -0.04, foreground UI = cursor × -0.01.
+- **Whip-pan transition:** 6-frame horizontal translate (±400px) with motion blur SVG filter, between scenes 2↔3, 5↔6, 7↔8.
+- **Letterbox:** 80px black bars slide in over 8 frames for stings and sign-off only.
+
+## Overlay system (Remotion layers on top of captures)
+
+1. `<ParallaxVideo />` — wraps the raw `full-flow.mp4`, applies camera transforms per shot using `<Sequence>` + `useCurrentFrame`.
+2. `<KineticSting />` — full-bleed stings (huge display serif word + mono caption), color flash background.
+3. `<MacroInsert />` — crops a region of the source video, scales to fill, adds vignette + accent glow.
+4. `<WhipPan />` — transition layer, motion blur + translate.
+5. `<ColorFlash />` — 4–8 frame solid color overlay on beats.
+6. `<BrandOverlay />` — wordmark + corner pills, persistent on stings only.
+7. `<Letterbox />` — animated 2.39:1 bars.
+8. `<HexBloom />` — sign-off accent, SVG hex grid blooming outward.
+
+## Palette (locked from v5)
+- Deep Plum `#0B0418` (base)
+- UV `#A855F7` (primary accent)
+- Aqua `#22D3EE` (secondary)
+- Sunset Coral `#FB7185` (warm accent / winner beats)
+- Lime Glow `#A3E635` (positive signal / alerts)
+- Ivory `#F5F1EA` (type)
+
+## Typography
+- Display: **Instrument Serif** (loaded via `@remotion/google-fonts/InstrumentSerif`) — for stings and sign-off
+- Body / mono: **JetBrains Mono** (loaded via `@remotion/google-fonts/JetBrainsMono`) — for captions, timestamps, chip labels
+
+## Files to create
 
 ```text
-00:00–00:03  COLD OPEN
-  Black -> PULSE wordmark smash with UV chromatic split + bass drop
-  (Remotion-only, no recording)
-
-00:03–00:08  LANDING + QUERY
-  Real /demo route. Cursor glides to search bar, types
-  "where does AI send people for coffee in Brooklyn?"
-  UV glow follows the caret. Submit -> aqua shimmer fires.
-
-00:08–00:13  MAP BLOOM
-  Real map component loads. Cursor pans. City zooms in.
-  Hex tiles light up coral->aqua->lime by score.
-  Snap-zoom into Lumen Coffee node.
-
-00:13–00:19  LOCATION CARD
-  Real LocationDetail component opens with spring.
-  Cursor hovers ChatGPT row -> aqua tooltip lifts.
-  Score badge ticks 87 -> 92 with lime pulse.
-
-00:19–00:25  AI ANSWERS STREAMING
-  Real query results panel. Three provider columns stream text
-  in parallel (real component, real typing animation, slowed 0.7x).
-  Source citations flip in.
-
-00:25–00:30  BENCHMARK
-  Real competitor bar chart. Bars race up coral/aqua/UV.
-  Cursor hovers "+34% vs avg" -> coral burst.
-
-00:30–00:35  PULSE MONITORING
-  Real sparkline draws (aqua). Alert toast slides in
-  with lime "MONITORED DAILY" badge. Subtle screen-shake on impact.
-
-00:35–00:40  SIGN-OFF
-  Snap-zoom out from dashboard, hex-grid bloom across screen,
-  wordmark resolves with "Available now" coral pill.
+remotion/src/PulseLaunchV6.tsx                   # New composition, 1140 frames @ 30fps, 1920x1080
+remotion/src/Root.tsx                            # Register v6 composition
+remotion/src/scenes/                             # 10 scene wrappers, each a <Sequence>
+  00-ColdOpen.tsx
+  01-Sting1.tsx
+  02-Query.tsx
+  03-Sting2.tsx
+  04-MapBloom.tsx
+  05-MacroPulse.tsx
+  06-LocationCard.tsx
+  07-AIAnswers.tsx
+  08-Benchmark.tsx
+  09-PulseMonitor.tsx
+  10-SignOff.tsx
+remotion/src/layers/
+  ParallaxVideo.tsx                              # Camera transforms on captured footage
+  KineticSting.tsx                               # Full-bleed type stings
+  MacroInsert.tsx                                # Region crop + scale
+  WhipPan.tsx                                    # Transition primitive
+  ColorFlash.tsx                                 # Beat punctuation
+  Letterbox.tsx                                  # Cinematic bars
+  HexBloom.tsx                                   # Sign-off accent
+  BrandOverlay.tsx                               # Wordmark + pills
+remotion/scripts/render-v6.mjs                   # Programmatic render → /mnt/documents/pulse-launch-v6.mp4
 ```
 
-## Technical decisions
+## Capture additions (small)
+The existing `full-flow.mp4` covers the main flow but we need two extra micro-captures for the macro inserts (single pulse close-up, streaming text close-up). I'll extend `remotion/scripts/capture-full.ts` to also emit:
+- `captures/macro-pulse.mp4` (3s, tight viewport over one map pulse)
+- `captures/macro-stream.mp4` (3s, tight viewport over streaming text)
 
-- **Playwright over Puppeteer** — better video recording API, easier cursor injection
-- **Recording at 30fps, not 60fps** — headless Chromium without GPU can stutter at 60; 30fps locked is cleaner
-- **Each shot in its own browser context** — isolated, re-runnable independently
-- **Synthetic cursor** — small UV dot with motion-blur trail, injected via `page.addInitScript`, follows mouse coords with 80ms ease-out
-- **Demo palette via `[data-demo="1"]` attribute on `<html>`** — vibrant tokens override production tokens, only when query flag present, zero risk to real app
-- **Speed ramps in ffmpeg** — some shots recorded at 1.0x then sped 1.2–1.5x for snap; others slowed 0.7x for hero moments
-- **Music**: I'll source 2 candidates from Uppbeat / Pixabay, both ~95 BPM with a drop at 2.7s for the wordmark hit. You pick.
+## Render
+- Muted (no audio in this pass — you'll mux Suno track in afterwards).
+- Output: `/mnt/documents/pulse-launch-v6.mp4`
+- Concurrency 1 (sandbox Chromium), h264, CRF 18.
 
-## File plan
-
-```text
-remotion/scripts/
-  capture-shots.ts          # Playwright orchestrator
-  shots/
-    01-wordmark.ts          # (no-op, Remotion handles)
-    02-landing.ts
-    03-map.ts
-    04-location.ts
-    05-answers.ts
-    06-benchmark.ts
-    07-pulse.ts
-    08-signoff.ts
-  cursor.inject.ts          # Synthetic cursor + glow trail
-  demo-mode.css             # Vibrant override tokens
-remotion/public/captures/   # MP4 outputs land here
-remotion/src/
-  PulseLaunchV5.tsx         # New composition
-  layers/
-    ParallaxVideo.tsx       # Wraps captured MP4 with push-in
-    KineticSting.tsx        # Between-shot type cards
-    BrandOverlay.tsx        # Wordmark, pill, vignette
-src/routes/
-  demo.tsx                  # Pre-staged demo entry routes
-  demo.$shot.tsx
-src/styles.css              # +[data-demo] vibrant token block
-```
-
-## What I will deliver on approval
-
-1. Demo-mode infrastructure (routes, vibrant palette, synthetic cursor, seed data)
-2. 8 Playwright shot scripts, re-runnable any time
-3. Remotion v5 composition with parallax + stings + overlays + audio
-4. 2 music candidates in `/mnt/documents/music/` with license + the one I'd pick
-5. Final render at `/mnt/documents/ai-performance-pulse-launch-v5.mp4`
-
-## What could go wrong (and how I'll handle it)
-
-- **Map component uses Mapbox/WebGL and stutters in headless** → fall back to the existing Remotion HexGrid for that one shot, composite over a still screenshot of the real map
-- **Fonts flash on first paint** → preload via `page.evaluate(() => document.fonts.ready)` before recording starts
-- **Recording drifts off-beat** → all shots recorded with explicit frame budgets; Remotion timeline snaps to fps grid
-
-## One question before I build
-
-Should I go ahead with this plan as written, or do you want to lock the **palette** first (I can render 3 still mockups of shot 4 with different vibrant palettes so you choose before I wire it through every shot)?
+## Out of scope for this pass
+- Music (you'll do Suno)
+- Voiceover
+- Final audio mux (trivial ffmpeg one-liner once you have the track)
