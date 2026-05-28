@@ -246,13 +246,11 @@ export function IntroSequence({ onDone }: Props) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ultraviolet opacity-75" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ultraviolet" />
-          </span>
-          <span className="text-sm font-semibold uppercase tracking-widest text-white/90">
-            Uberall
-          </span>
+          <img
+            src={uberallLogo}
+            alt="Uberall"
+            className="h-10 w-auto object-contain md:h-12"
+          />
         </motion.div>
 
         <motion.div
