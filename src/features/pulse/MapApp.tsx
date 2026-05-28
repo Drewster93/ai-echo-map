@@ -228,8 +228,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     );
   }
 
-  const scopeLabel =
-    role === "regional" && regionCity ? `${regionCity} region` : "Worldwide";
+  const scopeLabel = "Worldwide";
 
   return (
     <>
