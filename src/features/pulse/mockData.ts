@@ -78,7 +78,7 @@ const londonSeeds: Array<[string, string, number, number]> = [
   ["Hackney", "Lumen Broadway Market", 51.535, -0.063],
 ];
 
-function rand(seed: number) {
+export function rand(seed: number) {
   // Mulberry32
   return function () {
     seed |= 0;
