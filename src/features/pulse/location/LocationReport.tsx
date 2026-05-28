@@ -11,6 +11,7 @@ interface Props {
   onBack: () => void;
   allLocations?: Location[];
   onSelectLocation?: (id: string) => void;
+  roleSwitcher?: React.ReactNode;
 }
 
 export function LocationReportView({ location, brand, onBack, allLocations, onSelectLocation }: Props) {

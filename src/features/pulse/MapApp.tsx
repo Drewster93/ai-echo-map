@@ -205,18 +205,6 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
       brandedLocations.find((l) => l.id === locationId) ?? brandedLocations[0];
     return (
       <>
-        <div className="fixed bottom-4 left-4 z-40">
-          <RoleSwitcher
-            role={role}
-            setRole={setRole}
-            regionCity={regionCity}
-            setRegionCity={setRegionCity}
-            locationId={locationId}
-            setLocationId={setLocationId}
-            locations={brandedLocations}
-          />
-        </div>
-
         <div className="h-screen w-full overflow-y-auto">
           <LocationReportView
             location={activeLoc}
@@ -224,6 +212,17 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
             onBack={() => setRole("admin")}
             allLocations={brandedLocations}
             onSelectLocation={setLocationId}
+            roleSwitcher={
+              <RoleSwitcher
+                role={role}
+                setRole={setRole}
+                regionCity={regionCity}
+                setRegionCity={setRegionCity}
+                locationId={locationId}
+                setLocationId={setLocationId}
+                locations={brandedLocations}
+              />
+            }
           />
         </div>
       </>
