@@ -33,9 +33,9 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
   const avgPosition = (1 + (100 - mentionPct) / 28).toFixed(1);
 
   const mentionBand =
-    mentionPct >= 60 ? { label: "Strong", cls: "bg-soft-green/20 text-soft-green" }
-    : mentionPct >= 40 ? { label: "Moderate", cls: "bg-yellow-400/15 text-[#a07a00]" }
-    : { label: "Low", cls: "bg-orange-uberall/20 text-orange-uberall" };
+    mentionPct >= 60 ? { label: "Strong", cls: "bg-[#22c55e]/25 text-[#15803d]" }
+    : mentionPct >= 40 ? { label: "Moderate", cls: "bg-[#eab308]/25 text-[#a16207]" }
+    : { label: "Low", cls: "bg-[#f97316]/25 text-[#c2410c]" };
 
   return (
     <AnimatePresence initial={false}>
@@ -150,11 +150,12 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                                 Math.max(1, loc.prompts.length)) *
                               100;
                             const confidence =
+                            const confidence =
                               loc.prompts.length >= 8
-                                ? { label: "High confidence", cls: "bg-soft-green/20 text-soft-green" }
+                                ? { label: "High confidence", cls: "bg-[#22c55e]/25 text-[#15803d]" }
                                 : loc.prompts.length >= 4
-                                  ? { label: "Medium", cls: "bg-yellow-400/15 text-[#a07a00]" }
-                                  : { label: "Low", cls: "bg-orange-uberall/20 text-orange-uberall" };
+                                  ? { label: "Medium", cls: "bg-[#eab308]/25 text-[#a16207]" }
+                                  : { label: "Low", cls: "bg-[#f97316]/25 text-[#c2410c]" };
                             return (
                               <div
                                 key={loc.id}
