@@ -40,13 +40,6 @@ export function LocationReportView({ location, brand, onBack, allLocations, onSe
       <div className="sticky top-0 z-30 w-full border-b border-white/5 bg-[#1a0d3d] text-white">
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-8 py-5">
           <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              aria-label="Back to map"
-              className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#6b46c1] to-[#3b1e7a] shadow-[0_0_24px_rgba(139,92,246,0.4)] transition hover:scale-105"
-            >
-              <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
-            </button>
             <div>
               <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] text-white/55">
                 <span className="text-[#a78bfa]">◆</span> Property Dashboard
