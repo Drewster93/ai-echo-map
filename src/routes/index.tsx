@@ -116,7 +116,8 @@ function Index() {
       )}
       <AnimatePresence mode="popLayout">
         {!revealing && introDone && (
-          <LandingScreen key="landing" onSubmit={handleBrand} />
+          <LandingScreen key="landing" onSubmit={onLandingSubmit} />
+
         )}
         {!introDone && (
           <IntroSequence key="intro" onDone={() => setIntroDone(true)} />
