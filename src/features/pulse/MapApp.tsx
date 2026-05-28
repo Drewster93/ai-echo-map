@@ -277,25 +277,16 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
           </motion.div>
 
           <motion.div custom={1} variants={hudVariants} initial="hidden" animate="show">
-            {role === "regional" && regionCity ? (
-              <RegionalOverview
-                brand={brand.split(/\s+/)[0] || brand}
-                city={regionCity}
-                locations={scopedLocations}
-                scoreFor={scoreFor}
-              />
-            ) : (
-              <WorldwideOverview
-                brand={brand.split(/\s+/)[0] || brand}
-                avgMention={avgScore}
-                competitorPct={competitorPct}
-                avgCitation={avgCitation}
-                avgPosition={avgPosition}
-                monthlySearches={monthlySearches}
-                valueCaptured={valueCaptured}
-                narrative={narrative}
-              />
-            )}
+            <WorldwideOverview
+              brand={brand.split(/\s+/)[0] || brand}
+              avgMention={avgScore}
+              competitorPct={competitorPct}
+              avgCitation={avgCitation}
+              avgPosition={avgPosition}
+              monthlySearches={monthlySearches}
+              valueCaptured={valueCaptured}
+              narrative={narrative}
+            />
           </motion.div>
 
           <motion.div custom={2} variants={hudVariants} initial="hidden" animate="show">
