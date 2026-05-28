@@ -176,10 +176,12 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       container.addEventListener("wheel", fireInteract, { passive: true });
       container.addEventListener("touchstart", fireInteract, { passive: true });
 
-      // Always re-render markers on any zoom change so pins survive zooms.
-      map.on("zoomend", () => {
+      // Always re-render markers after map transforms so pins survive zooms and pans.
+      const repaintMarkers = () => {
         renderMarkers();
-      });
+        requestAnimationFrame(renderMarkers);
+      };
+      map.on("zoomend moveend viewreset", repaintMarkers);
 
 
       if (dive && !dovedRef.current) {
