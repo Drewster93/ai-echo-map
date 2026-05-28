@@ -89,16 +89,16 @@ export function ResultsSection({ brand, locations, assistant, avgScore }: Props)
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.8, ease: EASE }}
-      className="relative z-20 mx-auto w-full max-w-7xl px-6 py-20"
+      className="relative z-20 mx-auto w-full max-w-7xl bg-white px-6 py-20 text-[#260e5a]"
     >
       <header className="mb-10 flex flex-col gap-2">
-        <span className="font-display text-[10px] uppercase tracking-[0.3em] text-aqua/80">
+        <span className="font-display text-[10px] uppercase tracking-[0.3em] text-[#260e5a]/80">
           Pulse Report
         </span>
-        <h2 className="font-display text-4xl text-white md:text-5xl">
+        <h2 className="font-display text-4xl text-[#260e5a] md:text-5xl">
           How {brand} shows up in AI answers
         </h2>
-        <p className="max-w-2xl text-sm text-white/60">
+        <p className="max-w-2xl text-sm text-[#260e5a]/60">
           Aggregated from {stats.totalPrompts.toLocaleString()} prompts {assistantContext},
           across {stats.cityStats.length} cities in the last 7 days.
         </p>
@@ -133,13 +133,12 @@ export function ResultsSection({ brand, locations, assistant, avgScore }: Props)
 
       {/* Breakdown grid */}
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Assistant breakdown */}
         <Panel title="Mention rate by assistant" className="lg:col-span-2">
           <div className="flex flex-col gap-3">
             {stats.assistantRows.map((row) => (
               <div key={row.key} className="flex items-center gap-4">
-                <div className="w-24 text-sm text-white/80">{row.label}</div>
-                <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/5">
+                <div className="w-24 text-sm text-[#260e5a]/80">{row.label}</div>
+                <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-[#260e5a]/10">
                   <div
                     className="absolute inset-y-0 left-0 rounded-full"
                     style={{
@@ -150,10 +149,10 @@ export function ResultsSection({ brand, locations, assistant, avgScore }: Props)
                     }}
                   />
                 </div>
-                <div className="w-20 text-right font-display text-sm tabular-nums text-white">
+                <div className="w-20 text-right font-display text-sm tabular-nums text-[#260e5a]">
                   {row.rate.toFixed(0)}%
                 </div>
-                <div className="hidden w-16 text-right text-[11px] text-white/40 md:block">
+                <div className="hidden w-16 text-right text-[11px] text-[#260e5a]/40 md:block">
                   {row.total} pr.
                 </div>
               </div>
@@ -176,7 +175,6 @@ export function ResultsSection({ brand, locations, assistant, avgScore }: Props)
             total={stats.totalPrompts}
           />
         </Panel>
-      </div>
 
       {/* City breakdown */}
       <div className="mt-6">
@@ -187,20 +185,20 @@ export function ResultsSection({ brand, locations, assistant, avgScore }: Props)
               return (
                 <div
                   key={c.city}
-                  className="rounded-xl border border-white/5 bg-white/[0.02] p-4"
+                  className="rounded-xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] p-4"
                 >
                   <div className="flex items-baseline justify-between">
-                    <div className="font-display text-lg text-white">{c.city}</div>
-                    <div className="font-display text-xl tabular-nums text-aqua">
+                    <div className="font-display text-lg text-[#260e5a]">{c.city}</div>
+                    <div className="font-display text-xl tabular-nums text-[#4B1A99]">
                       {rate.toFixed(0)}%
                     </div>
                   </div>
-                  <div className="mt-1 text-[11px] uppercase tracking-wider text-white/40">
+                  <div className="mt-1 text-[11px] uppercase tracking-wider text-[#260e5a]/40">
                     Mention rate
                   </div>
-                  <div className="mt-3 flex items-center justify-between text-xs text-white/60">
+                  <div className="mt-3 flex items-center justify-between text-xs text-[#260e5a]/60">
                     <span>{c.userMentioned}/{c.totalPrompts} prompts</span>
-                    <span className="text-white/40">
+                    <span className="text-[#260e5a]/40">
                       {c.leader ? `vs ${c.leader}` : "no rival"}
                     </span>
                   </div>
@@ -225,9 +223,20 @@ function Kpi({
   hint?: string;
   accent?: boolean;
 }) {
+function Kpi({
+  label,
+  value,
+  hint,
+  accent = false,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  accent?: boolean;
+}) {
   return (
     <div
-      className="glass rounded-2xl p-5"
+      className="rounded-2xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] p-5"
       style={
         accent
           ? {
@@ -237,15 +246,15 @@ function Kpi({
           : undefined
       }
     >
-      <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">
+      <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#260e5a]/60">
         {label}
       </div>
-      <div className="mt-2 font-display text-3xl text-white">{value}</div>
-      {hint && <div className="mt-1 text-xs text-white/50">{hint}</div>}
+      <div className="mt-2 font-display text-3xl text-[#260e5a]">{value}</div>
+      {hint && <div className="mt-1 text-xs text-[#260e5a]/50">{hint}</div>}
     </div>
   );
 }
-
+}
 function Panel({
   title,
   children,
@@ -256,8 +265,8 @@ function Panel({
   className?: string;
 }) {
   return (
-    <div className={`glass rounded-2xl p-5 ${className}`}>
-      <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">
+    <div className={`rounded-2xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] p-5 ${className}`}>
+      <div className="mb-4 text-[10px] font-bold uppercase tracking-[0.25em] text-[#260e5a]/60">
         {title}
       </div>
       {children}
