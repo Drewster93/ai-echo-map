@@ -71,9 +71,12 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     [assistant, range, replayDay],
   );
 
+  // Admin view aggregates at city scale (coarse H3 res); regional/location
+  // views stay at fine resolution so individual properties are visible.
+  const hexRes = role === "admin" ? 5 : 8;
   const hexCells = useMemo(
-    () => buildHexCells(scopedLocations, scoreFor),
-    [scopedLocations, scoreFor],
+    () => buildHexCells(scopedLocations, scoreFor, hexRes),
+    [scopedLocations, scoreFor, hexRes],
   );
 
   const selected = selectedHex ? hexCells.find((c) => c.h3 === selectedHex) ?? null : null;
