@@ -41,7 +41,7 @@ function Index() {
     [demoLocations, places, brand],
   );
 
-  function applyDemoFallback(value: string, toastId: string | number) {
+  function applyDemoFallback(value: string, toastId?: string | number) {
     const mapped = MOCK_LOCATIONS.map((l) => ({ ...l, brand: value }));
     setDemoLocations(mapped);
     toast.success(`Demo mode · ${mapped.length} sample locations for ${value}`, {
@@ -49,10 +49,14 @@ function Index() {
     });
   }
 
-  async function handleBrand(value: string) {
+  async function handleBrand(value: string, opts?: { demo?: boolean }) {
     setBrand(value);
     setPlaces(null);
     setDemoLocations(null);
+    if (opts?.demo) {
+      applyDemoFallback(value);
+      return;
+    }
     const toastId = toast.loading(`Searching Google Places for "${value}"…`);
     try {
       const res = await fetchLocations({
@@ -70,6 +74,20 @@ function Index() {
       applyDemoFallback(value, toastId);
     }
   }
+
+  // Demo URL flag: ?demo=Brand+Name skips intro + Places API and auto-reveals.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const demo = params.get("demo");
+    if (demo) {
+      setIntroDone(true);
+      // brief delay so the landing screen registers before the reveal kicks
+      const t = setTimeout(() => handleBrand(demo, { demo: true }), 50);
+      return () => clearTimeout(t);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   return (
