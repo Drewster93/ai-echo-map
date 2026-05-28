@@ -209,8 +209,9 @@ function Metric({
   value: string;
   footer?: ReactNode;
 }) {
+}) {
+  return (
     <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5">
-      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/55">
         {label}
       </div>
       <div className="mt-1 font-display text-2xl leading-none text-white">{value}</div>
