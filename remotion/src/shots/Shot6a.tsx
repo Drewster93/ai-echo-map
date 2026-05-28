@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  AbsoluteFill,
-  interpolate,
-  useCurrentFrame,
-} from "remotion";
+import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { COLORS } from "../theme";
 import { HexGrid } from "../components/HexGrid";
 import { MapGlobe } from "../components/MapGlobe";
@@ -12,45 +8,37 @@ import { MapGlobe } from "../components/MapGlobe";
 export const Shot6a: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // 4 stages, 0..32, 32..70, 70..100, 100..130
-  // Each layer is scaled DOWN as we pull out, revealing the parent layer.
-  const t = frame / 130;
-
-  // Hex scale: starts huge, shrinks fast
-  const hexScale = interpolate(frame, [0, 50], [10, 0.4], {
+  const hexScale = interpolate(frame, [0, 50], [7.5, 0.4], {
     extrapolateRight: "clamp",
     easing: (v) => 1 - Math.pow(1 - v, 3),
   });
-  const hexOp = interpolate(frame, [0, 35, 50], [1, 0.7, 0], {
+  const hexOp = interpolate(frame, [0, 35, 50], [1, 0.85, 0], {
     extrapolateRight: "clamp",
   });
 
-  // City hex grid: appears at f=25, scales down after f=55
-  const cityOp = interpolate(frame, [25, 40, 70, 85], [0, 1, 1, 0], {
+  const cityOp = interpolate(frame, [10, 26, 70, 88], [0, 1, 1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const cityScale = interpolate(frame, [25, 85], [4, 0.6], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  // Map/globe appears at f=60
-  const globeOp = interpolate(frame, [60, 80, 110, 125], [0, 1, 1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const globeScale = interpolate(frame, [60, 125], [3, 0.3], {
+  const cityScale = interpolate(frame, [10, 88], [2.5, 0.6], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // Logo mark coalesces at f=110
-  const logoOp = interpolate(frame, [110, 130], [0, 1], {
+  const globeOp = interpolate(frame, [52, 74, 110, 125], [0, 1, 1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const logoScale = interpolate(frame, [110, 130], [0.4, 1], {
+  const globeScale = interpolate(frame, [52, 125], [1.8, 0.3], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  const logoOp = interpolate(frame, [108, 130], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const logoScale = interpolate(frame, [108, 130], [0.55, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -63,7 +51,20 @@ export const Shot6a: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* hex */}
+      {/* glowing core so early pull-out isn't blank */}
+      <div
+        style={{
+          position: "absolute",
+          width: 420,
+          height: 420,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${COLORS.aqua}55 0%, ${COLORS.ultraviolet}33 35%, transparent 75%)`,
+          opacity: hexOp,
+          filter: "blur(10px)",
+          transform: `scale(${0.6 + hexScale * 0.15})`,
+        }}
+      />
+
       <svg
         width={400}
         height={400}
@@ -83,7 +84,6 @@ export const Shot6a: React.FC = () => {
         />
       </svg>
 
-      {/* city hexgrid */}
       <div
         style={{
           position: "absolute",
@@ -104,7 +104,6 @@ export const Shot6a: React.FC = () => {
         />
       </div>
 
-      {/* globe */}
       <div
         style={{
           position: "absolute",
@@ -125,7 +124,6 @@ export const Shot6a: React.FC = () => {
         />
       </div>
 
-      {/* logo mark */}
       <div
         style={{
           position: "absolute",
@@ -141,7 +139,6 @@ export const Shot6a: React.FC = () => {
           justifyContent: "center",
         }}
       >
-        {/* hex inside */}
         <svg width="120" height="120" viewBox="0 0 120 120">
           <polygon
             points="60,8 110,36 110,84 60,112 10,84 10,36"

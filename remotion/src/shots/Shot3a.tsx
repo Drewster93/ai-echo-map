@@ -6,7 +6,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { COLORS, plex, fraunces } from "../theme";
+import { COLORS, plex } from "../theme";
 import { HexGrid } from "../components/HexGrid";
 import { AnamorphicBars } from "../motion/Cinematic";
 import { CINE_IN } from "../motion/easings";
@@ -16,7 +16,6 @@ export const Shot3a: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // tile zoom
   const zoom = interpolate(frame, [0, 60], [1, 18], {
     extrapolateRight: "clamp",
     easing: (v) => v * v,
@@ -26,6 +25,9 @@ export const Shot3a: React.FC = () => {
     extrapolateRight: "clamp",
   });
   const hexIn = spring({ frame: frame - 55, fps, config: CINE_IN });
+
+  const hotspotX = 0.58;
+  const hotspotY = 0.48;
 
   return (
     <AbsoluteFill
@@ -37,7 +39,6 @@ export const Shot3a: React.FC = () => {
     >
       <AnamorphicBars show height={120} />
 
-      {/* red tile being zoomed */}
       <div
         style={{
           position: "absolute",
@@ -61,7 +62,6 @@ export const Shot3a: React.FC = () => {
         3%
       </div>
 
-      {/* hex neighborhood map */}
       <div
         style={{
           position: "absolute",
@@ -83,15 +83,54 @@ export const Shot3a: React.FC = () => {
         />
       </div>
 
-      {/* corner labels */}
+      {/* hotspot center so the frame isn't empty */}
       <div
         style={{
           position: "absolute",
-          bottom: 150,
-          left: 90,
+          left: `${hotspotX * 100}%`,
+          top: `${hotspotY * 100}%`,
+          width: 340,
+          height: 340,
+          borderRadius: "50%",
+          transform: `translate(-50%, -50%) scale(${0.8 + hexIn * 0.25})`,
+          background: `radial-gradient(circle, ${COLORS.coral}55 0%, ${COLORS.coral}22 32%, transparent 70%)`,
+          opacity: 0.9 * hexIn,
+          filter: "blur(6px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: `${hotspotX * 100}%`,
+          top: `${hotspotY * 100}%`,
+          transform: `translate(-50%, -50%)`,
+          opacity: hexIn,
+        }}
+      >
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <polygon
+            points="60,10 108,36 108,84 60,110 12,84 12,36"
+            fill={`${COLORS.coral}33`}
+            stroke={COLORS.coral}
+            strokeWidth={3}
+            style={{ filter: `drop-shadow(0 0 20px ${COLORS.coral})` }}
+          />
+        </svg>
+      </div>
+
+      {/* safe labels */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 118,
+          left: 120,
+          padding: "10px 16px",
+          borderRadius: 999,
+          background: "rgba(5,3,13,0.72)",
+          border: `1px solid ${COLORS.aqua}55`,
           fontFamily: plex,
-          fontSize: 18,
-          letterSpacing: 6,
+          fontSize: 16,
+          letterSpacing: 4,
           color: COLORS.aqua,
           opacity: hexIn,
           textTransform: "uppercase",
@@ -102,11 +141,15 @@ export const Shot3a: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          bottom: 150,
-          right: 90,
+          bottom: 118,
+          right: 120,
+          padding: "10px 16px",
+          borderRadius: 999,
+          background: "rgba(5,3,13,0.72)",
+          border: `1px solid ${COLORS.coral}55`,
           fontFamily: plex,
           fontWeight: 700,
-          fontSize: 26,
+          fontSize: 22,
           color: COLORS.coral,
           opacity: hexIn,
           textShadow: `0 0 14px ${COLORS.coral}`,
