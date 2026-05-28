@@ -26,22 +26,12 @@ function brandToDomain(brand: string): string {
   return `${slug}.com`;
 }
 
-function BrandLogo({ brand }: { brand: string }) {
-  const [errored, setErrored] = useState(false);
-  const initial = brand.trim().charAt(0).toUpperCase() || "?";
-  if (errored) {
-    return (
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#7515f5] text-sm font-bold text-white">
-        {initial}
-      </div>
-    );
-  }
+function BrandLogo() {
   return (
     <img
-      src={`https://www.google.com/s2/favicons?domain=${brandToDomain(brand)}&sz=128`}
-      alt={`${brand} logo`}
+      src="https://www.google.com/s2/favicons?domain=uberall.com&sz=128"
+      alt="Uberall logo"
       className="h-9 w-9 rounded-lg object-contain"
-      onError={() => setErrored(true)}
     />
   );
 }
@@ -126,25 +116,15 @@ export function SideNav({ brand }: { brand?: string | null }) {
           open ? "w-[72px]" : "w-0 overflow-hidden"
         }`}
       >
-        {brand && (
-          <div className="flex h-16 items-center justify-center">
-            <BrandLogo brand={brand} />
-          </div>
-        )}
+        <div className="flex h-16 items-center justify-center">
+          <BrandLogo />
+        </div>
 
         {/* Top section */}
         <div className="flex flex-col items-center gap-1.5 px-2">
           {TOP_ITEMS.map((i) =>
             renderItem(i, { highlight: i.key === ACTIVE_KEY ? false : false }),
           )}
-        </div>
-
-        {/* Spacer divider */}
-        <div className="mx-4 my-4 h-px bg-black/5" />
-
-        {/* Mid items */}
-        <div className="flex flex-col items-center gap-1.5 px-2">
-          {MID_ITEMS.map((i) => renderItem(i))}
         </div>
 
         {/* Bottom */}
