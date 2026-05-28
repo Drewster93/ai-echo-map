@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { HexCell, Location } from "./types";
 import { COMPETITORS } from "./mockData";
@@ -25,13 +26,32 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
   const hexLocations = hex ? locations.filter((l) => hex.locationIds.includes(l.id)) : [];
   const score = hex ? Math.round(hex.intensity) : 0;
   const cluster = hex?.cluster ?? "";
-  const allPrompts = hexLocations.flatMap((l) => l.prompts).slice(0, 8);
+  const allPromptsFull = hexLocations.flatMap((l) => l.prompts);
+  const allPrompts = allPromptsFull.slice(0, 8);
   const competitorsMentioned = Array.from(
-    new Set(allPrompts.map((p) => p.competitor).filter(Boolean) as string[]),
+    new Set(allPromptsFull.map((p) => p.competitor).filter(Boolean) as string[]),
   ).slice(0, 4);
   const fallbackCompetitors = competitorsMentioned.length
     ? competitorsMentioned
     : COMPETITORS.slice(0, 3);
+
+  // Derived metrics for the stat row
+  const totalPrompts = allPromptsFull.length || 1;
+  const mentionPct = score; // aggregated mention rate (0-100)
+  const competitorPct = Math.round(
+    (allPromptsFull.filter((p) => p.status === "competitor_higher" || p.competitor).length /
+      totalPrompts) *
+      100,
+  );
+  const gapPp = mentionPct - competitorPct;
+  // Mock-but-deterministic citation rate + avg position derived from score
+  const citationPct = Math.max(2, Math.round(mentionPct * 0.22));
+  const avgPosition = (1 + (100 - mentionPct) / 28).toFixed(1);
+
+  const mentionBand =
+    mentionPct >= 60 ? { label: "Strong", cls: "bg-soft-green/20 text-soft-green" }
+    : mentionPct >= 40 ? { label: "Moderate", cls: "bg-yellow-400/15 text-yellow-300" }
+    : { label: "Low", cls: "bg-orange-uberall/20 text-orange-uberall" };
 
   // SVG ring math
   const R = 54;
@@ -70,7 +90,38 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
             </button>
           </div>
 
+          {/* Top metrics row */}
+          <div className="grid grid-cols-2 gap-2 px-6 pb-4">
+            <Metric
+              label="Mention %"
+              value={`${mentionPct.toFixed(1)}%`}
+              footer={<span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${mentionBand.cls}`}>{mentionBand.label}</span>}
+            />
+            <Metric
+              label="Competitor Mention %"
+              value={`${competitorPct.toFixed(1)}%`}
+              footer={
+                <span className="text-[11px] text-white/60">
+                  Gap: <span className={gapPp >= 0 ? "font-bold text-soft-green" : "font-bold text-orange-uberall"}>
+                    {gapPp >= 0 ? "+" : ""}{gapPp.toFixed(1)}pp
+                  </span>
+                </span>
+              }
+            />
+            <Metric
+              label="Citation %"
+              value={`${citationPct.toFixed(1)}%`}
+              footer={<span className="text-[11px] text-white/50">Prompts citing brand</span>}
+            />
+            <Metric
+              label="Avg Position"
+              value={avgPosition}
+              footer={<span className="text-[11px] text-white/50">Where brand is mentioned</span>}
+            />
+          </div>
+
           <div className="flex items-center gap-5 px-6 pb-5">
+
             <div className="relative h-[140px] w-[140px] shrink-0">
               <div className="absolute inset-0 grid place-items-center">
                 <PulseCircle size={140} color="#3072FC" opacity={0.25} />
@@ -166,5 +217,25 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
         </motion.aside>
       )}
     </AnimatePresence>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  footer,
+}: {
+  label: string;
+  value: string;
+  footer?: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
+      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/45">
+        {label}
+      </div>
+      <div className="mt-1 font-display text-2xl leading-none text-white">{value}</div>
+      {footer && <div className="mt-1.5">{footer}</div>}
+    </div>
   );
 }
