@@ -35,18 +35,6 @@ export function RoleSwitcher({
           <button
             key={r}
             onClick={() => {
-  const cities = Array.from(new Set(locations.map((l) => l.city)));
-  const filteredLocs = regionCity
-    ? locations.filter((l) => l.city === regionCity)
-    : locations;
-
-  return (
-    <div className="flex items-center gap-2">
-      <div className="inline-flex items-center rounded-full border border-[#1a0d3d]/10 bg-white/60 p-0.5 text-xs font-medium">
-        {(["admin", "regional", "location"] as Role[]).map((r) => (
-          <button
-            key={r}
-            onClick={() => {
               setRole(r);
               if (r === "admin") {
                 setRegionCity(null);
@@ -69,7 +57,7 @@ export function RoleSwitcher({
         ))}
       </div>
 
-      {role === "regional" && (
+      {(role === "regional" || role === "location") && (
         <PillSelect
           ariaLabel="Location"
           value={locationId}
@@ -80,17 +68,6 @@ export function RoleSwitcher({
           }))}
         />
       )}
-        <PillSelect
-          ariaLabel="Location"
-          value={locationId}
-          onChange={(v) => setLocationId(v || null)}
-          options={locations.map((l) => ({
-            value: l.id,
-            label: `${l.name} · ${l.city}`,
-          }))}
-        />
-      )}
-
     </div>
   );
 }
