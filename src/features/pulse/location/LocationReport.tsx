@@ -14,7 +14,7 @@ interface Props {
   roleSwitcher?: React.ReactNode;
 }
 
-export function LocationReportView({ location, brand, onBack, allLocations, onSelectLocation }: Props) {
+export function LocationReportView({ location, brand, onBack, allLocations, onSelectLocation, roleSwitcher }: Props) {
   const report = useMemo(() => buildLocationReport(location, brand), [location, brand]);
   const brandFirst = brand.split(/\s+/)[0] || brand;
 
