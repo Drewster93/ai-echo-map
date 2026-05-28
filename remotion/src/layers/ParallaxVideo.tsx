@@ -72,7 +72,7 @@ export const ParallaxVideo: React.FC<Props> = ({
           transformOrigin: `${origin.x * 100}% ${origin.y * 100}%`,
         }}
       >
-        <OffthreadVideo
+        <Video
           src={staticFile(src)}
           startFrom={startFromFrame}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
