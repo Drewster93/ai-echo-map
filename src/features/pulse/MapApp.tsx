@@ -199,8 +199,8 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const valueCaptured = Math.max(0, Math.min(100, avgScore * 0.45));
   const narrative = `${brand}'s strongest AI presence shows up in heritage and resort markets. Major urban markets underperform with competitor brands dominating share of voice.`;
 
-  // Location Manager full-page report — short-circuits the map UI
-  if (role === "location") {
+  // Location Manager / Regional full-page report — short-circuits the map UI
+  if (role === "location" || role === "regional") {
     const activeLoc =
       brandedLocations.find((l) => l.id === locationId) ?? brandedLocations[0];
     return (
@@ -228,8 +228,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
     );
   }
 
-  const scopeLabel =
-    role === "regional" && regionCity ? `${regionCity} region` : "Worldwide";
+  const scopeLabel = "Worldwide";
 
   return (
     <>
@@ -278,25 +277,16 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
           </motion.div>
 
           <motion.div custom={1} variants={hudVariants} initial="hidden" animate="show">
-            {role === "regional" && regionCity ? (
-              <RegionalOverview
-                brand={brand.split(/\s+/)[0] || brand}
-                city={regionCity}
-                locations={scopedLocations}
-                scoreFor={scoreFor}
-              />
-            ) : (
-              <WorldwideOverview
-                brand={brand.split(/\s+/)[0] || brand}
-                avgMention={avgScore}
-                competitorPct={competitorPct}
-                avgCitation={avgCitation}
-                avgPosition={avgPosition}
-                monthlySearches={monthlySearches}
-                valueCaptured={valueCaptured}
-                narrative={narrative}
-              />
-            )}
+            <WorldwideOverview
+              brand={brand.split(/\s+/)[0] || brand}
+              avgMention={avgScore}
+              competitorPct={competitorPct}
+              avgCitation={avgCitation}
+              avgPosition={avgPosition}
+              monthlySearches={monthlySearches}
+              valueCaptured={valueCaptured}
+              narrative={narrative}
+            />
           </motion.div>
 
           <motion.div custom={2} variants={hudVariants} initial="hidden" animate="show">

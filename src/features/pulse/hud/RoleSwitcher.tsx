@@ -41,7 +41,7 @@ export function RoleSwitcher({
                 setLocationId(null);
               } else if (r === "regional") {
                 if (!regionCity) setRegionCity(cities[0] ?? null);
-                setLocationId(null);
+                if (!locationId) setLocationId(filteredLocs[0]?.id ?? locations[0]?.id ?? null);
               } else if (r === "location") {
                 if (!locationId) setLocationId(filteredLocs[0]?.id ?? locations[0]?.id ?? null);
               }
@@ -57,19 +57,7 @@ export function RoleSwitcher({
         ))}
       </div>
 
-      {role === "regional" && (
-        <PillSelect
-          ariaLabel="Region"
-          value={regionCity}
-          onChange={(v) => setRegionCity(v || null)}
-          options={locations.map((l) => ({
-            value: l.city,
-            label: `${l.name} · ${l.city}`,
-          }))}
-        />
-      )}
-
-      {role === "location" && (
+      {(role === "regional" || role === "location") && (
         <PillSelect
           ariaLabel="Location"
           value={locationId}
@@ -80,7 +68,6 @@ export function RoleSwitcher({
           }))}
         />
       )}
-
     </div>
   );
 }
