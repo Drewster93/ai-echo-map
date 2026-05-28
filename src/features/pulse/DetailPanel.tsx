@@ -180,6 +180,9 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                                   </span>
                                 </div>
                               </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
