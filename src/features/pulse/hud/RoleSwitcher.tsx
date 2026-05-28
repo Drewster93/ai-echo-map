@@ -59,8 +59,6 @@ export function RoleSwitcher({
 
       {role === "regional" && (
         <PillSelect
-      {role === "regional" && (
-        <PillSelect
           ariaLabel="Region"
           value={regionCity}
           onChange={(v) => setRegionCity(v || null)}
@@ -70,6 +68,10 @@ export function RoleSwitcher({
           }))}
         />
       )}
+
+      {role === "location" && (
+        <PillSelect
+          ariaLabel="Location"
           value={locationId}
           onChange={(v) => setLocationId(v || null)}
           options={locations.map((l) => ({
