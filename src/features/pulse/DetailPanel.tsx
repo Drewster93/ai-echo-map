@@ -62,8 +62,12 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
   return (
     <AnimatePresence initial={false}>
       {hex && (
-        <motion.section
           key={hex.h3}
+          ref={sectionRef}
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 30, opacity: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           className="relative z-10 w-full border-t border-white/10 bg-[#05030d] px-6 pb-8 pt-6"
         >
           {/* Header bar */}
