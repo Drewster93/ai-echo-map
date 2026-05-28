@@ -1,31 +1,29 @@
 ## Goal
 
-Make pins zoom-aware on the map:
-- **Zoom < 9** → one aggregated pin per city, placed at the city centroid.
-- **Zoom ≥ 9** → individual property pins (current behavior).
-- Clicking any pin still inspects metrics via the existing hex-select flow.
+Make sure the locations displayed in the HUD and the blind-spot tour reflect exactly the locations returned by the Google Places search, and cap the search at 20 locations.
 
 ## Changes
 
-### `src/features/pulse/PulseMap.tsx`
+1. **Cap the fetch at 20 locations**
+   - `src/routes/index.tsx`: change the request payload from `maxLocations: 40` to `maxLocations: 20`.
+   - `src/lib/googlePlaces/search.functions.ts`: tighten the Zod validator from `.max(120)` to `.max(20)` so the cap is enforced server-side too.
 
-1. Track current map zoom in a ref + state (`const [zoom, setZoom] = useState<number>(...)`), updated on Leaflet `zoomend`.
-2. Compute marker set based on zoom:
-   - If `zoom < 9`: group `locations` by `city`, compute average score per city and centroid `(lat, lng)`, render one pin per city.
-   - If `zoom >= 9`: render one pin per location (current logic).
-3. Pin color uses the same `pinColorForScore` thresholds (city pin uses avg score).
-4. Click handler:
-   - Property pin → existing: find hex cell containing the location and call `onHexSelect(cell.h3)`.
-   - City pin → find any hex cell whose `locationIds` belong to a location in that city and select it (so `DetailPanel` opens with city-scoped metrics, matching current behavior at admin zoom).
-5. Re-run `renderMarkers()` whenever `zoom` crosses the threshold (add `zoom` to the existing render effect dependencies).
-6. Optional polish: city pin slightly larger (e.g. 36×44) with a small count badge showing number of properties in that city.
+2. **Make HUD counts match the fetched set**
+   - The HUD (`TopHeader`, `StatBlock`, `WorldwideOverview`) already derives `propertiesCount` / `marketsCount` from `scopedLocations`. After the cap change, those will read directly off the 20 (or fewer) real places.
+   - Sanity-check: `buildLocationsFromPlaces` currently drops places with no lat/lng. Keep that, but log how many were dropped so the toast count and HUD count stay consistent. If we want the toast to show the *displayed* count rather than the raw API count, update `index.tsx` toast to use `locations.length` after the build step.
 
-### No changes required
+3. **Make the tour match the fetched locations**
+   - `useBlindSpotTour` already receives `brandedLocations`, which is now the fetched set.
+   - `selectTourStops` aggregates those by `city`. With only ~20 places this still works: stronghold = top-scoring city, blind spot = lowest, opportunity = middle. No further code change required beyond confirming the tour only auto-starts once real data is in (already wired via `usingRealData` + `arrivedRef`).
+   - Add a guard: if fewer than 2 distinct cities are present, the tour will produce a single stop or none. That's acceptable, but we'll keep `selectTourStops`' existing empty-array fallback so the tour cleanly ends instead of looping.
 
-- `MapApp.tsx`, `DetailPanel.tsx`, `hexUtils.ts`, role-switcher logic, regional/location report routes.
-- The admin coarse-vs-fine hex resolution stays as-is; this change only affects pin rendering.
+## Technical notes
+
+- No type or schema changes to `Location` / `GooglePlacesLocation`.
+- No changes to `MapApp` plumbing; the tour and counts already flow from the same `brandedLocations` source.
+- Server-side `searchGooglePlaces` will still page through regions but will stop at 20 due to the `maxLocations` cap propagated from the validator.
 
 ## Out of scope
 
-- Tour, competitor markers, replay, filters — unchanged.
-- No changes to data model or types.
+- Reworking tour stop selection logic (still city-aggregated).
+- Changing how categories/domain filtering work in `search.server.ts`.

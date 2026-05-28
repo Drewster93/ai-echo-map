@@ -43,19 +43,21 @@ function Index() {
     const toastId = toast.loading(`Searching Google Places for "${value}"…`);
     try {
       const res = await fetchLocations({
-        data: { brand: value, country: "global", maxLocations: 40 },
+        data: { brand: value, country: "global", maxLocations: 20 },
       });
       if (res.error) {
         toast.error(`Google Places: ${res.error}`, { id: toastId });
         return;
       }
       setPlaces(res.locations);
-      toast.success(`Found ${res.locations.length} locations for ${value}`, { id: toastId });
+      const mapped = buildLocationsFromPlaces(res.locations, value);
+      toast.success(`Found ${mapped.length} locations for ${value}`, { id: toastId });
     } catch (err) {
       console.error(err);
       toast.error("Failed to reach Google Places", { id: toastId });
     }
   }
+
 
   return (
     <main

@@ -7,7 +7,7 @@ const inputSchema = z.object({
   brand: z.string().min(1).max(120),
   country: z.string().min(2).max(20).optional(),
   language: z.string().min(2).max(10).optional(),
-  maxLocations: z.number().int().min(1).max(120).optional(),
+  maxLocations: z.number().int().min(1).max(20).optional(),
 });
 
 export const searchBrandLocations = createServerFn({ method: "POST" })
