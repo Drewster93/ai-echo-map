@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Local GEO Pulse · Uberall" },
+      { title: "AI Performance Pulse" },
       {
         name: "description",
         content:
