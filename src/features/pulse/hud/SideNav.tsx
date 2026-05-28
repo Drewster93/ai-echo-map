@@ -126,11 +126,9 @@ export function SideNav({ brand }: { brand?: string | null }) {
         <div className="flex flex-col items-center gap-1.5 px-2">
           {TOP_ITEMS.map((i) =>
             renderItem(i, { highlight: i.key === ACTIVE_KEY ? false : false }),
-          )}
+        <div className="flex h-16 items-center justify-center">
+          <BrandLogo />
         </div>
-
-        {/* Spacer divider */}
-        <div className="mx-4 my-4 h-px bg-black/5" />
 
         {/* Mid items */}
         <div className="flex flex-col items-center gap-1.5 px-2">
