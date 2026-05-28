@@ -23,7 +23,12 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Props) {
-  const hexLocations = hex ? locations.filter((l) => hex.locationIds.includes(l.id)) : [];
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (hex && sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [hex?.h3]);
   const score = hex ? Math.round(hex.intensity) : 0;
   const cluster = hex?.cluster ?? "";
   const allPromptsFull = hexLocations.flatMap((l) => l.prompts);
