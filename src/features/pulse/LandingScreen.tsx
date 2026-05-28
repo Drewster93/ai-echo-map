@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import uberallLogo from "@/assets/uberall-logo.png";
 import { PulseArc } from "./PulseArc";
 
 interface Props {
