@@ -243,10 +243,7 @@ function Kpi({
       {hint && <div className="mt-1 text-xs text-[#260e5a]/50">{hint}</div>}
     </div>
   );
-  );
 }
-
-function Panel({
 
 function Panel({
   title,
@@ -276,7 +273,7 @@ function OutcomeBar({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex h-3 w-full overflow-hidden rounded-full bg-white/5">
+      <div className="flex h-3 w-full overflow-hidden rounded-full bg-[#260e5a]/10">
         {segments.map((s) => {
           const pct = total ? (s.value / total) * 100 : 0;
           if (pct <= 0) return null;
@@ -297,16 +294,16 @@ function OutcomeBar({
           const pct = total ? (s.value / total) * 100 : 0;
           return (
             <div key={s.label} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-white/80">
+              <div className="flex items-center gap-2 text-[#260e5a]/80">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: s.color, boxShadow: `0 0 8px ${s.color}` }}
                 />
                 {s.label}
               </div>
-              <div className="font-display tabular-nums text-white">
+              <div className="font-display tabular-nums text-[#260e5a]">
                 {pct.toFixed(0)}%
-                <span className="ml-2 text-xs text-white/40">{s.value}</span>
+                <span className="ml-2 text-xs text-[#260e5a]/40">{s.value}</span>
               </div>
             </div>
           );
