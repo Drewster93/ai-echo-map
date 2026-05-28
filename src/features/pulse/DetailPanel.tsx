@@ -68,6 +68,7 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
     <AnimatePresence initial={false}>
       {hex && (
         <motion.section
+          ref={sectionRef}
           key={hex.h3}
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
