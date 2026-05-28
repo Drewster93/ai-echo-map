@@ -11,7 +11,7 @@ export function buildHexCells(
   const map = new Map<string, { intensity: number; weight: number; locs: string[]; cluster: string }>();
 
   for (const loc of locations) {
-    const center = latLngToCell(loc.lat, loc.lng, HEX_RES);
+    const center = latLngToCell(loc.lat, loc.lng, res);
     const ring = gridDisk(center, 1); // center + 6 neighbors
     const score = scoreFor(loc);
     ring.forEach((h, i) => {
