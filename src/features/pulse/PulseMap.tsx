@@ -211,7 +211,11 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       <circle cx="15" cy="15" r="4.5" fill="white" stroke="${ring}" stroke-width="1"/>
     </svg>`;
   }
+
+  const CITY_ZOOM_THRESHOLD = 9;
+
   function renderMarkers() {
+
     const L = LRef.current;
     const map = mapRef.current;
     const layer = markerLayerRef.current;
