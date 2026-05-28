@@ -271,6 +271,48 @@ export function MapApp({ brand, onSwitchBrand, revealing = true, locations: loca
         competitorMarkers={competitorMarkers}
       />
 
+      <AnimatePresence>
+        {(isLoading || isEmpty) && (
+          <motion.div
+            key={isLoading ? "loading" : "empty"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            className="absolute inset-0 z-30 flex items-center justify-center bg-[#05030d]/85 backdrop-blur-sm"
+          >
+            <div className="flex flex-col items-center gap-4 text-center">
+              {isLoading ? (
+                <>
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+                  <p className="font-display text-lg text-white/90">
+                    Searching Google Places for {brand}…
+                  </p>
+                  <p className="text-sm text-white/50">
+                    Pulling live business locations to map your AI footprint.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-display text-xl text-white">
+                    No locations found for {brand}
+                  </p>
+                  <p className="text-sm text-white/60">
+                    We couldn't find any matching Google Business Profile listings.
+                  </p>
+                  <button
+                    onClick={onSwitchBrand}
+                    className="rounded-full border border-white/20 px-4 py-2 text-sm text-white transition hover:bg-white/10"
+                  >
+                    Try another brand
+                  </button>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {revealing && (
         <>
           <motion.div custom={0} variants={hudVariants} initial="hidden" animate="show">
