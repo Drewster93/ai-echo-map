@@ -35,8 +35,7 @@ export const SCENE_DURATIONS = {
   s11: 230,
 };
 
-  s11: 200,
-};
+
 
 export const TOTAL_FRAMES = Object.values(SCENE_DURATIONS).reduce(
   (a, b) => a + b,
