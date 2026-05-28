@@ -95,12 +95,12 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
             return;
           }
           if (durationSec <= 0) {
-            map.fitBounds(bounds, { padding: [120, 120], animate: false });
+            map.fitBounds(bounds, { padding: [180, 180], animate: false });
             resolve();
             return;
           }
           map.flyToBounds(bounds, {
-            padding: [120, 120],
+            padding: [180, 180],
             duration: durationSec,
             easeLinearity: 0.25,
           });
@@ -325,9 +325,9 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       fireArrived();
       return;
     }
-    const padded = bounds.pad(0.15);
+    const padded = bounds.pad(0.35);
     const targetCenter = padded.getCenter();
-    const targetZoom = Math.min(map.getBoundsZoom(padded), 7);
+    const targetZoom = Math.min(map.getBoundsZoom(padded), 5);
     initialBoundsRef.current = bounds;
     if (reduced) {
       map.setView(targetCenter, targetZoom);
