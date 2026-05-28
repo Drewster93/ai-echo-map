@@ -362,6 +362,19 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   }
 
   function computeBounds(locs: Location[]): import("leaflet").LatLngBounds | null {
+    const L = LRef.current;
+    if (!L || locs.length === 0) return null;
+    return L.latLngBounds(locs.map((l) => [l.lat, l.lng] as [number, number]));
+  }
+
+  useEffect(() => {
+    if (!dive || dovedRef.current) return;
+    const map = mapRef.current;
+    if (!readyRef.current || !map) return;
+    dovedRef.current = true;
+    runDive(map);
+  }, [dive]);
+
   useEffect(() => {
     if (!readyRef.current) return;
     if (dataRenderedRef.current) {
@@ -374,19 +387,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locations]);
 
-
-  useEffect(() => {
-    if (!dive || dovedRef.current) return;
-    const map = mapRef.current;
-    if (!readyRef.current || !map) return;
-    dovedRef.current = true;
-    runDive(map);
-  }, [dive]);
-
-  useEffect(() => {
-    if (readyRef.current && dataRenderedRef.current) renderMarkers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locations]);
 
   const cellKey = useMemo(
     () => hexCells.map((c) => `${c.h3}:${c.intensity.toFixed(1)}`).join("|"),
