@@ -227,6 +227,7 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const scopeLabel =
     role === "regional" && regionCity ? `${regionCity} region` : "Worldwide";
 
+  return (
     <>
     <motion.div
       className="relative w-full"
