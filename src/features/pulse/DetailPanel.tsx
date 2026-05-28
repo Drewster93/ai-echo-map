@@ -144,8 +144,6 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
   );
 }
 
-  );
-}
 
 
 function Metric({
