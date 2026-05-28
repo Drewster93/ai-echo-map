@@ -175,6 +175,7 @@ export function ResultsSection({ brand, locations, assistant, avgScore }: Props)
             total={stats.totalPrompts}
           />
         </Panel>
+      </div>
 
       {/* City breakdown */}
       <div className="mt-6">
