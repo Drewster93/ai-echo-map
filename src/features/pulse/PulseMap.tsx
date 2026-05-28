@@ -170,11 +170,12 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       let lastBucket = map.getZoom() < 9 ? "city" : "props";
       map.on("zoomend", () => {
         const b = map.getZoom() < 9 ? "city" : "props";
-        if (b !== lastBucket && dataRenderedRef.current) {
+        if (b !== lastBucket) {
           lastBucket = b;
           renderMarkers();
         }
       });
+
 
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
@@ -377,15 +378,15 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
 
   useEffect(() => {
     if (!readyRef.current) return;
-    if (dataRenderedRef.current) {
-      renderMarkers();
-    } else if (locations.length > 0) {
-      // Data arrived after init but before dive finished — render immediately
-      // so retrieved locations are visible even at the overview zoom.
-      paintData();
-    }
+    // Always (re)paint when locations change. Marks dataRendered so other
+    // effects know data has been drawn at least once.
+    dataRenderedRef.current = true;
+    renderMarkers();
+    renderHex();
+    renderCompetitors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locations]);
+
 
 
   const cellKey = useMemo(
