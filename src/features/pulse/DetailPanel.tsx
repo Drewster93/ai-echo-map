@@ -158,18 +158,18 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                             return (
                               <div
                                 key={loc.id}
-                                className="rounded-xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-3 py-2.5"
+                                className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5"
                               >
-                                <div className="truncate text-sm font-semibold text-[#260e5a]">
+                                <div className="truncate text-sm font-semibold text-white">
                                   {loc.name}
                                 </div>
-                                <div className="mt-0.5 truncate text-[11px] text-[#260e5a]/60">
+                                <div className="mt-0.5 truncate text-[11px] text-white/60">
                                   {loc.cluster}
                                 </div>
-                                <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#260e5a]/10 pt-2">
-                                  <span className="text-[11px] text-[#260e5a]/70">
+                                <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/15 pt-2">
+                                  <span className="text-[11px] text-white/70">
                                     Mention{" "}
-                                    <span className="font-bold text-[#260e5a]">
+                                    <span className="font-bold text-white">
                                       {mention.toFixed(1)}%
                                     </span>
                                   </span>
@@ -180,8 +180,6 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                                   </span>
                                 </div>
                               </div>
-                            );
-                          })}
                         </div>
                       </div>
                     ))}
