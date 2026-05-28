@@ -165,12 +165,14 @@ export const Scene06Query: React.FC = () => {
               height={900}
               brand="Starbucks"
               sidebar={
-                <div
-                  style={{
-                    opacity: panelIn,
-                    transform: `translateX(${(1 - panelIn) * 60}px)`,
-                  }}
-                >
+                panelIn > 0.04 ? (
+                  <div
+                    style={{
+                      opacity: panelIn,
+                      transform: `translateX(${(1 - panelIn) * 60}px)`,
+                    }}
+                  >
+
                   <div
                     style={{
                       fontFamily: plex,
@@ -262,8 +264,10 @@ export const Scene06Query: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                </div>
+                  </div>
+                ) : null
               }
+
             >
               <div
                 style={{

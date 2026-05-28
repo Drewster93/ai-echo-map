@@ -12,16 +12,18 @@ import { GradientText } from "../components/GradientText";
 export const Scene11CTA: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const now = spring({ frame, fps, config: { damping: 18 } });
+  const now = spring({ frame: frame + 10, fps, config: { damping: 16 } });
   const turnIn = spring({
-    frame: frame - 35,
+    frame: frame - 18,
     fps,
-    config: { damping: 16 },
+    config: { damping: 15 },
   });
-  const turnOut = interpolate(frame, [85, 100], [1, 0], {
+
+  const turnOut = interpolate(frame, [72, 88], [1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+
 
   const questionIn = spring({
     frame: frame - 95,
@@ -41,28 +43,30 @@ export const Scene11CTA: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
-      {frame < 105 && (
+      {frame < 92 && (
         <div
           style={{
             position: "absolute",
             opacity: Math.min(turnIn, turnOut),
-            transform: `scale(${0.9 + turnIn * 0.1})`,
+            transform: `scale(${0.9 + Math.max(now, turnIn) * 0.1})`,
             fontFamily: fraunces,
             fontWeight: 500,
             fontSize: 180,
             color: COLORS.white,
+
             letterSpacing: -5,
             textAlign: "center",
             lineHeight: 1,
           }}
         >
-          {frame < 35 ? (
-            <span style={{ opacity: now }}>Now</span>
+          {frame < 22 ? (
+            <span style={{ opacity: Math.max(0.75, now) }}>Now</span>
           ) : (
             <>
               Now it&rsquo;s{" "}
               <em style={{ fontStyle: "italic" }}>your turn.</em>
             </>
+
           )}
         </div>
       )}

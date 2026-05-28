@@ -13,12 +13,13 @@ import { GradientText } from "../components/GradientText";
 export const Scene01Problem: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const todayIn = spring({ frame, fps, config: { damping: 18 } });
-  const todayOut = interpolate(frame, [40, 60], [1, 0], {
+  const todayIn = spring({ frame: frame + 8, fps, config: { damping: 18 } });
+  const todayOut = interpolate(frame, [26, 42], [1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
   const todayOpacity = Math.min(todayIn, todayOut);
+
 
   const line1In = spring({
     frame: frame - 60,
@@ -34,21 +35,23 @@ export const Scene01Problem: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
-      {frame < 70 && (
+      {frame < 52 && (
         <div
           style={{
             opacity: todayOpacity,
-            transform: `scale(${0.92 + todayIn * 0.08})`,
+            transform: `scale(${0.9 + todayIn * 0.1})`,
             fontFamily: fraunces,
             fontSize: 220,
             fontWeight: 500,
             color: COLORS.white,
             letterSpacing: -6,
+            textShadow: "0 0 40px rgba(134,14,255,0.22)",
           }}
         >
           Today
         </div>
       )}
+
       {frame >= 60 && (
         <div
           style={{
