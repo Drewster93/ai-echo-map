@@ -260,12 +260,12 @@ export function IntroSequence({ onDone }: Props) {
           transition={{ duration: 0.8, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
           <span className="h-1 w-1 rounded-full bg-ultraviolet" />
-          World's First · Local GEO
+          World's First · AI Performance
         </motion.div>
 
         {/* Word-by-word headline reveal */}
         <h1 className="font-display text-balance text-5xl leading-[1.05] text-white md:text-7xl">
-          {["Local", "GEO"].map((word, i) => (
+          {["AI", "Performance"].map((word, i) => (
             <motion.span
               key={word}
               className="mr-3 inline-block"
