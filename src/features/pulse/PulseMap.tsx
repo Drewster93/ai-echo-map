@@ -170,11 +170,12 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       let lastBucket = map.getZoom() < 9 ? "city" : "props";
       map.on("zoomend", () => {
         const b = map.getZoom() < 9 ? "city" : "props";
-        if (b !== lastBucket && dataRenderedRef.current) {
+        if (b !== lastBucket) {
           lastBucket = b;
           renderMarkers();
         }
       });
+
 
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
