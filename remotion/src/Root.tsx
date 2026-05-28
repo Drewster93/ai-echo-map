@@ -8,7 +8,6 @@ import { PulseLaunchV6, PULSE_V6_TOTAL } from "./PulseLaunchV6";
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-    <>
       <Composition
         id="pulse-launch-v6"
         component={PulseLaunchV6}
@@ -17,6 +16,8 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
       />
+      <Composition
+        id="pulse-launch"
         component={PulseLaunch}
         durationInFrames={PULSE_TOTAL}
         fps={30}
@@ -50,4 +51,3 @@ export const RemotionRoot: React.FC = () => {
     </>
   );
 };
-
