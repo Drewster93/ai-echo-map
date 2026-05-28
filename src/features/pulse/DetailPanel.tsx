@@ -23,12 +23,6 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Props) {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    if (hex && sectionRef.current) {
-      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [hex?.h3]);
   const hexLocations = hex ? locations.filter((l) => hex.locationIds.includes(l.id)) : [];
   const score = hex ? Math.round(hex.intensity) : 0;
   const cluster = hex?.cluster ?? "";
@@ -59,22 +53,16 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
     : mentionPct >= 40 ? { label: "Moderate", cls: "bg-yellow-400/15 text-yellow-300" }
     : { label: "Low", cls: "bg-orange-uberall/20 text-orange-uberall" };
 
-  // SVG ring math
-  const R = 54;
-  const C = 2 * Math.PI * R;
-  const dash = (score / 100) * C;
-
   return (
     <AnimatePresence initial={false}>
       {hex && (
         <motion.section
-          ref={sectionRef}
           key={hex.h3}
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 flex h-[50vh] w-full flex-col overflow-y-auto bg-[#05030d] px-6 pb-6 pt-5"
+          className="pointer-events-auto fixed inset-x-4 bottom-4 z-30 max-h-[42vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#05030d]/95 px-6 pb-5 pt-4 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)] backdrop-blur-xl"
         >
           {/* Header bar */}
           <div className="glass flex items-center justify-between rounded-2xl border border-white/5 px-6 py-4 shadow-[0_20px_60px_-30px_rgba(134,14,255,0.6)]">
