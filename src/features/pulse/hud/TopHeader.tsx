@@ -48,8 +48,6 @@ export function TopHeader({
     <header className="absolute inset-x-4 top-4 z-30 rounded-2xl border border-white/40 bg-white/70 px-6 py-4 shadow-[0_8px_32px_rgba(15,8,40,0.12)] backdrop-blur-xl saturate-150">
       <div className="flex items-start justify-between gap-6">
         <div className="flex items-start gap-4">
-          {/* brand logo */}
-          <BrandMark brand={brand} />
           <div>
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-ultraviolet">
               <span className="text-[#1a0d3d]/40">◆</span>
