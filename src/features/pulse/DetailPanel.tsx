@@ -96,7 +96,7 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                   label="Competitor Mention"
                   value={`${competitorPct.toFixed(1)}%`}
                   footer={
-                    <span className="text-[11px] text-[#260e5a]/65">
+                    <span className="text-[11px] text-white/65">
                       Gap: <span className={`rounded px-1.5 py-0.5 text-[11px] font-bold ${gapPp >= 0 ? "bg-[#22c55e]/25 text-[#15803d]" : "bg-[#f97316]/25 text-[#c2410c]"}`}>
                         {gapPp >= 0 ? "+" : ""}{gapPp.toFixed(1)}pp
                       </span>
@@ -106,12 +106,12 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                 <Metric
                   label="Citation Rate"
                   value={`${citationPct.toFixed(1)}%`}
-                  footer={<span className="text-[11px] text-[#260e5a]/55">Prompts citing brand</span>}
+                  footer={<span className="text-[11px] text-white/55">Prompts citing brand</span>}
                 />
                 <Metric
                   label="Avg Position"
                   value={avgPosition}
-                  footer={<span className="text-[11px] text-[#260e5a]/55">Where brand is mentioned</span>}
+                  footer={<span className="text-[11px] text-white/55">Where brand is mentioned</span>}
                 />
               </div>
 
@@ -180,7 +180,7 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                                   </span>
                                 </div>
                               </div>
-                              </div>
+                            );
                             );
                           })}
                         </div>
@@ -210,12 +210,11 @@ function Metric({
   value: string;
   footer?: ReactNode;
 }) {
-  return (
-    <div className="rounded-xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-3 py-2.5">
-      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#260e5a]/55">
+    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5">
+      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/55">
         {label}
       </div>
-      <div className="mt-1 font-display text-2xl leading-none text-[#260e5a]">{value}</div>
+      <div className="mt-1 font-display text-2xl leading-none text-white">{value}</div>
       {footer && <div className="mt-1.5">{footer}</div>}
     </div>
   );
