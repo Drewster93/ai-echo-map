@@ -62,7 +62,10 @@ export function RoleSwitcher({
           ariaLabel="Region"
           value={regionCity}
           onChange={(v) => setRegionCity(v || null)}
-          options={cities.map((c) => ({ value: c, label: c }))}
+          options={locations.map((l) => ({
+            value: l.city,
+            label: `${l.name} · ${l.city}`,
+          }))}
         />
       )}
 
