@@ -303,12 +303,71 @@ export async function searchGooglePlaces(
   };
 
   if (country && country.toLowerCase() !== 'global') {
+    const subRegions = COUNTRY_SUB_REGIONS[upperCountry];
     const bounds = COUNTRY_BOUNDS[upperCountry];
-    const locationParam = bounds ? { locationRestriction: { rectangle: bounds } } : {};
-    const results = await searchRegion(brand, googleApiKey, language, maxLocations, locationParam, countryNames, upperCountry);
-    return results
-      .filter(nameFilter)
-      .map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
+
+    if (!subRegions || subRegions.length === 0) {
+      const locationParam = bounds ? { locationRestriction: { rectangle: bounds } } : {};
+      const results = await searchRegion(brand, googleApiKey, language, maxLocations, locationParam, countryNames, upperCountry);
+      return results
+        .filter(nameFilter)
+        .map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
+    }
+
+    const perRegion = Math.max(10, Math.ceil(maxLocations / Math.max(1, Math.ceil(subRegions.length / 2))));
+    const regionResults = await Promise.all(
+      subRegions.map(r =>
+        searchRegion(
+          brand,
+          googleApiKey,
+          language,
+          perRegion,
+          { locationRestriction: { rectangle: r.rect } },
+          countryNames,
+          `${upperCountry}_${r.label}`,
+        ),
+      ),
+    );
+
+    // Dedupe + name filter, preserve per-region buckets for interleaving
+    const seen = new Set<string>();
+    const buckets: PlaceWithId[][] = regionResults.map(list => {
+      const out: PlaceWithId[] = [];
+      for (const p of list) {
+        const id = p._placeId || p.name + '|' + p.address;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        if (!nameFilter(p)) continue;
+        out.push(p);
+      }
+      return out;
+    });
+
+    // Domain filter across all
+    const flat = ([] as PlaceWithId[]).concat(...buckets);
+    const domainFiltered = new Set(filterByDominantDomain(flat).map(p => p._placeId || p.name + '|' + p.address));
+    const filteredBuckets = buckets.map(b => b.filter(p => domainFiltered.has(p._placeId || p.name + '|' + p.address)));
+
+    // Round-robin interleave so every sub-region is represented
+    const interleaved: PlaceWithId[] = [];
+    const cursors = filteredBuckets.map(() => 0);
+    let added = true;
+    while (added && interleaved.length < maxLocations) {
+      added = false;
+      for (let i = 0; i < filteredBuckets.length; i++) {
+        if (interleaved.length >= maxLocations) break;
+        const bucket = filteredBuckets[i];
+        if (cursors[i] < bucket.length) {
+          interleaved.push(bucket[cursors[i]++]);
+          added = true;
+        }
+      }
+    }
+
+    const counts = subRegions.map((r, i) => `${r.label}:${filteredBuckets[i].length}`).join(', ');
+    console.log(`[Google Places ${upperCountry}] ${counts} → Final: ${interleaved.length}`);
+
+    return interleaved.map(({ _placeId: _pid, ...rest }) => { void _pid; return rest; });
   }
 
   const regions: { label: string; bias: Record<string, unknown> }[] = [
