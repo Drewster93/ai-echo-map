@@ -41,7 +41,7 @@ function Index() {
     [demoLocations, places, brand],
   );
 
-  function useDemoFallback(value: string, toastId: string | number) {
+  function applyDemoFallback(value: string, toastId: string | number) {
     const mapped = MOCK_LOCATIONS.map((l) => ({ ...l, brand: value }));
     setDemoLocations(mapped);
     toast.success(`Demo mode · ${mapped.length} sample locations for ${value}`, {
@@ -59,7 +59,7 @@ function Index() {
         data: { brand: value, country: "global", maxLocations: 20 },
       });
       if (res.error || res.locations.length === 0) {
-        useDemoFallback(value, toastId);
+        applyDemoFallback(value, toastId);
         return;
       }
       setPlaces(res.locations);
@@ -67,8 +67,9 @@ function Index() {
       toast.success(`Found ${mapped.length} locations for ${value}`, { id: toastId });
     } catch (err) {
       console.error(err);
-      useDemoFallback(value, toastId);
+      applyDemoFallback(value, toastId);
     }
+  }
   }
 
   return (
