@@ -90,10 +90,8 @@ function Index() {
             onSwitchBrand={() => {
               setBrand(null);
               setPlaces(null);
+              setDemoLocations(null);
             }}
-            revealing={revealing}
-            locations={locations}
-          />
         </div>
       )}
       <AnimatePresence mode="popLayout">
