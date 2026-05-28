@@ -230,11 +230,10 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   return (
     <>
     <motion.div
-      className="relative w-full"
+      className="relative h-screen w-full"
       animate={{
         opacity: revealing ? 1 : 0.55,
         scale: revealing ? 1 : 1.06,
-        height: selected ? "50vh" : "100vh",
       }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
