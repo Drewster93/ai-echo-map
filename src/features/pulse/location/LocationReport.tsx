@@ -2,15 +2,18 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import type { Location } from "../types";
+import { PillSelect } from "../hud/PillSelect";
 import { buildLocationReport, formatUsd, type LocationReport, type PromptRow } from "./reportData";
 
 interface Props {
   location: Location;
   brand: string;
   onBack: () => void;
+  allLocations?: Location[];
+  onSelectLocation?: (id: string) => void;
 }
 
-export function LocationReportView({ location, brand, onBack }: Props) {
+export function LocationReportView({ location, brand, onBack, allLocations, onSelectLocation }: Props) {
   const report = useMemo(() => buildLocationReport(location, brand), [location, brand]);
   const brandFirst = brand.split(/\s+/)[0] || brand;
 
