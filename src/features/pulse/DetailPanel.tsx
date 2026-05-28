@@ -97,7 +97,7 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                   value={`${competitorPct.toFixed(1)}%`}
                   footer={
                     <span className="text-[11px] text-[#260e5a]/65">
-                      Gap: <span className={gapPp >= 0 ? "font-bold text-soft-green" : "font-bold text-orange-uberall"}>
+                      Gap: <span className={`rounded px-1.5 py-0.5 text-[11px] font-bold ${gapPp >= 0 ? "bg-[#22c55e]/25 text-[#15803d]" : "bg-[#f97316]/25 text-[#c2410c]"}`}>
                         {gapPp >= 0 ? "+" : ""}{gapPp.toFixed(1)}pp
                       </span>
                     </span>
