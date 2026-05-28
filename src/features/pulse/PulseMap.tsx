@@ -211,9 +211,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       <circle cx="15" cy="15" r="4.5" fill="white" stroke="${ring}" stroke-width="1"/>
     </svg>`;
   }
-
-  const CITY_ZOOM_THRESHOLD = 9;
-
   function renderMarkers() {
     const L = LRef.current;
     const map = mapRef.current;
@@ -238,17 +235,27 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
 
     const zoom = map.getZoom();
 
+    // Coordinate-bucket size shrinks as you zoom in, so groups split apart
+    // and every retrieved location remains represented by at least one pin.
+    function bucketKey(loc: Location): string {
+      const cityKey = (loc.city || loc.cluster || "").trim().toLowerCase();
+      const grid = zoom < 4 ? 4 : zoom < 6 ? 2 : zoom < 8 ? 1 : 0.25;
+      const latB = Math.round(loc.lat / grid) * grid;
+      const lngB = Math.round(loc.lng / grid) * grid;
+      return cityKey ? `${cityKey}@${latB},${lngB}` : `${latB},${lngB}`;
+    }
+
     if (zoom < CITY_ZOOM_THRESHOLD) {
-      // Aggregate per city — every group ALWAYS produces a visible pin,
+      // Aggregate per bucket — every group ALWAYS produces a visible pin,
       // including groups with a single location.
-      const cityGroups = new Map<string, Location[]>();
+      const groups = new Map<string, Location[]>();
       validLocations.forEach((loc) => {
-        const key = loc.city?.trim() || loc.cluster?.trim() || loc.name?.trim() || loc.id;
-        const arr = cityGroups.get(key) ?? [];
+        const key = bucketKey(loc);
+        const arr = groups.get(key) ?? [];
         arr.push(loc);
-        cityGroups.set(key, arr);
+        groups.set(key, arr);
       });
-      cityGroups.forEach((locs, cityKey) => {
+      groups.forEach((locs) => {
         if (locs.length === 0) return;
         const lat = locs.reduce((s, l) => s + l.lat, 0) / locs.length;
         const lng = locs.reduce((s, l) => s + l.lng, 0) / locs.length;
@@ -268,7 +275,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           iconSize: [36, 44],
           iconAnchor: [18, 42],
         });
-        const marker = L.marker([lat, lng], { icon, riseOnHover: true }).addTo(layer);
+        const marker = L.marker([lat, lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
         marker.on("click", () => {
           const locIds = new Set(locs.map((l) => l.id));
           const cell = hexCells.find((c) => c.locationIds?.some((id) => locIds.has(id)));
@@ -276,7 +283,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           else {
             mapRef.current?.flyTo([lat, lng], CITY_ZOOM_THRESHOLD + 0.5, { duration: 0.8 });
           }
-          void cityKey;
         });
       });
       return;
@@ -291,10 +297,14 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
         iconSize: [30, 38],
         iconAnchor: [15, 36],
       });
-      const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true }).addTo(layer);
+      const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
       marker.on("click", () => {
         const cell = hexCells.find((c) => c.locationIds?.includes(loc.id));
         if (cell) onHexSelect(cell.h3);
+      });
+    });
+  }
+
       });
     });
   }
