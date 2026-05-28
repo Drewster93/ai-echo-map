@@ -266,7 +266,7 @@ export function IntroSequence({ onDone }: Props) {
 
         {/* Word-by-word headline reveal */}
         <h1 className="font-display text-balance text-5xl leading-[1.05] text-white md:text-7xl">
-          {["AI", "Visibility"].map((word, i) => (
+          {["Local", "GEO"].map((word, i) => (
             <motion.span
               key={word}
               className="mr-3 inline-block"
