@@ -227,7 +227,7 @@ function Metric({
 }: {
   label: string;
   value: string;
-  footer?: React.ReactNode;
+  footer?: ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
