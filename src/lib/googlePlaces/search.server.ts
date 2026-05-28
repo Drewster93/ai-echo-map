@@ -108,7 +108,7 @@ const COUNTRY_NAMES: Record<string, string[]> = {
   BE: ['Belgium', 'Belgique', 'België'],
 };
 
-const COUNTRY_BOUNDS: Record<string, { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } }> = {
+export const COUNTRY_BOUNDS: Record<string, { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } }> = {
   US: { low: { latitude: 24.396, longitude: -125.0 }, high: { latitude: 49.384, longitude: -66.934 } },
   DE: { low: { latitude: 47.27, longitude: 5.87 }, high: { latitude: 55.06, longitude: 15.04 } },
   GB: { low: { latitude: 49.96, longitude: -8.17 }, high: { latitude: 60.86, longitude: 1.75 } },
@@ -125,9 +125,9 @@ const COUNTRY_BOUNDS: Record<string, { low: { latitude: number; longitude: numbe
   BE: { low: { latitude: 49.5, longitude: 2.55 }, high: { latitude: 51.5, longitude: 6.4 } },
 };
 
-type Rect = { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } };
+export type Rect = { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } };
 
-const COUNTRY_SUB_REGIONS: Record<string, { label: string; rect: Rect }[]> = {
+export const COUNTRY_SUB_REGIONS: Record<string, { label: string; rect: Rect }[]> = {
   US: [
     { label: 'PACIFIC_NW',  rect: { low: { latitude: 42.0, longitude: -125.0 }, high: { latitude: 49.0, longitude: -116.0 } } },
     { label: 'WEST_COAST',  rect: { low: { latitude: 32.5, longitude: -125.0 }, high: { latitude: 42.0, longitude: -114.0 } } },
@@ -209,11 +209,11 @@ const COUNTRY_SUB_REGIONS: Record<string, { label: string; rect: Rect }[]> = {
 };
 
 
-interface PlaceWithId extends GooglePlacesLocation {
+export interface PlaceWithId extends GooglePlacesLocation {
   _placeId?: string;
 }
 
-async function searchRegion(
+export async function searchRegion(
   brand: string,
   googleApiKey: string,
   language: string,
