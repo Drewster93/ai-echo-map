@@ -1,73 +1,114 @@
-# Make the launch video way more dynamic (Lovable 2.0 energy)
 
-The current cut reads as elegant but slow — long holds, gentle springs, mostly single-layer scenes. The Lovable 2.0 reference (1:20) lands because of relentless motion: nothing sits still for more than ~1s, every cut has a directional hand-off (push, zoom, whip-pan, mask wipe), UI elements physically fly into frame, and kinetic typography fills every transition. We'll port that energy onto the AI Performance Pulse storyboard without changing the narrative.
+# Launch Video v3 — "From Brand to Location. From Guesswork to a Pulse."
 
-## What changes (creative)
+## Why v2 doesn't land yet
 
-**Pacing**
-- Master length goes from 76s → ~60s. Average scene 4–6s, with 2–3 punchy 1.5–2s "stinger" beats.
-- No scene holds a single composition: every shot has at least one continuous camera move (push-in, parallax, orbit, dolly) OR a layered element entering/exiting every 8–15 frames.
-- Cut on motion: outgoing element's velocity is matched by incoming element's entrance vector.
+Watching v2 as a videographer:
+- Pacing is even, not edited. No "punch in, hold, breathe, smash-cut" rhythm.
+- Camera is monotonic — every scene gets the same gentle zoom. No dolly, no whip-pan, no rack-focus, no parallax.
+- The brand→location pivot is *said* (title cards) but never *shown* as one continuous visual transformation.
+- The "pulse" metaphor is a passive background, not a heartbeat the viewer feels.
+- The product UI is recreated but never used as a hero — no fly-through, no cursor, no live query.
+- 11 scenes / 68s = too long for a hook reel.
 
-**Motion language (replaces current gentle springs)**
-- New default entrance: `spring({ damping: 12, stiffness: 220, mass: 0.6 })` with a 6–10px blur-to-sharp and 1.04 → 1.0 scale settle. Snappy, not floaty.
-- Add a "whip" easing (`bezier(0.7, 0, 0.15, 1)`) for typography and UI panels traveling >300px.
-- Hero stinger motion: overshoot 1.12 → 0.97 → 1.0 with a 2-frame motion blur smear (rendered as a stretched ghost copy at 35% opacity).
-- Replace fades-between-scenes with directional transitions: mask wipes, slide-pushes, zoom-throughs, and a recurring "hex shutter" wipe (hex grid closes over scene A, opens onto scene B) as the brand-signature transition.
+## The new film — director's treatment
 
-**Kinetic typography (new)**
-- Every text block animates per-word (and key words per-character) with 2–3 frame staggers, not as a single block.
-- Headlines arrive on a 3D perspective tilt (`rotateX(-15deg) → 0`) and settle.
-- Numbers count up rapidly with a `tabular-nums` ticker; the counter for "4,182,560 AI prompts" runs over 24 frames with a final overshoot.
-- Add full-screen "kinetic title cards" (Lovable 2.0 style): single bold word fills the frame for 18–24 frames between major beats — e.g., "BRAND-LEVEL." → "WRONG." → "LOCATION-LEVEL."
+**Logline:** *"Brand-level visibility is a vanity number. The real signal lives location by location — and you can finally feel its pulse."*
 
-**Layered UI choreography**
-- The recreated app UI no longer appears as one block. Sidebar slides in from left, topbar drops from top, map canvas scales up from center, hex tiles cascade-reveal, then a cursor flies in and triggers an interaction — all within ~1.5s.
-- Add "screen-in-screen" moments: the UI shrinks into a floating card while a second UI panel pushes in from the side (regional comparison, drill-down).
-- Camera continually pushes into UI hotspots so the frame never feels static. Use `transform: scale + translate` on the whole product frame, not just the elements.
+**Length:** 50s master (1500f @ 30fps). 6 acts, 12 shots, average shot ~4s, two 1s stingers.
 
-**Background system**
-- Persistent layer across all scenes: drifting hex constellation + soft pulse arcs already in place, but accelerated 2x and given parallax (3 depth layers moving at 0.3x / 0.6x / 1x).
-- Light-leak / chromatic accent flares on every cut (1 frame white flash + 3 frame violet bloom) to sell impact.
-- Occasional full-frame "scan line" sweep tied to data moments.
+**Aesthetic:** Dark cosmic pushed cinematic — anamorphic letterbox mattes on hero moments (2.39:1), volumetric light beams, particulate dust, chromatic aberration on cuts, 3-frame motion-blur ghost trails, grain overlay throughout. Palette: ultraviolet `#860eff` + aqua `#3ce0d8` + plum + hot-coral `#ff5a4a` for "danger/blindspot" beats. Type: Fraunces (display, italic on emotional words) + IBM Plex Sans (UI).
 
-**Color punch**
-- Same palette (`#860eff`, `#3072fc`, `#7bffff`, `#ff5b02`) but accent flashes go brighter on stingers. Add high-contrast white kinetic-type cards for breathing-room beats.
+**Camera grammar (the missing piece):**
+1. Dolly-in — opening tension
+2. Whip-pan with motion blur — brand→location pivot
+3. Orbit — globe / scale beat
+4. Rack focus — pulse drill
+5. Crane down — into a single hex
+6. Hero pull-out — final logo lockup
 
-## Adapted 11-beat structure (~60s)
+## The 6 acts (shot list)
 
-1. **Problem stinger (0–4s)** — Rapid-fire montage: 6 brand logos flash with "AI-visible ✓" stamps, then a globe pulls back, hex tiles dim out one region at a time. Kinetic card: "BRAND-LEVEL ISN'T ENOUGH."
-2. **Meet (4–8s)** — Hex shutter opens on logo lockup; tagline whips in per-word. Camera dollies forward through the wordmark.
-3. **Promise (8–13s)** — Hex grid builds tile-by-tile with cascading scale-in (8-frame stagger across 60 tiles); each tile briefly lights with a query string.
-4. **Scale (13–19s)** — Counter rockets to 4,182,560; "240 countries" badge slams in; mini-globes orbit the number.
-5. **Coverage montage (19–24s)** — World map with 8 location pins firing in sequence, each pin triggers a 1-frame zoom to a local hex cluster, then snaps back.
-6. **Query (24–30s)** — Product UI flies in (sidebar→topbar→canvas in 12 frames), cursor lands in the input, text types out, results explode onto the map.
-7. **Compare (30–36s)** — Split-screen push: two regions race, hex visibility bars fill at different speeds, a "WINNER" tag slams onto one side.
-8. **Drill (36–42s)** — Camera Ken-Burns zooms into a single hex; UI panels orbit around it showing query examples, competitor share, gap score.
-9. **Edge (42–48s)** — Two brand logos plotted on the same hex grid; one grid fills with brand color, the other stays dim; kinetic card: "OWN THE HEX. OWN THE MARKET."
-10. **API (48–53s)** — Code editor flies in tilted on perspective; `fetch('/api/public/brand-coverage?brand=…')` types out character-by-character; JSON response cascades down; "Built for devs" stamp.
-11. **CTA (53–60s)** — Hex shutter closes onto wordmark + URL. Final stinger: pulse arc explodes outward, kinetic card "AI Performance Pulse" with 3-frame motion-blur smear, hold 12 frames.
+```text
+ACT 1 — HOOK (0:00–0:06)   [180f]
+  Shot 1.1  Black. A single white dot pulses at center. One word fades in: "VISIBILITY."
+  Shot 1.2  Dot explodes into a sphere of city-light particles.
+            CUT TO white frame (3f) — "But where?" in tight Fraunces italic.
 
-## What we'll do in build mode (technical)
+ACT 2 — THE LIE OF BRAND-LEVEL (0:06–0:14)   [240f]
+  Shot 2.1  Hero stat: massive "87%" odometer counter rolls up.
+            Subtitle: "AI visibility score"   Small caps: "BRAND AVERAGE".
+  Shot 2.2  Whip-pan LEFT. 87% shatters into 200+ location tiles, each with its own score:
+            12%, 94%, 3%, 71%... most red. Stinger type: "THE AVERAGE LIED."
 
-- Add `remotion/src/motion/` with shared easings, spring presets, kinetic-text components (`KineticWord`, `KineticChar`, `Counter`, `TitleCard`), and a `HexShutter` transition presentation.
-- Add `remotion/src/components/CutFlash.tsx` (1-frame white + 3-frame violet bloom) and `ParallaxLayer.tsx` for 3-depth background drift.
-- Refactor `MainVideo.tsx` to use `TransitionSeries` with `HexShutter`, slide-push, and zoom-through transitions between scenes (no more fades).
-- Rewrite each `Scene0X*.tsx` to:
-  - Use the new spring/easing presets
-  - Add continuous camera transform on the root `AbsoluteFill`
-  - Stagger every text block per-word/char
-  - Add at least 2 layered elements with independent timings
-  - Drop hold times so nothing sits >24 frames without motion
-- Insert 3 full-frame kinetic title cards between major beats (after Scene 1, after Scene 5, before Scene 11).
-- Re-render the 1920×1080 master, then re-render the 1080×1080 (square) and 1080×1920 (vertical) adapter compositions. Adapters will need re-cropping for kinetic title cards (center-safe).
-- QA: render stills at 12 frame checkpoints across the timeline and inspect every cut for visible motion-on-motion.
+ACT 3 — THE PIVOT (0:14–0:22)   [240f]
+  Shot 3.1  Anamorphic bars drop. Dolly into one red tile → it becomes a neighborhood
+            map; hex grid materializes.
+  Shot 3.2  Three stacked lines whip in:
+              "BRAND-LEVEL"      (struck through, coral)
+              "→ LOCATION-LEVEL" (aqua, overshoot)
+              Tagline: "Where AI actually sends customers."
 
-## Out of scope (still)
-- Voiceover / music bed (can layer in after; sandbox renders muted).
-- Real product screenshots (still recreated UI).
-- Changes to the live app itself.
+ACT 4 — MEET THE PULSE (0:22–0:33)   [330f]
+  Shot 4.1  Wordmark assembles letter-by-letter with chromatic split:
+            "AI Performance Pulse". Tagline crawls under.
+  Shot 4.2  Live UI fly-through (recreated app):
+            sidebar slides in → topbar drops → globe materializes →
+            cursor enters → types "best italian restaurant near me" →
+            hex map blooms with mention-rate colors → KPI cards count up.
+            Choreographed in ~8s, no static frame >0.3s.
 
-## One question before I build
+ACT 5 — THE PULSE METAPHOR (0:33–0:43)   [300f]
+  Shot 5.1  Rack-focus from UI to a single hex tile. Hex expands fullscreen →
+            becomes an EKG line. EKG pulse syncs with arcs radiating across a city map.
+            Stinger card: "FEEL EVERY LOCATION'S HEARTBEAT."
+  Shot 5.2  Three competitor logos as ghost-pulses around the hex; ours pulses brightest.
+            Caption: "Yours vs. theirs, block by block."
 
-Audio: do you want me to **score this with an ambient electronic bed + UI SFX via ElevenLabs** in the same pass (adds ~5 min render + costs API credits), or **deliver muted MP4s** that you'll score in your editor? The kinetic cuts are designed to hit on beat either way.
+ACT 6 — THE NO-BRAINER CLOSE (0:43–0:50)   [210f]
+  Shot 6.1  Crane-out from the hex through city → country → globe →
+            globe collapses into the product logo mark.
+  Shot 6.2  Hero lockup: "AI Performance Pulse"
+            Tagline: "Local AI visibility. Mapped. Measured. Won."
+            URL ghost-fades; 8-frame coral underline whip. Final 12-frame hold (only hold in the film).
+```
+
+## What gets built / refactored
+
+**Delete:** current Scenes 01–11, three TitleCard interludes, current `MainVideo` Series layout. (Old "API / for developers" beat — removed entirely.)
+
+**Replace `MainVideo.tsx`** with a 6-act `TransitionSeries` using mixed transitions (whip-pan, hex-shutter, rack-focus dissolve, crane-zoom).
+
+**New cinematic primitives** under `remotion/src/motion/`:
+- `CameraRig.tsx` — composable transforms: dolly, orbit, crane, whipPan, rackFocus.
+- `MotionBlurTrail.tsx` — 3-frame ghost trail for >300px travel.
+- `AnamorphicBars.tsx` — top/bottom mattes that drop in for hero shots.
+- `Grain.tsx`, `Vignette.tsx`, `ChromaticSplit.tsx`, `LightLeak.tsx` — always-on film overlays.
+- `Heartbeat.tsx` — EKG line + radial pulse, synced to shared `bpm`.
+- `Counter.tsx` — odometer-style rolling digits with overshoot.
+- `KineticLine.tsx` — line-by-line whip-in with per-word stagger and italic accents.
+
+**New shot components** under `remotion/src/shots/` (one file per shot, 12 files), composed by `MainVideo.tsx`.
+
+**Upgrade `ProductFrame`** — scripted cursor, live-typed query, animated hex bloom with counting KPIs (Act 4.2).
+
+**Upgrade `MapGlobe`** — orbit camera + city-light particles (Act 1.2 + Act 6.1 crane).
+
+**Persistent layers** (full-duration): `PulseArcBg` (kept), `Grain`, `Vignette`, `LightLeak` triggered at act boundaries.
+
+**Adapters:** `SquareVideo` re-crops with safe-area pads for Act 4.2 UI; `VerticalVideo` reflows kinetic type as stacked lines, tighter crops on globe/hex.
+
+**Timing additions** in `easings.ts`: `WHIP` (Bezier 0.85, 0, 0.05, 1), `CINE_IN` (damping 14, stiffness 160), `OVERSHOOT` (damping 8, stiffness 240). Scene cuts: 2-frame coral/aqua flash. Act-boundary cuts: 6-frame hex-shutter wipe.
+
+**Render:** master 1920×1080 @ 30fps, 1500 frames (50s), then square + vertical. QA stills at f=0, 90, 180, 300, 420, 540, 720, 900, 1080, 1260, 1400, 1499.
+
+## Out of scope
+
+- Audio bed + SFX (mute MP4 only — say the word if you want ElevenLabs voiceover/SFX this pass).
+- Real screen recordings — UI stays a high-fidelity recreation.
+- No changes to the live web app.
+- No "API for developers" act (removed).
+
+## One creative call before I build
+
+Coral "danger" accent `#ff5a4a` for the "brand-level lied" beats — okay to introduce, or stay strictly within UV/aqua/plum?

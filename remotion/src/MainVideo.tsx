@@ -1,193 +1,148 @@
 import React from "react";
 import { AbsoluteFill, Series, Sequence } from "remotion";
 import { PulseArcBg } from "./components/PulseArcBg";
-import { CameraPush } from "./motion/CameraPush";
 import { CutFlash } from "./motion/CutFlash";
-import { TitleCard } from "./motion/TitleCard";
+import {
+  CameraRig,
+  FilmOverlays,
+  LightLeak,
+} from "./motion/Cinematic";
 import { COLORS } from "./theme";
-import { Scene01Problem } from "./scenes/Scene01Problem";
-import { Scene02Meet } from "./scenes/Scene02Meet";
-import { Scene03Promise } from "./scenes/Scene03Promise";
-import { Scene04Scale } from "./scenes/Scene04Scale";
-import { Scene05Coverage } from "./scenes/Scene05Coverage";
-import { Scene06Query } from "./scenes/Scene06Query";
-import { Scene07Compare } from "./scenes/Scene07Compare";
-import { Scene08Drill } from "./scenes/Scene08Drill";
-import { Scene09Edge } from "./scenes/Scene09Edge";
-import { Scene10Api } from "./scenes/Scene10Api";
-import { Scene11CTA } from "./scenes/Scene11CTA";
 
-// Tightened durations (~30% shorter than original) — kinetic pacing.
-export const SCENE_DURATIONS = {
-  s01: 150,
-  s02: 90,
-  card1: 36,
-  s03: 110,
-  s04: 145,
-  s05: 150,
-  card2: 36,
-  s06: 240,
-  s07: 180,
-  s08: 260,
-  s09: 180,
-  s10: 200,
-  card3: 36,
-  s11: 230,
+import { Shot1a } from "./shots/Shot1a";
+import { Shot1b } from "./shots/Shot1b";
+import { Shot2a } from "./shots/Shot2a";
+import { Shot2b } from "./shots/Shot2b";
+import { Shot3a } from "./shots/Shot3a";
+import { Shot3b } from "./shots/Shot3b";
+import { Shot4a } from "./shots/Shot4a";
+import { Shot4b } from "./shots/Shot4b";
+import { Shot5a } from "./shots/Shot5a";
+import { Shot5b } from "./shots/Shot5b";
+import { Shot6a } from "./shots/Shot6a";
+import { Shot6b } from "./shots/Shot6b";
+
+// 50s @ 30fps = 1500 frames. 6 acts, 12 shots.
+export const SHOT_DURATIONS = {
+  s1a: 90,
+  s1b: 90,
+  s2a: 110,
+  s2b: 130,
+  s3a: 120,
+  s3b: 120,
+  s4a: 100,
+  s4b: 230,
+  s5a: 170,
+  s5b: 130,
+  s6a: 130,
+  s6b: 80,
 };
 
-
-
-export const TOTAL_FRAMES = Object.values(SCENE_DURATIONS).reduce(
+export const TOTAL_FRAMES = Object.values(SHOT_DURATIONS).reduce(
   (a, b) => a + b,
   0,
 );
 
-type Dir = React.ComponentProps<typeof CameraPush>["direction"];
-
-const Beat: React.FC<{
+type ShotProps = {
   duration: number;
-  direction?: Dir;
-  amount?: number;
-  flashColor?: string;
+  rig: React.ComponentProps<typeof CameraRig>["rig"];
+  flash?: string;
+  bg?: boolean;
   children: React.ReactNode;
-}> = ({ duration, direction = "in", amount = 0.06, flashColor, children }) => (
+};
+
+const Shot: React.FC<ShotProps> = ({ duration, rig, flash, bg = true, children }) => (
   <>
-    <CameraPush duration={duration} direction={direction} amount={amount}>
+    {bg && <PulseArcBg intensity={0.7} />}
+    <CameraRig duration={duration} rig={rig}>
       {children}
-    </CameraPush>
-    <CutFlash color={flashColor} />
+    </CameraRig>
+    <CutFlash color={flash ?? COLORS.ultraviolet} />
   </>
 );
 
 export const MainVideo: React.FC = () => {
   return (
-    <AbsoluteFill style={{ background: COLORS.bg }}>
-      <PulseArcBg />
+    <AbsoluteFill style={{ background: "#000" }}>
       <Series>
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s01}>
-          <Beat duration={SCENE_DURATIONS.s01} direction="in" amount={0.08}>
-            <Scene01Problem />
-          </Beat>
+        {/* ACT 1 — HOOK */}
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s1a}>
+          <Shot duration={SHOT_DURATIONS.s1a} rig={{ kind: "dolly", from: 1, to: 1.08 }} bg={false}>
+            <Shot1a />
+          </Shot>
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s1b}>
+          <Shot duration={SHOT_DURATIONS.s1b} rig={{ kind: "dolly", from: 0.9, to: 1.15 }} bg={false} flash={COLORS.aqua}>
+            <Shot1b />
+          </Shot>
         </Series.Sequence>
 
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s02}>
-          <Beat
-            duration={SCENE_DURATIONS.s02}
-            direction="in"
-            amount={0.05}
-            flashColor={COLORS.aqua}
-          >
-            <Scene02Meet />
-          </Beat>
+        {/* ACT 2 — THE LIE */}
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s2a}>
+          <Shot duration={SHOT_DURATIONS.s2a} rig={{ kind: "dolly", from: 1.04, to: 1.0 }} flash={COLORS.ultraviolet}>
+            <Shot2a />
+          </Shot>
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s2b}>
+          <Shot duration={SHOT_DURATIONS.s2b} rig={{ kind: "whipPan", axis: "x", px: 1600, at: 6, window: 8 }} flash={COLORS.coral}>
+            <Shot2b />
+          </Shot>
+          <LightLeak at={6} color={COLORS.coral} side="left" />
         </Series.Sequence>
 
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.card1}>
-          <Sequence durationInFrames={SCENE_DURATIONS.card1}>
-            <TitleCard
-              words={["BRAND-LEVEL", "ISN'T", "ENOUGH."]}
-              accent={COLORS.orange}
-              italicLast
-            />
-          </Sequence>
-          <CutFlash color={COLORS.orange} />
+        {/* ACT 3 — THE PIVOT */}
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s3a}>
+          <Shot duration={SHOT_DURATIONS.s3a} rig={{ kind: "dolly", from: 1, to: 1.18 }} flash={COLORS.coral}>
+            <Shot3a />
+          </Shot>
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s3b}>
+          <Shot duration={SHOT_DURATIONS.s3b} rig={{ kind: "dolly", from: 1.05, to: 1.0 }} flash={COLORS.aqua}>
+            <Shot3b />
+          </Shot>
+          <LightLeak at={0} color={COLORS.aqua} side="right" />
         </Series.Sequence>
 
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s03}>
-          <Beat duration={SCENE_DURATIONS.s03} direction="left" amount={0.06}>
-            <Scene03Promise />
-          </Beat>
+        {/* ACT 4 — MEET THE PULSE */}
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s4a}>
+          <Shot duration={SHOT_DURATIONS.s4a} rig={{ kind: "dolly", from: 0.95, to: 1.04 }} flash={COLORS.aqua}>
+            <Shot4a />
+          </Shot>
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s4b}>
+          <Shot duration={SHOT_DURATIONS.s4b} rig={{ kind: "dolly", from: 0.98, to: 1.06 }} flash={COLORS.ultraviolet}>
+            <Shot4b />
+          </Shot>
         </Series.Sequence>
 
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s04}>
-          <Beat
-            duration={SCENE_DURATIONS.s04}
-            direction="in"
-            amount={0.07}
-            flashColor={COLORS.aqua}
-          >
-            <Scene04Scale />
-          </Beat>
+        {/* ACT 5 — THE PULSE METAPHOR */}
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s5a}>
+          <Shot duration={SHOT_DURATIONS.s5a} rig={{ kind: "rackFocus", sharpAt: 50 }} flash={COLORS.aquaBright}>
+            <Shot5a />
+          </Shot>
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s5b}>
+          <Shot duration={SHOT_DURATIONS.s5b} rig={{ kind: "orbit", degrees: 8 }} flash={COLORS.aqua}>
+            <Shot5b />
+          </Shot>
         </Series.Sequence>
 
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s05}>
-          <Beat duration={SCENE_DURATIONS.s05} direction="right" amount={0.05}>
-            <Scene05Coverage />
-          </Beat>
+        {/* ACT 6 — CLOSE */}
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s6a}>
+          <Shot duration={SHOT_DURATIONS.s6a} rig={{ kind: "crane", fromScale: 1, toScale: 0.9, fromY: 0, toY: 40 }} flash={COLORS.ultraviolet}>
+            <Shot6a />
+          </Shot>
         </Series.Sequence>
-
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.card2}>
-          <Sequence durationInFrames={SCENE_DURATIONS.card2}>
-            <TitleCard
-              words={["LOCATION", "BY", "LOCATION."]}
-              accent={COLORS.ultraviolet}
-              italicLast
-            />
-          </Sequence>
-          <CutFlash color={COLORS.ultraviolet} />
-        </Series.Sequence>
-
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s06}>
-          <Beat duration={SCENE_DURATIONS.s06} direction="in" amount={0.05}>
-            <Scene06Query />
-          </Beat>
-        </Series.Sequence>
-
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s07}>
-          <Beat
-            duration={SCENE_DURATIONS.s07}
-            direction="up"
-            amount={0.04}
-            flashColor={COLORS.blue}
-          >
-            <Scene07Compare />
-          </Beat>
-        </Series.Sequence>
-
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s08}>
-          <Beat duration={SCENE_DURATIONS.s08} direction="in" amount={0.09}>
-            <Scene08Drill />
-          </Beat>
-        </Series.Sequence>
-
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s09}>
-          <Beat
-            duration={SCENE_DURATIONS.s09}
-            direction="left"
-            amount={0.05}
-            flashColor={COLORS.aqua}
-          >
-            <Scene09Edge />
-          </Beat>
-        </Series.Sequence>
-
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s10}>
-          <Beat duration={SCENE_DURATIONS.s10} direction="in" amount={0.06}>
-            <Scene10Api />
-          </Beat>
-        </Series.Sequence>
-
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.card3}>
-          <Sequence durationInFrames={SCENE_DURATIONS.card3}>
-            <TitleCard
-              words={["OWN", "THE", "HEX."]}
-              accent={COLORS.aqua}
-              italicLast
-            />
-          </Sequence>
-          <CutFlash color={COLORS.aqua} />
-        </Series.Sequence>
-
-        <Series.Sequence durationInFrames={SCENE_DURATIONS.s11}>
-          <Beat
-            duration={SCENE_DURATIONS.s11}
-            direction="in"
-            amount={0.08}
-            flashColor={COLORS.ultraviolet}
-          >
-            <Scene11CTA />
-          </Beat>
+        <Series.Sequence durationInFrames={SHOT_DURATIONS.s6b}>
+          <Shot duration={SHOT_DURATIONS.s6b} rig={{ kind: "dolly", from: 1.02, to: 1.0 }} flash={COLORS.aquaBright}>
+            <Shot6b />
+          </Shot>
+          <LightLeak at={4} color={COLORS.aquaBright} side="left" />
         </Series.Sequence>
       </Series>
+
+      {/* Always-on film overlays */}
+      <FilmOverlays grain={0.06} vignette={0.55} />
     </AbsoluteFill>
   );
 };
