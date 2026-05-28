@@ -75,19 +75,17 @@ function Index() {
     }
   }
 
-  // Demo URL flag: ?demo=Brand+Name skips intro + Places API and auto-reveals.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const demo = params.get("demo");
-    if (demo) {
-      setIntroDone(true);
-      // brief delay so the landing screen registers before the reveal kicks
-      const t = setTimeout(() => handleBrand(demo, { demo: true }), 50);
-      return () => clearTimeout(t);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Demo URL flag: ?demo=1 skips the Google Places API and uses mock data,
+  // so screen recordings always land on a real, populated map.
+  const isDemo =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("demo") === "1";
+
+  // Wrapper that respects the demo flag for user-triggered submits.
+  function onLandingSubmit(value: string) {
+    return handleBrand(value, { demo: isDemo });
+  }
+
 
 
   return (
