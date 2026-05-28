@@ -1,4 +1,4 @@
-import { AbsoluteFill, OffthreadVideo, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
+import { AbsoluteFill, Video, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 
 interface CameraMove {
   // Each entry: from frame X (relative to sequence), apply transform
