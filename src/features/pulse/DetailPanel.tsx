@@ -208,6 +208,8 @@ function Metric({
   label: string;
   value: string;
   footer?: ReactNode;
+}) {
+  return (
     <div className="rounded-xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-3 py-2.5">
       <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#260e5a]/55">
         {label}
@@ -215,6 +217,6 @@ function Metric({
       <div className="mt-1 font-display text-2xl leading-none text-[#260e5a]">{value}</div>
       {footer && <div className="mt-1.5">{footer}</div>}
     </div>
-
   );
 }
+
