@@ -18,21 +18,23 @@ import { Scene10Api } from "./scenes/Scene10Api";
 import { Scene11CTA } from "./scenes/Scene11CTA";
 
 // Tightened durations (~30% shorter than original) — kinetic pacing.
-// Each scene also gets a CameraPush wrapper and a CutFlash on entry.
 export const SCENE_DURATIONS = {
-  s01: 120,
-  s02: 75,
-  card1: 36, // "BRAND-LEVEL." / "WRONG."
-  s03: 95,
-  s04: 120,
-  s05: 130,
-  card2: 36, // "LOCATION-LEVEL."
-  s06: 200,
-  s07: 150,
-  s08: 210,
-  s09: 150,
-  s10: 170,
-  card3: 36, // "OWN THE HEX."
+  s01: 150,
+  s02: 90,
+  card1: 36,
+  s03: 110,
+  s04: 145,
+  s05: 150,
+  card2: 36,
+  s06: 240,
+  s07: 180,
+  s08: 260,
+  s09: 180,
+  s10: 200,
+  card3: 36,
+  s11: 230,
+};
+
   s11: 200,
 };
 
