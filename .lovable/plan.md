@@ -1,89 +1,73 @@
-# AI Performance Pulse — Launch Video (Plan)
+# Make the launch video way more dynamic (Lovable 2.0 energy)
 
-A code-rendered Remotion video that mirrors the reference storyboard but reframes every beat around the product's thesis: **brand-level AI visibility is dead — the next edge is location-level AI visibility.** Rendered in three aspect ratios from a single project so the same master can ship to YouTube, the website hero, LinkedIn feed, and vertical (Reels / LinkedIn mobile).
+The current cut reads as elegant but slow — long holds, gentle springs, mostly single-layer scenes. The Lovable 2.0 reference (1:20) lands because of relentless motion: nothing sits still for more than ~1s, every cut has a directional hand-off (push, zoom, whip-pan, mask wipe), UI elements physically fly into frame, and kinetic typography fills every transition. We'll port that energy onto the AI Performance Pulse storyboard without changing the narrative.
 
----
+## What changes (creative)
 
-## 1. Creative direction
+**Pacing**
+- Master length goes from 76s → ~60s. Average scene 4–6s, with 2–3 punchy 1.5–2s "stinger" beats.
+- No scene holds a single composition: every shot has at least one continuous camera move (push-in, parallax, orbit, dolly) OR a layered element entering/exiting every 8–15 frames.
+- Cut on motion: outgoing element's velocity is matched by incoming element's entrance vector.
 
-**Thesis baked into every scene:** AI assistants (ChatGPT, Perplexity, Gemini, Claude) recommend places hex-by-hex, store-by-store — not brand-by-brand. Winners will be the ones who can *see* and *fix* their local AI presence.
+**Motion language (replaces current gentle springs)**
+- New default entrance: `spring({ damping: 12, stiffness: 220, mass: 0.6 })` with a 6–10px blur-to-sharp and 1.04 → 1.0 scale settle. Snappy, not floaty.
+- Add a "whip" easing (`bezier(0.7, 0, 0.15, 1)`) for typography and UI panels traveling >300px.
+- Hero stinger motion: overshoot 1.12 → 0.97 → 1.0 with a 2-frame motion blur smear (rendered as a stretched ghost copy at 35% opacity).
+- Replace fades-between-scenes with directional transitions: mask wipes, slide-pushes, zoom-throughs, and a recurring "hex shutter" wipe (hex grid closes over scene A, opens onto scene B) as the brand-signature transition.
 
-**Aesthetic:** Dark cosmic (matching the live app) + Uberall pulse arcs.
-- Background: `#05030d` → `#260e5a` radial, with drifting pulse arcs (reuse the `PulseArc` motif)
-- Accents: ultraviolet `#860eff`, tech blue `#3072fc`, aqua `#7bffff`, orange `#ff5b02`
-- Typography: **Fraunces** (display, big editorial headlines) + **IBM Plex Sans** (body/UI) + **Space Grotesk** (numbers/counters) — exactly the stack the app already uses
-- Motion system: smooth spring entrances (`damping: 18`), accent pulses on hero moments, hex-grid reveals as connective tissue between scenes, no hard cuts to black
+**Kinetic typography (new)**
+- Every text block animates per-word (and key words per-character) with 2–3 frame staggers, not as a single block.
+- Headlines arrive on a 3D perspective tilt (`rotateX(-15deg) → 0`) and settle.
+- Numbers count up rapidly with a `tabular-nums` ticker; the counter for "4,182,560 AI prompts" runs over 24 frames with a final overshoot.
+- Add full-screen "kinetic title cards" (Lovable 2.0 style): single bold word fills the frame for 18–24 frames between major beats — e.g., "BRAND-LEVEL." → "WRONG." → "LOCATION-LEVEL."
 
-**Sound:** ambient electronic bed + tasteful UI chirps for clicks/typing and a swelling pad for the CTA. Rendered muted by default (sandbox can't encode AAC reliably); we'll either composite audio post-render via ffmpeg from a royalty-free track + ElevenLabs SFX, or ship muted with on-screen captions.
+**Layered UI choreography**
+- The recreated app UI no longer appears as one block. Sidebar slides in from left, topbar drops from top, map canvas scales up from center, hex tiles cascade-reveal, then a cursor flies in and triggers an interaction — all within ~1.5s.
+- Add "screen-in-screen" moments: the UI shrinks into a floating card while a second UI panel pushes in from the side (regional comparison, drill-down).
+- Camera continually pushes into UI hotspots so the frame never feels static. Use `transform: scale + translate` on the whole product frame, not just the elements.
 
----
+**Background system**
+- Persistent layer across all scenes: drifting hex constellation + soft pulse arcs already in place, but accelerated 2x and given parallax (3 depth layers moving at 0.3x / 0.6x / 1x).
+- Light-leak / chromatic accent flares on every cut (1 frame white flash + 3 frame violet bloom) to sell impact.
+- Occasional full-frame "scan line" sweep tied to data moments.
 
-## 2. Adapted storyboard (11 scenes, ~75–80s master)
+**Color punch**
+- Same palette (`#860eff`, `#3072fc`, `#7bffff`, `#ff5b02`) but accent flashes go brighter on stingers. Add high-contrast white kinetic-type cards for breathing-room beats.
 
-| # | Time | Beat | What the viewer sees |
-|---|------|------|----------------------|
-| 1 | 0:00–0:06 | **Problem** | Drifting glowing spheres. "Today" fades. Then: *"Brands optimize for AI visibility at the brand level."* Subtitle: *"But AI doesn't recommend brands. It recommends places."* (word "places" pulses) |
-| 2 | 0:06–0:09 | **Meet** | Pulse arcs converge → "Meet" → logo lockup **AI Performance Pulse** with the Uberall arc icon |
-| 3 | 0:09–0:13 | **Promise** | "Local AI visibility" → "hex by hex" → "in real time" — text scales through over a growing hex grid |
-| 4 | 0:13–0:18 | **Scale** | Animated counter: *"4,182,560 AI prompts analyzed per day"* with a tiny sparkline. Subtitle: *"across 240 countries"* |
-| 5 | 0:18–0:23 | **Diverse coverage** | Quick montage of recognizable brand pulses lighting up a world map: Starbucks, McDonald's, Sephora, Decathlon — each one a different continent flaring with hex coverage |
-| 6 | 0:23–0:33 | **AI-powered query** (replaces "Prompt-to-UI") | Recreated landing input from the live app: cursor types **"Starbucks"** → Go. Camera zooms into the map; hexes ignite by region; the side panel slides in with mention-rate stats. This *is* the product's core interaction. |
-| 7 | 0:33–0:40 | **Regional comparison** (replaces "Collaboration") | Split-globe view: North America 87% vs South-East Asia 12%. Pulsing red zones highlight blind spots. Caption: *"Spot the regions AI forgot."* |
-| 8 | 0:41–0:53 | **Drill into a location** (replaces "Visual editing") | Click on a single hex → location detail panel opens showing: store name, AI mention rate, top competitors mentioned instead, recommended fixes. Numbers tick up live. |
-| 9 | 0:54–1:02 | **Competitive edge** (replaces "Publish") | Two brands side by side on the same hex grid. Yours: glowing aqua. Competitor: faded. Caption builds: *"Publish" → "Fix" → "Win the hex."* Browser frame shows the live coverage dashboard on a laptop. |
-| 10 | 1:03–1:11 | **API / Dev mode** | "Introducing" → "/coverage API" in glowing gradient. Toggle flips to a code editor showing a real `fetch('/api/public/brand-coverage?brand=…')` call returning JSON. Caption: *"Wire location-level AI visibility into your stack."* |
-| 11 | 1:12–1:19 | **CTA** | "Now" → "Now it's your turn" → "Which hexes does AI forget about you?" Background forms the pulse-arc silhouette. Logo + URL `aiperformancepulse.com` (or chosen domain). |
+## Adapted 11-beat structure (~60s)
 
----
+1. **Problem stinger (0–4s)** — Rapid-fire montage: 6 brand logos flash with "AI-visible ✓" stamps, then a globe pulls back, hex tiles dim out one region at a time. Kinetic card: "BRAND-LEVEL ISN'T ENOUGH."
+2. **Meet (4–8s)** — Hex shutter opens on logo lockup; tagline whips in per-word. Camera dollies forward through the wordmark.
+3. **Promise (8–13s)** — Hex grid builds tile-by-tile with cascading scale-in (8-frame stagger across 60 tiles); each tile briefly lights with a query string.
+4. **Scale (13–19s)** — Counter rockets to 4,182,560; "240 countries" badge slams in; mini-globes orbit the number.
+5. **Coverage montage (19–24s)** — World map with 8 location pins firing in sequence, each pin triggers a 1-frame zoom to a local hex cluster, then snaps back.
+6. **Query (24–30s)** — Product UI flies in (sidebar→topbar→canvas in 12 frames), cursor lands in the input, text types out, results explode onto the map.
+7. **Compare (30–36s)** — Split-screen push: two regions race, hex visibility bars fill at different speeds, a "WINNER" tag slams onto one side.
+8. **Drill (36–42s)** — Camera Ken-Burns zooms into a single hex; UI panels orbit around it showing query examples, competitor share, gap score.
+9. **Edge (42–48s)** — Two brand logos plotted on the same hex grid; one grid fills with brand color, the other stays dim; kinetic card: "OWN THE HEX. OWN THE MARKET."
+10. **API (48–53s)** — Code editor flies in tilted on perspective; `fetch('/api/public/brand-coverage?brand=…')` types out character-by-character; JSON response cascades down; "Built for devs" stamp.
+11. **CTA (53–60s)** — Hex shutter closes onto wordmark + URL. Final stinger: pulse arc explodes outward, kinetic card "AI Performance Pulse" with 3-frame motion-blur smear, hold 12 frames.
 
-## 3. Technical approach
+## What we'll do in build mode (technical)
 
-**Stack:** Remotion + React + Tailwind, scaffolded under `remotion/` per the project's video-creator workflow. Single composition `main` at **1920x1080 / 30fps / ~2370 frames**, plus two adapter compositions:
-- `square` — 1080x1080, scenes reflowed (headlines stacked, map cropped centered)
-- `vertical` — 1080x1920, headlines top, product UI bottom
+- Add `remotion/src/motion/` with shared easings, spring presets, kinetic-text components (`KineticWord`, `KineticChar`, `Counter`, `TitleCard`), and a `HexShutter` transition presentation.
+- Add `remotion/src/components/CutFlash.tsx` (1-frame white + 3-frame violet bloom) and `ParallaxLayer.tsx` for 3-depth background drift.
+- Refactor `MainVideo.tsx` to use `TransitionSeries` with `HexShutter`, slide-push, and zoom-through transitions between scenes (no more fades).
+- Rewrite each `Scene0X*.tsx` to:
+  - Use the new spring/easing presets
+  - Add continuous camera transform on the root `AbsoluteFill`
+  - Stagger every text block per-word/char
+  - Add at least 2 layered elements with independent timings
+  - Drop hold times so nothing sits >24 frames without motion
+- Insert 3 full-frame kinetic title cards between major beats (after Scene 1, after Scene 5, before Scene 11).
+- Re-render the 1920×1080 master, then re-render the 1080×1080 (square) and 1080×1920 (vertical) adapter compositions. Adapters will need re-cropping for kinetic title cards (center-safe).
+- QA: render stills at 12 frame checkpoints across the timeline and inspect every cut for visible motion-on-motion.
 
-**File structure:**
-```
-remotion/
-  src/
-    index.ts, Root.tsx, MainVideo.tsx
-    scenes/Scene01Problem.tsx … Scene11CTA.tsx
-    components/
-      PulseArcBg.tsx         # reused from src/features/pulse/PulseArc
-      HexGrid.tsx            # animated h3-style hex coverage
-      ProductFrame.tsx       # recreated app chrome (sidebar + map area)
-      MapGlobe.tsx           # stylized globe with continent rectangles
-      Counter.tsx, GradientText.tsx, SfxClick.tsx
-    adapters/SquareVideo.tsx, VerticalVideo.tsx
-  scripts/render-remotion.mjs   # programmatic render (sandbox-safe)
-  public/fonts/                 # Fraunces, IBM Plex, Space Grotesk TTFs
-```
+## Out of scope (still)
+- Voiceover / music bed (can layer in after; sandbox renders muted).
+- Real product screenshots (still recreated UI).
+- Changes to the live app itself.
 
-**Product UI recreation:** the AI-query, regional comparison, drill-down, and competitive-edge scenes all rebuild the live app's chrome in Remotion (dark plum sidebar, pulse-arc header, hex map area) rather than embedding screenshots — keeps motion crisp at any resolution and lets text animate per character.
+## One question before I build
 
-**Rendering:** programmatic render script with `chromeMode: "chrome-for-testing"`, `muted: true`, `concurrency: 1`, symlinked ffmpeg/ffprobe and patched musl compositor — per the sandbox constraints. Outputs:
-- `/mnt/documents/ai-performance-pulse-launch-1080p.mp4` (YouTube / web hero)
-- `/mnt/documents/ai-performance-pulse-launch-square.mp4` (LinkedIn feed)
-- `/mnt/documents/ai-performance-pulse-launch-vertical.mp4` (Reels / LinkedIn mobile)
-
-**Audio:** v1 ships muted. If desired in a follow-up, I'll generate an ElevenLabs music bed + per-scene SFX and mux them in with ffmpeg.
-
-**QA:** spot-render stills at frames 0, 90, 240, 540, 900, 1500, 2100, 2350 with `bunx remotion still` and visually inspect before the full render. Re-render any scene that breaks.
-
----
-
-## 4. Out of scope (call out before building)
-
-- No real-time analytics / no actual Google Places calls inside the video — UI numbers are scripted for narrative pacing
-- No voiceover (can add via ElevenLabs in a follow-up)
-- The video lives entirely under `remotion/` and ships as MP4 files — no changes to the running app
-
----
-
-## 5. What I need from you before building
-
-Nothing blocking — but two quick confirms once you approve the plan:
-1. The headline counter in Scene 4 ("4,182,560 AI prompts analyzed per day") — keep that number or substitute a real one you'd like to publish?
-2. The final URL in Scene 11 — `aiperformancepulse.com`, the current Lovable URL, or something else?
-
-I'll proceed with sensible defaults if you don't specify.
+Audio: do you want me to **score this with an ambient electronic bed + UI SFX via ElevenLabs** in the same pass (adds ~5 min render + costs API credits), or **deliver muted MP4s** that you'll score in your editor? The kinetic cuts are designed to hit on beat either way.
