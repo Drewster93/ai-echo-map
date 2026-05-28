@@ -155,6 +155,10 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       hexLayerRef.current = L.layerGroup().addTo(map);
       const overlayPane = map.getPanes().overlayPane;
       if (overlayPane) overlayPane.classList.add("hex-overlay-pane");
+      // Dedicated high-z pane for pins so they always sit above tiles/overlays.
+      const pinPane = map.createPane("pulse-pins");
+      pinPane.style.zIndex = "650";
+      pinPane.style.pointerEvents = "auto";
       markerLayerRef.current = L.layerGroup().addTo(map);
       competitorLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
@@ -166,20 +170,18 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       container.addEventListener("wheel", fireInteract, { passive: true });
       container.addEventListener("touchstart", fireInteract, { passive: true });
 
-      // Re-render markers when crossing the city/property zoom threshold
-      let lastBucket = map.getZoom() < 9 ? "city" : "props";
+      // Always re-render markers on any zoom change so pins survive zooms.
       map.on("zoomend", () => {
-        const b = map.getZoom() < 9 ? "city" : "props";
-        if (b !== lastBucket) {
-          lastBucket = b;
-          renderMarkers();
-        }
+        renderMarkers();
       });
 
 
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
         runDive(map);
+      } else {
+        // No dive — paint immediately so pins appear without waiting on a moveend.
+        paintData();
       }
     })();
     return () => {
@@ -190,6 +192,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   function pinColorForScore(score: number): { fill: string; ring: string } {
     if (score >= 60) return { fill: "#34c759", ring: "#1f8b3d" }; // green
@@ -212,6 +215,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   const CITY_ZOOM_THRESHOLD = 9;
 
   function renderMarkers() {
+
     const L = LRef.current;
     const map = mapRef.current;
     const layer = markerLayerRef.current;
@@ -235,17 +239,27 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
 
     const zoom = map.getZoom();
 
+    // Coordinate-bucket size shrinks as you zoom in, so groups split apart
+    // and every retrieved location remains represented by at least one pin.
+    function bucketKey(loc: Location): string {
+      const cityKey = (loc.city || loc.cluster || "").trim().toLowerCase();
+      const grid = zoom < 4 ? 4 : zoom < 6 ? 2 : zoom < 8 ? 1 : 0.25;
+      const latB = Math.round(loc.lat / grid) * grid;
+      const lngB = Math.round(loc.lng / grid) * grid;
+      return cityKey ? `${cityKey}@${latB},${lngB}` : `${latB},${lngB}`;
+    }
+
     if (zoom < CITY_ZOOM_THRESHOLD) {
-      // Aggregate per city — every group ALWAYS produces a visible pin,
+      // Aggregate per bucket — every group ALWAYS produces a visible pin,
       // including groups with a single location.
-      const cityGroups = new Map<string, Location[]>();
+      const groups = new Map<string, Location[]>();
       validLocations.forEach((loc) => {
-        const key = loc.city?.trim() || loc.cluster?.trim() || loc.name?.trim() || loc.id;
-        const arr = cityGroups.get(key) ?? [];
+        const key = bucketKey(loc);
+        const arr = groups.get(key) ?? [];
         arr.push(loc);
-        cityGroups.set(key, arr);
+        groups.set(key, arr);
       });
-      cityGroups.forEach((locs, cityKey) => {
+      groups.forEach((locs) => {
         if (locs.length === 0) return;
         const lat = locs.reduce((s, l) => s + l.lat, 0) / locs.length;
         const lng = locs.reduce((s, l) => s + l.lng, 0) / locs.length;
@@ -265,7 +279,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           iconSize: [36, 44],
           iconAnchor: [18, 42],
         });
-        const marker = L.marker([lat, lng], { icon, riseOnHover: true }).addTo(layer);
+        const marker = L.marker([lat, lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
         marker.on("click", () => {
           const locIds = new Set(locs.map((l) => l.id));
           const cell = hexCells.find((c) => c.locationIds?.some((id) => locIds.has(id)));
@@ -273,7 +287,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
           else {
             mapRef.current?.flyTo([lat, lng], CITY_ZOOM_THRESHOLD + 0.5, { duration: 0.8 });
           }
-          void cityKey;
         });
       });
       return;
@@ -288,13 +301,15 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
         iconSize: [30, 38],
         iconAnchor: [15, 36],
       });
-      const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true }).addTo(layer);
+      const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
       marker.on("click", () => {
         const cell = hexCells.find((c) => c.locationIds?.includes(loc.id));
         if (cell) onHexSelect(cell.h3);
       });
     });
   }
+
+
 
 
 
@@ -395,10 +410,9 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   );
   const focusKey = focus ? `${focus.center[0]},${focus.center[1]},${focus.radiusKm}` : "none";
   useEffect(() => {
-    if (readyRef.current && dataRenderedRef.current) {
-      renderHex();
-      renderMarkers();
-    }
+    if (!readyRef.current) return;
+    renderHex();
+    renderMarkers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellKey, selectedHex, focusKey]);
 
@@ -407,9 +421,10 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     [competitorMarkers],
   );
   useEffect(() => {
-    if (readyRef.current && dataRenderedRef.current) renderCompetitors();
+    if (readyRef.current) renderCompetitors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [competitorKey]);
+
 
   return <div ref={containerRef} className="absolute inset-0 z-0" />;
 });
