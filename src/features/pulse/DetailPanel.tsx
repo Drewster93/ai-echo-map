@@ -89,7 +89,38 @@ export function DetailPanel({ hex, locations, onClose, onImproveVisibility }: Pr
             </button>
           </div>
 
+          {/* Top metrics row */}
+          <div className="grid grid-cols-2 gap-2 px-6 pb-4">
+            <Metric
+              label="Mention %"
+              value={`${mentionPct.toFixed(1)}%`}
+              footer={<span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${mentionBand.cls}`}>{mentionBand.label}</span>}
+            />
+            <Metric
+              label="Competitor Mention %"
+              value={`${competitorPct.toFixed(1)}%`}
+              footer={
+                <span className="text-[11px] text-white/60">
+                  Gap: <span className={gapPp >= 0 ? "font-bold text-soft-green" : "font-bold text-orange-uberall"}>
+                    {gapPp >= 0 ? "+" : ""}{gapPp.toFixed(1)}pp
+                  </span>
+                </span>
+              }
+            />
+            <Metric
+              label="Citation %"
+              value={`${citationPct.toFixed(1)}%`}
+              footer={<span className="text-[11px] text-white/50">Prompts citing brand</span>}
+            />
+            <Metric
+              label="Avg Position"
+              value={avgPosition}
+              footer={<span className="text-[11px] text-white/50">Where brand is mentioned</span>}
+            />
+          </div>
+
           <div className="flex items-center gap-5 px-6 pb-5">
+
             <div className="relative h-[140px] w-[140px] shrink-0">
               <div className="absolute inset-0 grid place-items-center">
                 <PulseCircle size={140} color="#3072FC" opacity={0.25} />
