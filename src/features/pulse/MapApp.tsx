@@ -132,11 +132,24 @@ export function MapApp({ brand, onSwitchBrand, revealing = true, locations: loca
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assistant, range]);
 
+  const arrivedRef = useRef(false);
+  const tourStartedRef = useRef(false);
   const handleArrived = useCallback(() => {
+    arrivedRef.current = true;
     // Only auto-start the tour once real fetched locations are available.
-    if (!usingRealData) return;
+    if (!usingRealData || tourStartedRef.current) return;
+    tourStartedRef.current = true;
     tour.start();
   }, [tour, usingRealData]);
+
+  // If real locations arrive after the map has already settled, start the tour now.
+  useEffect(() => {
+    if (usingRealData && arrivedRef.current && !tourStartedRef.current) {
+      tourStartedRef.current = true;
+      tour.start();
+    }
+  }, [usingRealData, tour]);
+
 
 
   const handleUserInteract = useCallback(() => {
