@@ -150,7 +150,6 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
                                 Math.max(1, loc.prompts.length)) *
                               100;
                             const confidence =
-                            const confidence =
                               loc.prompts.length >= 8
                                 ? { label: "High confidence", cls: "bg-[#22c55e]/25 text-[#15803d]" }
                                 : loc.prompts.length >= 4
