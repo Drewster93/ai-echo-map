@@ -1,12 +1,12 @@
-I’ll update `src/features/pulse/PulseMap.tsx` so retrieved locations always produce a visible marker on the map.
+I found two likely causes:
+
+1. The preview is currently broken by a syntax error in `PulseMap.tsx` at the component closing line, so the map can fall back to client rendering and fail before pins reliably appear.
+2. Marker rendering is still gated by `dataRenderedRef`, and `paintData()` only runs once. If location data, zoom bucket, or map readiness changes after that first paint, pins can be cleared or skipped instead of being re-added.
 
 Plan:
-1. Keep the low-zoom city/group marker path, but make it robust:
-   - Group only valid retrieved locations with usable coordinates.
-   - If a group contains one location, still render the same visible pin instead of relying on count badges or zoomed-in property mode.
-   - Use a stable fallback group key so missing/empty city data cannot collapse markers into an invisible or empty group.
-2. Re-render markers after the initial dive and whenever location data changes, including the case where data arrives after the map was initialized.
-3. Ensure the “overview / zoomed further away” framing still fits all retrieved coordinates with padding, without hiding single-location results.
 
-Technical detail:
-- The likely failure is in `renderMarkers()`: below zoom 9 it switches to city aggregation. I’ll make that aggregation always create a marker for every non-empty group and add coordinate guards/fallbacks so a single retrieved location is never dropped.
+1. Fix the `PulseMap.tsx` syntax error so the map renders normally again.
+2. Make marker rendering idempotent: when valid locations exist and the map/layers are ready, pins should be drawn every time relevant data changes, not only during the first paint.
+3. Keep the low-zoom aggregation behavior, but guarantee every valid retrieved location contributes to a visible pin, including one-location city groups.
+4. Filter invalid coordinates consistently for bounds and pins so bad `0,0` or non-finite coordinates cannot break framing or marker creation.
+5. Verify the map loads without runtime errors and pins remain visible at overview zoom and after zoom changes.
