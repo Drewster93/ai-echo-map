@@ -166,6 +166,16 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       container.addEventListener("wheel", fireInteract, { passive: true });
       container.addEventListener("touchstart", fireInteract, { passive: true });
 
+      // Re-render markers when crossing the city/property zoom threshold
+      let lastBucket = map.getZoom() < 9 ? "city" : "props";
+      map.on("zoomend", () => {
+        const b = map.getZoom() < 9 ? "city" : "props";
+        if (b !== lastBucket && dataRenderedRef.current) {
+          lastBucket = b;
+          renderMarkers();
+        }
+      });
+
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
         runDive(map);
