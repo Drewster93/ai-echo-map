@@ -1,66 +1,89 @@
-# Geographic coverage for global brand search
+# AI Performance Pulse — Launch Video (Plan)
 
-## Problem
+A code-rendered Remotion video that mirrors the reference storyboard but reframes every beat around the product's thesis: **brand-level AI visibility is dead — the next edge is location-level AI visibility.** Rendered in three aspect ratios from a single project so the same master can ship to YouTube, the website hero, LinkedIn feed, and vertical (Reels / LinkedIn mobile).
 
-Searching "Starbucks" with `country=global` returns only North-European pins. The global branch in `src/lib/googlePlaces/search.server.ts` has two issues:
+---
 
-1. **Soft bias instead of hard restriction.** Each of the 8 continental rectangles uses `locationBias`, which Google's `searchText` may ignore — it often returns the same globally-relevant cluster regardless of the bias. After dedupe, you get one regional cluster.
-2. **No interleaving on the global path.** After merge + dedupe, results are `.slice(0, maxLocations)` from the concat order. One dominant region eats the whole budget.
+## 1. Creative direction
 
-The country path was just fixed to interleave; the global path was not.
+**Thesis baked into every scene:** AI assistants (ChatGPT, Perplexity, Gemini, Claude) recommend places hex-by-hex, store-by-store — not brand-by-brand. Winners will be the ones who can *see* and *fix* their local AI presence.
 
-## Fix
+**Aesthetic:** Dark cosmic (matching the live app) + Uberall pulse arcs.
+- Background: `#05030d` → `#260e5a` radial, with drifting pulse arcs (reuse the `PulseArc` motif)
+- Accents: ultraviolet `#860eff`, tech blue `#3072fc`, aqua `#7bffff`, orange `#ff5b02`
+- Typography: **Fraunces** (display, big editorial headlines) + **IBM Plex Sans** (body/UI) + **Space Grotesk** (numbers/counters) — exactly the stack the app already uses
+- Motion system: smooth spring entrances (`damping: 18`), accent pulses on hero moments, hex-grid reveals as connective tissue between scenes, no hard cuts to black
 
-### 1. `src/lib/googlePlaces/search.server.ts` — global path
+**Sound:** ambient electronic bed + tasteful UI chirps for clicks/typing and a swelling pad for the CTA. Rendered muted by default (sandbox can't encode AAC reliably); we'll either composite audio post-render via ffmpeg from a royalty-free track + ElevenLabs SFX, or ship muted with on-screen captions.
 
-- Switch each continental region from `locationBias` to `locationRestriction` (hard boundary, matches what the country sub-region path now does).
-- Keep per-region budget at 60, but interleave across the 8 continents round-robin (same pattern as the country branch) before slicing to `maxLocations`.
-- Apply `nameFilter` per-bucket, then `filterByDominantDomain` across the flat set, then interleave.
-- Update the log line to show per-region kept counts after filtering, not just raw counts.
+---
 
-### 2. Diagnostic endpoint — `src/routes/api/public/brand-coverage.ts`
+## 2. Adapted storyboard (11 scenes, ~75–80s master)
 
-A read-only GET endpoint to check brand presence per region without going through the UI:
+| # | Time | Beat | What the viewer sees |
+|---|------|------|----------------------|
+| 1 | 0:00–0:06 | **Problem** | Drifting glowing spheres. "Today" fades. Then: *"Brands optimize for AI visibility at the brand level."* Subtitle: *"But AI doesn't recommend brands. It recommends places."* (word "places" pulses) |
+| 2 | 0:06–0:09 | **Meet** | Pulse arcs converge → "Meet" → logo lockup **AI Performance Pulse** with the Uberall arc icon |
+| 3 | 0:09–0:13 | **Promise** | "Local AI visibility" → "hex by hex" → "in real time" — text scales through over a growing hex grid |
+| 4 | 0:13–0:18 | **Scale** | Animated counter: *"4,182,560 AI prompts analyzed per day"* with a tiny sparkline. Subtitle: *"across 240 countries"* |
+| 5 | 0:18–0:23 | **Diverse coverage** | Quick montage of recognizable brand pulses lighting up a world map: Starbucks, McDonald's, Sephora, Decathlon — each one a different continent flaring with hex coverage |
+| 6 | 0:23–0:33 | **AI-powered query** (replaces "Prompt-to-UI") | Recreated landing input from the live app: cursor types **"Starbucks"** → Go. Camera zooms into the map; hexes ignite by region; the side panel slides in with mention-rate stats. This *is* the product's core interaction. |
+| 7 | 0:33–0:40 | **Regional comparison** (replaces "Collaboration") | Split-globe view: North America 87% vs South-East Asia 12%. Pulsing red zones highlight blind spots. Caption: *"Spot the regions AI forgot."* |
+| 8 | 0:41–0:53 | **Drill into a location** (replaces "Visual editing") | Click on a single hex → location detail panel opens showing: store name, AI mention rate, top competitors mentioned instead, recommended fixes. Numbers tick up live. |
+| 9 | 0:54–1:02 | **Competitive edge** (replaces "Publish") | Two brands side by side on the same hex grid. Yours: glowing aqua. Competitor: faded. Caption builds: *"Publish" → "Fix" → "Win the hex."* Browser frame shows the live coverage dashboard on a laptop. |
+| 10 | 1:03–1:11 | **API / Dev mode** | "Introducing" → "/coverage API" in glowing gradient. Toggle flips to a code editor showing a real `fetch('/api/public/brand-coverage?brand=…')` call returning JSON. Caption: *"Wire location-level AI visibility into your stack."* |
+| 11 | 1:12–1:19 | **CTA** | "Now" → "Now it's your turn" → "Which hexes does AI forget about you?" Background forms the pulse-arc silhouette. Logo + URL `aiperformancepulse.com` (or chosen domain). |
 
+---
+
+## 3. Technical approach
+
+**Stack:** Remotion + React + Tailwind, scaffolded under `remotion/` per the project's video-creator workflow. Single composition `main` at **1920x1080 / 30fps / ~2370 frames**, plus two adapter compositions:
+- `square` — 1080x1080, scenes reflowed (headlines stacked, map cropped centered)
+- `vertical` — 1080x1920, headlines top, product UI bottom
+
+**File structure:**
 ```
-GET /api/public/brand-coverage?brand=Starbucks&scope=global
-GET /api/public/brand-coverage?brand=Starbucks&scope=country&country=US
+remotion/
+  src/
+    index.ts, Root.tsx, MainVideo.tsx
+    scenes/Scene01Problem.tsx … Scene11CTA.tsx
+    components/
+      PulseArcBg.tsx         # reused from src/features/pulse/PulseArc
+      HexGrid.tsx            # animated h3-style hex coverage
+      ProductFrame.tsx       # recreated app chrome (sidebar + map area)
+      MapGlobe.tsx           # stylized globe with continent rectangles
+      Counter.tsx, GradientText.tsx, SfxClick.tsx
+    adapters/SquareVideo.tsx, VerticalVideo.tsx
+  scripts/render-remotion.mjs   # programmatic render (sandbox-safe)
+  public/fonts/                 # Fraunces, IBM Plex, Space Grotesk TTFs
 ```
 
-Returns JSON:
-```json
-{
-  "brand": "Starbucks",
-  "scope": "global",
-  "regions": [
-    { "label": "NA_WEST",   "raw": 60, "kept": 47, "sample": ["Seattle", "..."] },
-    { "label": "EU_WEST",   "raw": 60, "kept": 38, "sample": [...] },
-    ...
-  ],
-  "totalUnique": 312,
-  "afterDomainFilter": 280
-}
-```
+**Product UI recreation:** the AI-query, regional comparison, drill-down, and competitive-edge scenes all rebuild the live app's chrome in Remotion (dark plum sidebar, pulse-arc header, hex map area) rather than embedding screenshots — keeps motion crisp at any resolution and lets text animate per character.
 
-Implementation notes:
-- Lives under `/api/public/*` so it's reachable on the published site without auth.
-- Input validated with Zod (`brand` 1–120 chars, `scope` enum, `country` optional 2–20 chars).
-- Reuses `searchRegion` and the same region tables from `search.server.ts` — refactor those into named exports so the diagnostic route can import them without duplicating geography.
-- Caps `sample` at 3 names per region; no PII, just location names.
-- Requires `GOOGLE_PLACES_API_KEY`; returns 503 if missing.
+**Rendering:** programmatic render script with `chromeMode: "chrome-for-testing"`, `muted: true`, `concurrency: 1`, symlinked ffmpeg/ffprobe and patched musl compositor — per the sandbox constraints. Outputs:
+- `/mnt/documents/ai-performance-pulse-launch-1080p.mp4` (YouTube / web hero)
+- `/mnt/documents/ai-performance-pulse-launch-square.mp4` (LinkedIn feed)
+- `/mnt/documents/ai-performance-pulse-launch-vertical.mp4` (Reels / LinkedIn mobile)
 
-### 3. Refactor for shared geography
+**Audio:** v1 ships muted. If desired in a follow-up, I'll generate an ElevenLabs music bed + per-scene SFX and mux them in with ffmpeg.
 
-Move `COUNTRY_BOUNDS`, `COUNTRY_SUB_REGIONS`, the global `regions` array, `searchRegion`, `mapPlace`, and `filterByDominantDomain` into named exports so both `searchGooglePlaces` and the diagnostic route consume the same tables. No behavior change for the existing flow.
+**QA:** spot-render stills at frames 0, 90, 240, 540, 900, 1500, 2100, 2350 with `bunx remotion still` and visually inspect before the full render. Re-render any scene that breaks.
 
-## Verification
+---
 
-1. Call `/api/public/brand-coverage?brand=Starbucks&scope=global` — expect non-zero `kept` counts across NA, EU, ASIA at minimum.
-2. In the UI, search "Starbucks" with worldwide selected → pins visible in North America, Europe, and Asia, not just one cluster.
-3. Server logs show interleaved per-region kept counts.
+## 4. Out of scope (call out before building)
 
-## Out of scope
+- No real-time analytics / no actual Google Places calls inside the video — UI numbers are scripted for narrative pacing
+- No voiceover (can add via ElevenLabs in a follow-up)
+- The video lives entirely under `remotion/` and ships as MP4 files — no changes to the running app
 
-- UI changes to `PulseMap`, HUD panels, country selector.
-- Caching layer for Places results (each diagnostic call hits the API; this is an admin/debug endpoint).
-- Auth on the diagnostic endpoint — it returns only public business listings; if you want it protected, say so and I'll add a shared secret header.
+---
+
+## 5. What I need from you before building
+
+Nothing blocking — but two quick confirms once you approve the plan:
+1. The headline counter in Scene 4 ("4,182,560 AI prompts analyzed per day") — keep that number or substitute a real one you'd like to publish?
+2. The final URL in Scene 11 — `aiperformancepulse.com`, the current Lovable URL, or something else?
+
+I'll proceed with sensible defaults if you don't specify.
