@@ -166,6 +166,16 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       container.addEventListener("wheel", fireInteract, { passive: true });
       container.addEventListener("touchstart", fireInteract, { passive: true });
 
+      // Re-render markers when crossing the city/property zoom threshold
+      let lastBucket = map.getZoom() < 9 ? "city" : "props";
+      map.on("zoomend", () => {
+        const b = map.getZoom() < 9 ? "city" : "props";
+        if (b !== lastBucket && dataRenderedRef.current) {
+          lastBucket = b;
+          renderMarkers();
+        }
+      });
+
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
         runDive(map);
@@ -198,16 +208,64 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     </svg>`;
   }
 
+  const CITY_ZOOM_THRESHOLD = 9;
+
   function renderMarkers() {
     const L = LRef.current;
+    const map = mapRef.current;
     const layer = markerLayerRef.current;
-    if (!L || !layer) return;
+    if (!L || !layer || !map) return;
     layer.clearLayers();
     // Map each location to its current hex intensity so colors stay in sync with filters
     const scoreByLoc = new Map<string, number>();
     hexCells.forEach((c) => {
       c.locationIds?.forEach((id: string) => scoreByLoc.set(id, c.intensity));
     });
+
+    const zoom = map.getZoom();
+
+    if (zoom < CITY_ZOOM_THRESHOLD) {
+      // Aggregate per city
+      const cityGroups = new Map<string, Location[]>();
+      locations.forEach((loc) => {
+        const key = loc.city ?? loc.name;
+        const arr = cityGroups.get(key) ?? [];
+        arr.push(loc);
+        cityGroups.set(key, arr);
+      });
+      cityGroups.forEach((locs, cityKey) => {
+        const lat = locs.reduce((s, l) => s + l.lat, 0) / locs.length;
+        const lng = locs.reduce((s, l) => s + l.lng, 0) / locs.length;
+        const avg =
+          locs.reduce((s, l) => s + (scoreByLoc.get(l.id) ?? l.visibilityScore), 0) /
+          locs.length;
+        const { fill, ring } = pinColorForScore(avg);
+        const count = locs.length;
+        const icon = L.divIcon({
+          className: "pulse-pin-wrap",
+          html: `<div class="pulse-pin" style="position:relative">${pinSvg(fill, ring)}${
+            count > 1
+              ? `<span style="position:absolute;top:-6px;right:-6px;background:#111;color:#fff;border:1.5px solid #fff;border-radius:9999px;font-size:10px;font-weight:600;line-height:1;padding:3px 5px;min-width:16px;text-align:center;">${count}</span>`
+              : ""
+          }</div>`,
+          iconSize: [36, 44],
+          iconAnchor: [18, 42],
+        });
+        const marker = L.marker([lat, lng], { icon, riseOnHover: true }).addTo(layer);
+        marker.on("click", () => {
+          const locIds = new Set(locs.map((l) => l.id));
+          const cell = hexCells.find((c) => c.locationIds?.some((id) => locIds.has(id)));
+          if (cell) onHexSelect(cell.h3);
+          else {
+            // Zoom in so individual pins appear
+            mapRef.current?.flyTo([lat, lng], CITY_ZOOM_THRESHOLD + 0.5, { duration: 0.8 });
+          }
+          void cityKey;
+        });
+      });
+      return;
+    }
+
     locations.forEach((loc) => {
       const score = scoreByLoc.get(loc.id) ?? loc.visibilityScore;
       const { fill, ring } = pinColorForScore(score);
@@ -219,12 +277,12 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       });
       const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true }).addTo(layer);
       marker.on("click", () => {
-        // Find the hex cell containing this location and select it
         const cell = hexCells.find((c) => c.locationIds?.includes(loc.id));
         if (cell) onHexSelect(cell.h3);
       });
     });
   }
+
 
   function renderHex() {
     // Hexes intentionally not rendered — premium pin-marker layout

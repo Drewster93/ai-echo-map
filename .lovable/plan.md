@@ -1,27 +1,31 @@
-## Problem
+## Goal
 
-When a user clicks a hex pin, `DetailPanel` currently renders inline beneath the map as a full-width section (`relative z-10 w-full border-t ...`). Because it sits in normal document flow after `MapApp`'s `h-screen` map, the page scrolls and the panel feels like a takeover of the section rather than a contextual modal over the map.
+Make pins zoom-aware on the map:
+- **Zoom < 9** → one aggregated pin per city, placed at the city centroid.
+- **Zoom ≥ 9** → individual property pins (current behavior).
+- Clicking any pin still inspects metrics via the existing hex-select flow.
 
-## Fix
+## Changes
 
-Convert `DetailPanel` into a fixed bottom overlay that covers roughly the lower 45% of the viewport, while the map remains fully visible above it. Click-outside / close button dismisses.
+### `src/features/pulse/PulseMap.tsx`
 
-### Changes to `src/features/pulse/DetailPanel.tsx`
+1. Track current map zoom in a ref + state (`const [zoom, setZoom] = useState<number>(...)`), updated on Leaflet `zoomend`.
+2. Compute marker set based on zoom:
+   - If `zoom < 9`: group `locations` by `city`, compute average score per city and centroid `(lat, lng)`, render one pin per city.
+   - If `zoom >= 9`: render one pin per location (current logic).
+3. Pin color uses the same `pinColorForScore` thresholds (city pin uses avg score).
+4. Click handler:
+   - Property pin → existing: find hex cell containing the location and call `onHexSelect(cell.h3)`.
+   - City pin → find any hex cell whose `locationIds` belong to a location in that city and select it (so `DetailPanel` opens with city-scoped metrics, matching current behavior at admin zoom).
+5. Re-run `renderMarkers()` whenever `zoom` crosses the threshold (add `zoom` to the existing render effect dependencies).
+6. Optional polish: city pin slightly larger (e.g. 36×44) with a small count badge showing number of properties in that city.
 
-- Replace section classes with a fixed bottom overlay:
-  - `fixed inset-x-0 bottom-0 z-30 max-h-[45vh] overflow-y-auto`
-  - Add rounded top corners, top border, backdrop blur, and a strong drop shadow so it reads as a floating sheet over the map.
-  - Constrain inner content width (e.g. `mx-auto max-w-7xl`) and keep the existing header + 4-up metrics grid.
-- Animate from `y: 40, opacity: 0` → `y: 0, opacity: 1` (slide-up sheet), exit reverse.
-- Remove the `scrollIntoView` effect (no longer needed — overlay appears in place).
-- Keep close button and Improve-visibility CTA unchanged.
+### No changes required
 
-### Changes to `src/features/pulse/MapApp.tsx`
+- `MapApp.tsx`, `DetailPanel.tsx`, `hexUtils.ts`, role-switcher logic, regional/location report routes.
+- The admin coarse-vs-fine hex resolution stays as-is; this change only affects pin rendering.
 
-- No structural change required; `DetailPanel` is already rendered as a sibling of the map. It will simply float over the map once it's `fixed`.
-- Optional: add a subtle backdrop dimmer (`fixed inset-0 z-20 bg-black/20`) behind the panel when `selected` is set, dismissing on click. (Will include this for polish.)
+## Out of scope
 
-### Out of scope
-
-- No changes to data, hex selection logic, ResultsSection, or routing.
-- No viewport / route layout changes in `src/routes/index.tsx`.
+- Tour, competitor markers, replay, filters — unchanged.
+- No changes to data model or types.
