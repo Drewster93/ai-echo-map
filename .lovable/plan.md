@@ -1,96 +1,146 @@
-## Goal
+# Pulse Launch Trailer v5 — Real App Recordings, Cinematic Edit
 
-A 45–55s launch film that **feels indistinguishable from the Lovable 2.0 video** — same rhythm, same kinetic-type grammar, same dark canvas + single UV accent — but the on-screen product is **AI Performance Pulse** and the narrative is **"see where AI mentions your brand."**
+## What changes vs v4
 
-## Why prior attempts failed (and what changes)
-
-- **Playwright captures** = JPEG-compressed, dropped frames, browser jank.
-- **Real app mounted in Remotion** = Leaflet maps and Framer Motion are non-deterministic per frame.
-- **Static PNG screenshots** = look like a slideshow. The Lovable video's energy comes from UI elements *moving inside the frame*, not just camera pushes over flat images.
-
-**New approach:** Rebuild ~6 Pulse surfaces as **purpose-built Remotion components** (pure React + Tailwind, every value driven by `useCurrentFrame()`). They use the real design tokens (Deep Plum `#05030d`, UV `#860eff`, Fraunces + IBM Plex Sans, real shadcn primitives copied in) so they ARE the app visually — but they're frame-deterministic, lossless 1920×1080, and can be choreographed shot-by-shot.
-
-A small number of legitimately complex surfaces (the Leaflet world map) stay as pre-captured PNGs and are animated with push-ins / hex blooms layered on top.
-
-## Visual system (locked, matches Lovable)
-
-- Canvas `#05030d` · Accent UV `#860eff` · Text `#FFFFFF` / `#A8A4B8`
-- Display: Fraunces 600 (huge kinetic words). Body: IBM Plex Sans 500.
-- **Hero type smash:** 12-frame ease-out scale 1.06→1.00 + opacity 0→1, hold 18f, exit 6f fade. Single word per cut. Letterforms can letterbox the UI to lower 60% or overlay full-frame.
-- **Cuts:** hard cuts only. Avg shot length 1.4s. No fades between scenes (except final).
-- **Camera moves:** push-in (1.0→1.08 over 24f), snap-zoom (1.0→2.5 in 8f for detail reveals), occasional whip-pan via 4-frame UV bar.
-- **Cursor:** scripted UV dot that lands on real interactive targets.
-- **No grain, no vignette, no chromatic aberration, no anamorphic bars.** Same restraint as Lovable.
-
-## Narrative (8 beats, ~48s)
-
-```text
-1. Cold open      0.0–2.5s   Wordmark "PULSE" smashes onto black, UV underline draws
-2. The question   2.5–7.0s   Hero type "WHERE DOES AI SEND PEOPLE?" over dim world map
-3. The map        7.0–13s    Push into city → hex grid blooms → score badges pop in
-4. Drill in       13–20s     Snap-zoom to one hex → location report card slides up
-5. The queries    20–28s     Query list types itself, AI answers stream, rank chips land
-6. The benchmark  28–36s     Competitor bars race, hero type "BENCHMARK" smashes
-7. The pulse      36–44s     7-day sparkline draws, alert toast lands, "MONITORED DAILY"
-8. Sign-off       44–48s     Wordmark + tagline + UV pill "Available now" → cut to black
-```
-
-Each beat = 2–4 cuts (~28 cuts total), matching Lovable's pacing.
-
-## What gets built as Remotion components vs. captured
-
-| Surface | Source | Why |
+| | v4 (now) | v5 (this plan) |
 |---|---|---|
-| Wordmark, hero type, lower-thirds, cursor, whip accents | Native Remotion | Pure motion |
-| Hex grid + score badges | Native Remotion (SVG, frame-driven) | Choreographable bloom |
-| Location report card | Native Remotion (copy of real card markup + tokens) | Frame-perfect entrance |
-| Query list + streaming AI answers | Native Remotion (typewriter + stream sim) | Critical to feel "live" |
-| Competitor comparison bars | Native Remotion (frame-driven width) | Bar race must be deterministic |
-| 7-day sparkline + alert toast | Native Remotion (SVG path draw) | Stroke-dashoffset animation |
-| World map base layer | Pre-captured PNG (already in `remotion/public/captures/`) | Leaflet can't render deterministically |
+| Source footage | Remotion rebuilds UI from scratch | **Headless Chromium records the real app** |
+| Interactions | Hand-animated `interpolate()` | **Scripted Playwright: real typing, real hovers, real clicks, real scroll** |
+| Cursor | Faked SVG dot | **Synthetic cursor injected into the live page, follows real `page.mouse` paths with easing** |
+| Palette | Mono dark (gloomy) | **Vibrant: Deep Plum base + UV magenta + Aqua + Sunset Coral accents** |
+| Cuts | Slow 1.4s avg | **Fast 0.6–1.2s avg, beat-locked to music** |
+| Audio | None | **Dark-electronic royalty-free track with a drop at the brand reveal** |
 
-This is the same technique top motion studios use: **the UI you see in the film is a film-grade rebuild of the product UI**, not a live recording. It will look identical to viewers because the design tokens are identical.
+## Visual direction — "Next-gen, not gloomy"
 
-## File structure
+Reference: Lovable 2.0 launch (fast cuts, real product, kinetic type stings, glowing accents on motion).
+
+**Color system (added to `src/styles.css` behind a `[data-demo]` flag — never touches production look):**
+- Base: Deep Plum `#0B0418`
+- Primary: UV `#A855F7`
+- Accent 1: Aqua `#22D3EE` (data, success, sparkline)
+- Accent 2: Sunset Coral `#FB7185` (alerts, deltas, focus rings)
+- Accent 3: Lime Glow `#A3E635` (positive scores, "live" badges)
+- Surface tint shifts hue subtly per shot — purple in shot 2, cyan in shot 4, coral in shot 7 — so each beat feels different.
+
+**Motion register:**
+- Glow trails on cursor moves
+- Soft bloom on hover states
+- Card lifts use UV-tinted shadows
+- Parallax push-ins at every cut (Premiere-style "transform zoom" baked into the Remotion composite layer)
+
+## Pipeline
 
 ```text
-remotion/src/
-  Root.tsx                     edit: register "pulse-launch"
-  PulseLaunch.tsx              new: 1440-frame TransitionSeries, 8 beats
-  theme.ts                     edit: lock palette + type
-  motion/
-    HeroType.tsx               new: kinetic smash text
-    Cursor.tsx                 new: scripted UV dot
-    Whip.tsx                   new: 4-frame accent bar
-    PushIn.tsx                 new: camera push wrapper
-    SnapZoom.tsx               new: detail zoom wrapper
-  shots/
-    01-Wordmark.tsx
-    02-Question.tsx
-    03-MapBloom.tsx            uses public/captures/world-map.png
-    04-HexDrill.tsx
-    05-LocationCard.tsx
-    06-QueryStream.tsx
-    07-BenchmarkBars.tsx
-    08-Sparkline.tsx
-    09-Signoff.tsx
-  ui/                          new: film-grade rebuilds of Pulse UI
-    HexGrid.tsx
-    ScoreBadge.tsx
-    LocationReportCard.tsx
-    QueryRow.tsx
-    AnswerStream.tsx
-    CompetitorBar.tsx
-    Sparkline.tsx
-    AlertToast.tsx
+1. Demo-mode app prep
+   └── ?demo=1 flag: vibrant palette, hidden chrome, seeded data, slowed animations
+   └── /demo-shots/* routes that pre-stage each shot perfectly
+2. Playwright capture (headless Chromium, 1920x1080, 30fps)
+   └── 8 scripted shots, each in its own context with recordVideo
+   └── Synthetic cursor injected via init script
+   └── ffmpeg trims/converts WebM -> MP4
+3. Remotion composite layer
+   └── Imports the 8 MP4s as <Video>
+   └── Adds: parallax push-ins, kinetic-type stings between shots,
+            wordmark/pill overlays, snap-zoom punches on key moments,
+            chromatic-aberration flash on cuts, glow vignette
+   └── Audio bed mixed in
+4. Render -> /mnt/documents/pulse-launch-v5.mp4
 ```
 
-All v3/v4 cinematic primitives stay on disk untouched. New composition id: `pulse-launch`. Renders to `/mnt/documents/ai-performance-pulse-launch-v4.mp4`.
+## The 8 shots (40s, beat-locked)
 
-## Honest answer to "is this possible?"
+```text
+00:00–00:03  COLD OPEN
+  Black -> PULSE wordmark smash with UV chromatic split + bass drop
+  (Remotion-only, no recording)
 
-**Yes, very close to identical.** The Lovable video's signature is (a) kinetic typography rhythm, (b) restrained palette + type, (c) UI elements that animate *inside* the frame, (d) hard cuts at 1–2s intervals. All four are reproducible with this approach. The one thing we won't match perfectly is shots of complex live interactions (map pan/zoom in Lovable's editor) — for our equivalent (Leaflet world map) we'll fake the push-in with a captured PNG, which reads as identical at video resolution.
+00:03–00:08  LANDING + QUERY
+  Real /demo route. Cursor glides to search bar, types
+  "where does AI send people for coffee in Brooklyn?"
+  UV glow follows the caret. Submit -> aqua shimmer fires.
 
-## Open question
+00:08–00:13  MAP BLOOM
+  Real map component loads. Cursor pans. City zooms in.
+  Hex tiles light up coral->aqua->lime by score.
+  Snap-zoom into Lumen Coffee node.
 
-Confirm the **8-beat narrative above** matches the story you want to tell. If you'd rather lead with "competitor benchmark" or "daily monitoring" instead of "the map," I'll reorder the beats before scaffolding.
+00:13–00:19  LOCATION CARD
+  Real LocationDetail component opens with spring.
+  Cursor hovers ChatGPT row -> aqua tooltip lifts.
+  Score badge ticks 87 -> 92 with lime pulse.
+
+00:19–00:25  AI ANSWERS STREAMING
+  Real query results panel. Three provider columns stream text
+  in parallel (real component, real typing animation, slowed 0.7x).
+  Source citations flip in.
+
+00:25–00:30  BENCHMARK
+  Real competitor bar chart. Bars race up coral/aqua/UV.
+  Cursor hovers "+34% vs avg" -> coral burst.
+
+00:30–00:35  PULSE MONITORING
+  Real sparkline draws (aqua). Alert toast slides in
+  with lime "MONITORED DAILY" badge. Subtle screen-shake on impact.
+
+00:35–00:40  SIGN-OFF
+  Snap-zoom out from dashboard, hex-grid bloom across screen,
+  wordmark resolves with "Available now" coral pill.
+```
+
+## Technical decisions
+
+- **Playwright over Puppeteer** — better video recording API, easier cursor injection
+- **Recording at 30fps, not 60fps** — headless Chromium without GPU can stutter at 60; 30fps locked is cleaner
+- **Each shot in its own browser context** — isolated, re-runnable independently
+- **Synthetic cursor** — small UV dot with motion-blur trail, injected via `page.addInitScript`, follows mouse coords with 80ms ease-out
+- **Demo palette via `[data-demo="1"]` attribute on `<html>`** — vibrant tokens override production tokens, only when query flag present, zero risk to real app
+- **Speed ramps in ffmpeg** — some shots recorded at 1.0x then sped 1.2–1.5x for snap; others slowed 0.7x for hero moments
+- **Music**: I'll source 2 candidates from Uppbeat / Pixabay, both ~95 BPM with a drop at 2.7s for the wordmark hit. You pick.
+
+## File plan
+
+```text
+remotion/scripts/
+  capture-shots.ts          # Playwright orchestrator
+  shots/
+    01-wordmark.ts          # (no-op, Remotion handles)
+    02-landing.ts
+    03-map.ts
+    04-location.ts
+    05-answers.ts
+    06-benchmark.ts
+    07-pulse.ts
+    08-signoff.ts
+  cursor.inject.ts          # Synthetic cursor + glow trail
+  demo-mode.css             # Vibrant override tokens
+remotion/public/captures/   # MP4 outputs land here
+remotion/src/
+  PulseLaunchV5.tsx         # New composition
+  layers/
+    ParallaxVideo.tsx       # Wraps captured MP4 with push-in
+    KineticSting.tsx        # Between-shot type cards
+    BrandOverlay.tsx        # Wordmark, pill, vignette
+src/routes/
+  demo.tsx                  # Pre-staged demo entry routes
+  demo.$shot.tsx
+src/styles.css              # +[data-demo] vibrant token block
+```
+
+## What I will deliver on approval
+
+1. Demo-mode infrastructure (routes, vibrant palette, synthetic cursor, seed data)
+2. 8 Playwright shot scripts, re-runnable any time
+3. Remotion v5 composition with parallax + stings + overlays + audio
+4. 2 music candidates in `/mnt/documents/music/` with license + the one I'd pick
+5. Final render at `/mnt/documents/ai-performance-pulse-launch-v5.mp4`
+
+## What could go wrong (and how I'll handle it)
+
+- **Map component uses Mapbox/WebGL and stutters in headless** → fall back to the existing Remotion HexGrid for that one shot, composite over a still screenshot of the real map
+- **Fonts flash on first paint** → preload via `page.evaluate(() => document.fonts.ready)` before recording starts
+- **Recording drifts off-beat** → all shots recorded with explicit frame budgets; Remotion timeline snaps to fps grid
+
+## One question before I build
+
+Should I go ahead with this plan as written, or do you want to lock the **palette** first (I can render 3 still mockups of shot 4 with different vibrant palettes so you choose before I wire it through every shot)?
