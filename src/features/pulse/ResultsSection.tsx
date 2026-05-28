@@ -224,17 +224,26 @@ function Kpi({
   hint?: string;
   accent?: boolean;
 }) {
-function Kpi({
-  label,
-  value,
-  hint,
-  accent = false,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  accent?: boolean;
-}) {
+  return (
+    <div
+      className="rounded-2xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] p-5"
+      style={
+        accent
+          ? {
+              borderColor: "rgba(134,14,255,0.35)",
+              boxShadow: "0 0 32px rgba(134,14,255,0.18)",
+            }
+          : undefined
+      }
+    >
+      <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#260e5a]/60">
+        {label}
+      </div>
+      <div className="mt-2 font-display text-3xl text-[#260e5a]">{value}</div>
+      {hint && <div className="mt-1 text-xs text-[#260e5a]/50">{hint}</div>}
+    </div>
+  );
+}
   return (
     <div
       className="rounded-2xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] p-5"
