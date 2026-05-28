@@ -11,7 +11,7 @@ export interface PromptResult {
 
 export interface Location {
   id: string;
-  city: "Berlin" | "Paris" | "London";
+  city: string;
   cluster: string; // e.g. "Berlin Mitte"
   name: string;
   lat: number;

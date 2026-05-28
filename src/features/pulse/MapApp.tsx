@@ -25,9 +25,10 @@ interface Props {
   brand: string;
   onSwitchBrand: () => void;
   revealing?: boolean;
+  locations?: Location[] | null;
 }
 
-export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
+export function MapApp({ brand, onSwitchBrand, revealing = true, locations: locationsProp = null }: Props) {
   const [assistant, setAssistant] = useState<Assistant>("all");
   const [range, setRange] = useState<TimeRange>("7d");
   const [selectedHex, setSelectedHexState] = useState<string | null>(null);
@@ -39,16 +40,21 @@ export function MapApp({ brand, onSwitchBrand, revealing = true }: Props) {
   const [regionCity, setRegionCity] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
 
-  const locations: Location[] = MOCK_LOCATIONS;
+  const locations: Location[] =
+    locationsProp && locationsProp.length > 0 ? locationsProp : MOCK_LOCATIONS;
+  const usingRealData = !!(locationsProp && locationsProp.length > 0);
 
   const brandedLocations = useMemo<Location[]>(
     () =>
-      locations.map((l) => ({
-        ...l,
-        name: l.name.replace("Lumen", brand.split(/\s+/)[0] || "Lumen"),
-      })),
-    [brand, locations],
+      usingRealData
+        ? locations
+        : locations.map((l) => ({
+            ...l,
+            name: l.name.replace("Lumen", brand.split(/\s+/)[0] || "Lumen"),
+          })),
+    [brand, locations, usingRealData],
   );
+
 
   const scopedLocations = useMemo<Location[]>(() => {
     if (role === "regional" && regionCity) {

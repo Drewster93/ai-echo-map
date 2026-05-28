@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { IntroSequence } from "@/features/pulse/IntroSequence";
 import { LandingScreen } from "@/features/pulse/LandingScreen";
 import { MapApp } from "@/features/pulse/MapApp";
 import { SideNav } from "@/features/pulse/hud/SideNav";
+import { buildLocationsFromPlaces } from "@/features/pulse/buildFromPlaces";
 import { searchBrandLocations } from "@/lib/googlePlaces/search.functions";
+import type { GooglePlacesLocation } from "@/lib/googlePlaces/types";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -26,11 +28,18 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [introDone, setIntroDone] = useState(false);
   const [brand, setBrand] = useState<string | null>(null);
+  const [places, setPlaces] = useState<GooglePlacesLocation[] | null>(null);
   const revealing = brand !== null;
   const fetchLocations = useServerFn(searchBrandLocations);
 
+  const locations = useMemo(
+    () => (places && brand ? buildLocationsFromPlaces(places, brand) : null),
+    [places, brand],
+  );
+
   async function handleBrand(value: string) {
     setBrand(value);
+    setPlaces(null);
     const toastId = toast.loading(`Searching Google Places for "${value}"…`);
     try {
       const res = await fetchLocations({
@@ -40,7 +49,7 @@ function Index() {
         toast.error(`Google Places: ${res.error}`, { id: toastId });
         return;
       }
-      console.log("[Google Places] locations:", res.locations);
+      setPlaces(res.locations);
       toast.success(`Found ${res.locations.length} locations for ${value}`, { id: toastId });
     } catch (err) {
       console.error(err);
@@ -64,8 +73,12 @@ function Index() {
         >
           <MapApp
             brand={brand ?? "Preview"}
-            onSwitchBrand={() => setBrand(null)}
+            onSwitchBrand={() => {
+              setBrand(null);
+              setPlaces(null);
+            }}
             revealing={revealing}
+            locations={locations}
           />
         </div>
       )}
@@ -80,6 +93,7 @@ function Index() {
     </main>
   );
 }
+
 
 
 
