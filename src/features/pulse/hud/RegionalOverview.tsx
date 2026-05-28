@@ -65,10 +65,9 @@ function Metric({
 }) {
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">{label}</p>
       <p
         className={
-          "font-display leading-tight text-slate-900 " + (smallValue ? "text-xl" : "text-3xl")
+          "font-numbers leading-tight text-slate-900 " + (smallValue ? "text-xl" : "text-3xl")
         }
       >
         {value}
