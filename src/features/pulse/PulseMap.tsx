@@ -254,13 +254,9 @@ export function PulseMap({
           locs.reduce((s, l) => s + (scoreByLoc.get(l.id) ?? l.visibilityScore), 0) /
           locs.length;
         const { fill, ring } = pinColorForScore(avg);
-        const count = locs.length;
-        const isCluster = count > 1;
         const icon = L.divIcon({
           className: "pulse-pin-wrap",
-          html: isCluster
-            ? `<div class="pulse-pin" style="position:relative;width:34px;height:44px;">${pinSvg(fill, ring)}<span style="position:absolute;top:-4px;right:-6px;background:#111;color:#fff;border:1.5px solid ${fill};border-radius:9999px;font-size:10px;font-weight:600;line-height:1;padding:3px 5px;min-width:16px;text-align:center;">${count}</span></div>`
-            : `<div class="pulse-pin">${pinSvg(fill, ring)}</div>`,
+          html: `<div class="pulse-pin">${pinSvg(fill, ring)}</div>`,
           iconSize: [34, 44],
           iconAnchor: [17, 42],
         });

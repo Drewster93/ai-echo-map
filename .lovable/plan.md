@@ -1,31 +1,30 @@
-## Fill the map and match the pin look
+## Slim the map to ~70 locations and drop cluster count badges
 
-### 1. Expand `src/features/pulse/mockData.ts` to ~330 locations
+### 1. `src/features/pulse/mockData.ts` — cut to ~70 locations
 
-Replace the per-city seed arrays with a single `SEEDS: Record<string, Seed[]>` map covering **47 cities** across all populated continents (matching the reference screenshot's distribution):
+Replace the dense `SEEDS` map with a leaner set:
 
-- **North America** (8): New York, San Francisco, Los Angeles, Chicago, Austin, Miami, Seattle, Vancouver, Montreal, Toronto, Mexico City
-- **South America** (4): São Paulo, Buenos Aires, Bogotá, Lima
-- **Europe** (17): Berlin, Paris, London, Amsterdam, Barcelona, Milan, Madrid, Lisbon, Dublin, Stockholm, Copenhagen, Oslo, Warsaw, Vienna, Zurich, Rome, Athens, Istanbul
-- **Middle East / Africa** (6): Dubai, Tel Aviv, Cairo, Nairobi, Cape Town, Lagos
-- **Asia** (11): Mumbai, Bangalore, Delhi, Bangkok, Jakarta, Seoul, Hong Kong, Taipei, Manila, Kuala Lumpur, Shanghai, Tokyo, Singapore
-- **Oceania** (4): Sydney, Melbourne, Brisbane, Perth, Auckland
+- **North America** (4 cities): New York, San Francisco, Los Angeles, Toronto — 2–3 locations each (~10)
+- **South America** (2): São Paulo, Buenos Aires — 2 each (~4)
+- **Europe** (8, deliberately thinned): London, Paris, Berlin, Amsterdam, Madrid, Milan, Stockholm, Istanbul — 2–3 each (~20). Drop Barcelona, Lisbon, Dublin, Copenhagen, Oslo, Warsaw, Vienna, Zurich, Rome, Athens, Brussels so Western Europe doesn't crowd at world zoom.
+- **Middle East / Africa** (3): Dubai, Cape Town, Lagos — 2 each (~6)
+- **Asia** (7): Mumbai, Bangalore, Bangkok, Seoul, Hong Kong, Shanghai, Tokyo, Singapore — 2–3 each (~18)
+- **Oceania** (2): Sydney, Melbourne — 2 each (~4)
 
-Each city: 3–13 locations with realistic neighborhood names and coordinates clustered in 3–6 districts. Total: ~330 locations.
+Target total: **~70 locations across ~26 cities**. Keep per-city neighborhood seeds realistic. `PROMPTS_BY_CITY` trimmed to the surviving cities; `GENERIC_PROMPTS` fallback unchanged. `buildLocations()` and the deterministic rng seed stay the same so visibility scores remain reproducible.
 
-`PROMPTS_BY_CITY` gets entries for every new city (5–7 localized prompts each), plus a `GENERIC_PROMPTS` fallback. `buildLocations()` iterates the `SEEDS` map instead of hardcoded concatenation. Deterministic rng seed unchanged so visibility scores stay reproducible.
+### 2. `src/features/pulse/PulseMap.tsx` — remove the cluster count badge
 
-### 2. Refine pin look in `src/features/pulse/PulseMap.tsx`
+In the marker render path, when `count > 1`:
+- Keep using the standard teardrop `pinSvg` (already in place).
+- Remove the small dark pill count badge element (the `<div style="position:absolute;top:-4px;right:-6px…">{count}</div>`) so clusters look identical to single pins.
+- Leave `iconSize`/`iconAnchor` at `[34, 44]` / `[17, 42]`.
+- Color logic (green/yellow/red by average score) unchanged.
 
-Match the reference screenshot's pin style:
-
-- **Single pin** (zoom ≥ 9): bump size 30×38 → 34×42, increase white stroke from 2.5 → 3, slightly stronger drop shadow. Keep teardrop + white center dot.
-- **Cluster pin** (zoom < 9): wrap the teardrop in a rounded white shield/badge base (subtle rounded square with shadow) so groups read as the layered "stacked" pins in the reference. Move the count badge to top-right as a small dark pill with the cluster color. Color of the shield follows the average score (subtle tint of the pin color).
-
-No changes to colors thresholds (green ≥60, yellow 40–60, red <40) or click behavior.
+Click behavior unchanged: clicking a cluster still zooms in / opens the group, single pins still open the detail panel.
 
 ### Out of scope
 
-- Basemap, legend, side panels, hex layer, filters.
-- Real geocoding — coordinates remain hand-picked seeds.
-- Hydration mismatch warning visible in runtime errors (separate issue: SSR vs client metric jitter; unrelated to pin/density work).
+- Basemap, hex layer, legend, filters, side panels.
+- Clustering thresholds in `bucketKey()` — current zoom-tiered grid already handles density; with fewer European cities it will naturally look uncluttered.
+- The unrelated SSR/CSR hydration mismatch on the "Avg Mention %" metric.
