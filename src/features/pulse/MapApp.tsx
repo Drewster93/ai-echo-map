@@ -23,12 +23,12 @@ import type { Assistant, Location, TimeRange } from "./types";
 
 interface Props {
   brand: string;
-  onSwitchBrand: () => void;
+  onSwitchBrand?: () => void;
   revealing?: boolean;
   locations?: Location[] | null;
 }
 
-export function MapApp({ brand, onSwitchBrand, revealing = true, locations: locationsProp = null }: Props) {
+export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, locations: locationsProp = null }: Props) {
   const [assistant, setAssistant] = useState<Assistant>("all");
   const [range, setRange] = useState<TimeRange>("7d");
   const [selectedHex, setSelectedHexState] = useState<string | null>(null);
