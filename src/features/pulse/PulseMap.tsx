@@ -162,15 +162,24 @@ export function PulseMap({
     return { fill: "#e53935", ring: "#9b1c1c" }; // red
   }
 
-  function pinSvg(fill: string, ring: string): string {
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="38" viewBox="0 0 30 38">
+  function pinSvg(fill: string, ring: string, size: "sm" | "md" = "md"): string {
+    const w = size === "md" ? 34 : 30;
+    const h = size === "md" ? 44 : 38;
+    const path =
+      size === "md"
+        ? "M17 1.5 C8.7 1.5 2 8.2 2 16.5 c0 10.5 15 25.5 15 25.5 s15-15 15-25.5 C32 8.2 25.3 1.5 17 1.5 z"
+        : "M15 1 C7.3 1 1 7.3 1 15 c0 9.5 14 22 14 22 s14-12.5 14-22 C29 7.3 22.7 1 15 1 z";
+    const cx = size === "md" ? 17 : 15;
+    const cy = size === "md" ? 16.5 : 15;
+    const r = size === "md" ? 5 : 4.5;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
       <defs>
         <filter id="ds" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.35"/>
+          <feDropShadow dx="0" dy="2.5" stdDeviation="2.2" flood-opacity="0.45"/>
         </filter>
       </defs>
-      <path filter="url(#ds)" d="M15 1 C7.3 1 1 7.3 1 15 c0 9.5 14 22 14 22 s14-12.5 14-22 C29 7.3 22.7 1 15 1 z" fill="${fill}" stroke="white" stroke-width="2.5"/>
-      <circle cx="15" cy="15" r="4.5" fill="white" stroke="${ring}" stroke-width="1"/>
+      <path filter="url(#ds)" d="${path}" fill="${fill}" stroke="white" stroke-width="3"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" stroke="${ring}" stroke-width="1"/>
     </svg>`;
   }
 
@@ -260,9 +269,9 @@ export function PulseMap({
       const { fill, ring } = pinColorForScore(score);
       const icon = L.divIcon({
         className: "pulse-pin-wrap",
-        html: `<div class="pulse-pin">${pinSvg(fill, ring)}</div>`,
-        iconSize: [30, 38],
-        iconAnchor: [15, 36],
+        html: `<div class="pulse-pin">${pinSvg(fill, ring, "md")}</div>`,
+        iconSize: [34, 44],
+        iconAnchor: [17, 42],
       });
       const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
       marker.on("click", () => {

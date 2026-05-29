@@ -1,47 +1,31 @@
-## Goal
+## Fill the map and match the pin look
 
-Boot straight into the live map. No intro, no landing, no Google Places. Sales lands on a globally-distributed mock brand with enough density and variety to showcase every feature (heatmap, drill-in, competitor benchmark, assistant filter, pulse alerts, regional overview, blind-spot tour).
+### 1. Expand `src/features/pulse/mockData.ts` to ~330 locations
 
-## Changes
+Replace the per-city seed arrays with a single `SEEDS: Record<string, Seed[]>` map covering **47 cities** across all populated continents (matching the reference screenshot's distribution):
 
-### `src/routes/index.tsx`
-- Strip everything except a direct `<MapApp />` mount inside the `SideNav` shell.
-- Remove: `IntroSequence`, `LandingScreen`, `AnimatePresence`, `useServerFn`, `searchBrandLocations`, `buildLocationsFromPlaces`, `places`/`demoLocations`/`brand` state, `isDemo`/`?demo=1` flag, `handleBrand`, `onSwitchBrand`.
-- Pass `brand = DEFAULT_BRAND` ("Lumen Coffee" — already in `mockData.ts`) and `locations = MOCK_LOCATIONS` directly.
-- `revealing` is always true → drop the conditional layout entirely.
+- **North America** (8): New York, San Francisco, Los Angeles, Chicago, Austin, Miami, Seattle, Vancouver, Montreal, Toronto, Mexico City
+- **South America** (4): São Paulo, Buenos Aires, Bogotá, Lima
+- **Europe** (17): Berlin, Paris, London, Amsterdam, Barcelona, Milan, Madrid, Lisbon, Dublin, Stockholm, Copenhagen, Oslo, Warsaw, Vienna, Zurich, Rome, Athens, Istanbul
+- **Middle East / Africa** (6): Dubai, Tel Aviv, Cairo, Nairobi, Cape Town, Lagos
+- **Asia** (11): Mumbai, Bangalore, Delhi, Bangkok, Jakarta, Seoul, Hong Kong, Taipei, Manila, Kuala Lumpur, Shanghai, Tokyo, Singapore
+- **Oceania** (4): Sydney, Melbourne, Brisbane, Perth, Auckland
 
-### Files to delete
-- `src/features/pulse/IntroSequence.tsx`
-- `src/features/pulse/LandingScreen.tsx`
-- `src/lib/googlePlaces/` (search.functions.ts, search.server.ts, types.ts)
-- `src/features/pulse/buildFromPlaces.ts`
+Each city: 3–13 locations with realistic neighborhood names and coordinates clustered in 3–6 districts. Total: ~330 locations.
 
-### `src/features/pulse/hud/SideNav.tsx`
-- Remove the "switch brand" affordance if it was the only consumer of `onSwitchBrand`. Otherwise make the prop optional and no-op.
+`PROMPTS_BY_CITY` gets entries for every new city (5–7 localized prompts each), plus a `GENERIC_PROMPTS` fallback. `buildLocations()` iterates the `SEEDS` map instead of hardcoded concatenation. Deterministic rng seed unchanged so visibility scores stay reproducible.
 
-### `src/features/pulse/mockData.ts` — global expansion
-Goal: ~80–110 locations across 10 cities on 4 continents so the map looks alive at any zoom and every demo beat has data to land on.
+### 2. Refine pin look in `src/features/pulse/PulseMap.tsx`
 
-Add city seed arrays alongside the existing Berlin / Paris / London:
-- **Europe**: Amsterdam (8), Barcelona (8), Milan (7)
-- **North America**: New York (12), San Francisco (10), Toronto (7)
-- **Asia / Pacific**: Tokyo (10), Singapore (7), Sydney (8)
+Match the reference screenshot's pin style:
 
-For each new city:
-1. Add a `PROMPTS_BY_CITY` entry (6–8 localized prompts — neighborhood + intent variations consistent with the existing voice).
-2. Add a `<city>Seeds` array of `[area, name, lat, lng]` tuples with realistic neighborhood names and coordinates clustered in 3–5 districts per city (so the hex bloom looks dense, not scattered).
-3. Spread `visibilityScore` bases across the full 20–95 range per city so the legend, "winning vs losing" benchmark, and blind-spot tour all have material to highlight.
-4. Include the new arrays in `buildLocations()`'s `all` concatenation.
+- **Single pin** (zoom ≥ 9): bump size 30×38 → 34×42, increase white stroke from 2.5 → 3, slightly stronger drop shadow. Keep teardrop + white center dot.
+- **Cluster pin** (zoom < 9): wrap the teardrop in a rounded white shield/badge base (subtle rounded square with shadow) so groups read as the layered "stacked" pins in the reference. Move the count badge to top-right as a small dark pill with the cluster color. Color of the shield follows the average score (subtle tint of the pin color).
 
-`Location.city` is already typed as `string`, so no type changes needed. `DEFAULT_BRAND` stays "Lumen Coffee".
+No changes to colors thresholds (green ≥60, yellow 40–60, red <40) or click behavior.
 
-### Verify
-- `MapApp`, `WorldwideOverview`, `RegionalOverview`, `useBlindSpotTour`, `selectTourStops` already iterate over `locations` generically — confirm no hardcoded city allow-lists. If any exist, widen them.
+### Out of scope
 
-## Out of scope
-- Remotion capture scripts (their `?demo=1` deep-link goes away; we'll update capture URLs when we re-record).
-- Removing `GOOGLE_PLACES_API_KEY` from project secrets (safe to delete in Settings once code is gone).
-- New competitor brands — keeping the existing 5.
-
-## Open question
-Stick with **"Lumen Coffee"** as the demo brand, or pick something more sector-neutral (e.g. a retail chain, hotel group) so sales can pitch beyond F&B?
+- Basemap, legend, side panels, hex layer, filters.
+- Real geocoding — coordinates remain hand-picked seeds.
+- Hydration mismatch warning visible in runtime errors (separate issue: SSR vs client metric jitter; unrelated to pin/density work).
