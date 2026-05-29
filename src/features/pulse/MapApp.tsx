@@ -95,14 +95,6 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
     [scopedLocations, showCompetitors],
   );
 
-  const competitorStats = useMemo(
-    () => getCityCompetitorStats(scopedLocations),
-    [scopedLocations],
-  );
-  const competitorMarkers = useMemo(
-    () => (showCompetitors ? buildCompetitorMarkers(scopedLocations) : []),
-    [scopedLocations, showCompetitors],
-  );
 
   // Replay loop (heat replay — separate from tour)
   const rafRef = useRef<number | null>(null);
