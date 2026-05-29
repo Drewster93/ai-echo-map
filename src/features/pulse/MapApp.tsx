@@ -95,56 +95,14 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
     [scopedLocations, showCompetitors],
   );
 
-  const tour = useBlindSpotTour({
-    mapHandle,
-    locations: brandedLocations,
-    scoreFor,
-    reducedMotion,
-    competitorStats: showCompetitors ? competitorStats : null,
-  });
-
-
-  const setSelectedHex = useCallback(
-    (h3: string | null) => {
-      if (h3 !== null && tour.isActive) tour.cancel();
-      setSelectedHexState(h3);
-    },
-    [tour],
+  const competitorStats = useMemo(
+    () => getCityCompetitorStats(scopedLocations),
+    [scopedLocations],
   );
-
-  // Cancel tour on filter change while active
-  const tourActiveRef = useRef(tour.isActive);
-  tourActiveRef.current = tour.isActive;
-  const tourCancelRef = useRef(tour.cancel);
-  tourCancelRef.current = tour.cancel;
-  useEffect(() => {
-    if (tourActiveRef.current) tourCancelRef.current();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assistant, range]);
-
-  const arrivedRef = useRef(false);
-  const tourStartedRef = useRef(false);
-  const handleArrived = useCallback(() => {
-    arrivedRef.current = true;
-    // Only auto-start the tour once real fetched locations are available.
-    if (!usingRealData || tourStartedRef.current) return;
-    tourStartedRef.current = true;
-    tour.start();
-  }, [tour, usingRealData]);
-
-  // If real locations arrive after the map has already settled, start the tour now.
-  useEffect(() => {
-    if (usingRealData && arrivedRef.current && !tourStartedRef.current) {
-      tourStartedRef.current = true;
-      tour.start();
-    }
-  }, [usingRealData, tour]);
-
-
-
-  const handleUserInteract = useCallback(() => {
-    if (tour.isActive) tour.cancel();
-  }, [tour]);
+  const competitorMarkers = useMemo(
+    () => (showCompetitors ? buildCompetitorMarkers(scopedLocations) : []),
+    [scopedLocations, showCompetitors],
+  );
 
   // Replay loop (heat replay — separate from tour)
   const rafRef = useRef<number | null>(null);
