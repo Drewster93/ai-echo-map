@@ -304,11 +304,24 @@ function buildPrompts(city: string, score: number, rng: () => number): PromptRes
 
 function buildLocations(): Location[] {
   const rng = rand(42);
-  const all: Array<[string, string, string, number, number]> = [
-    ...berlinSeeds.map((s) => ["Berlin", ...s] as [string, string, string, number, number]),
-    ...parisSeeds.map((s) => ["Paris", ...s] as [string, string, string, number, number]),
-    ...londonSeeds.map((s) => ["London", ...s] as [string, string, string, number, number]),
+  type Row = [string, string, string, number, number];
+  const tag = (city: string, seeds: Array<[string, string, number, number]>): Row[] =>
+    seeds.map((s) => [city, ...s] as Row);
+  const all: Row[] = [
+    ...tag("Berlin", berlinSeeds),
+    ...tag("Paris", parisSeeds),
+    ...tag("London", londonSeeds),
+    ...tag("Amsterdam", amsterdamSeeds),
+    ...tag("Barcelona", barcelonaSeeds),
+    ...tag("Milan", milanSeeds),
+    ...tag("New York", nyseeds),
+    ...tag("San Francisco", sfSeeds),
+    ...tag("Toronto", torontoSeeds),
+    ...tag("Tokyo", tokyoSeeds),
+    ...tag("Singapore", singaporeSeeds),
+    ...tag("Sydney", sydneySeeds),
   ];
+
   return all.map((row, i) => {
     const [city, area, name, lat, lng] = row;
     const base = 30 + Math.floor(rng() * 65);
