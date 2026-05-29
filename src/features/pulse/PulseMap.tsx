@@ -1,7 +1,6 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { HexCell, Location } from "./types";
 import { styleForIntensity } from "./hexUtils";
-import type { PulseMapHandle, TourFocus } from "./tour/useBlindSpotTour";
 import type { CompetitorMarker } from "./competitorData";
 
 interface Props {
@@ -15,8 +14,6 @@ interface Props {
   onArrived?: () => void;
   /** Fires when the user touches the map (drag/wheel/touch). */
   onUserInteract?: () => void;
-  /** Active focus window — non-focused cells dim out. */
-  focus?: TourFocus | null;
   /** Ghost competitor markers — rendered when non-empty. */
   competitorMarkers?: CompetitorMarker[];
 }
@@ -46,10 +43,16 @@ function cellCentroid(boundary: [number, number][]): [number, number] {
   return [lat / boundary.length, lng / boundary.length];
 }
 
-export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
-  { locations, hexCells, onHexSelect, selectedHex, dive = true, onArrived, onUserInteract, focus = null, competitorMarkers = [] },
-  ref,
-) {
+export function PulseMap({
+  locations,
+  hexCells,
+  onHexSelect,
+  selectedHex,
+  dive = true,
+  onArrived,
+  onUserInteract,
+  competitorMarkers = [],
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const LRef = useRef<LeafletNS | null>(null);
@@ -61,8 +64,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   const dataRenderedRef = useRef(false);
   const initialBoundsRef = useRef<import("leaflet").LatLngBounds | null>(null);
   const arrivedFiredRef = useRef(false);
-  const focusRef = useRef<TourFocus | null>(focus);
-  focusRef.current = focus;
   const locationsRef = useRef<Location[]>(locations);
   locationsRef.current = locations;
   const hexCellsRef = useRef<HexCell[]>(hexCells);
@@ -73,51 +74,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   onUserInteractRef.current = onUserInteract;
   const onArrivedRef = useRef(onArrived);
   onArrivedRef.current = onArrived;
-
-  useImperativeHandle(
-    ref,
-    (): PulseMapHandle => ({
-      flyTo: (center, zoom, durationSec = 1.2) =>
-        new Promise((resolve) => {
-          const map = mapRef.current;
-          if (!map) {
-            resolve();
-            return;
-          }
-          if (durationSec <= 0) {
-            map.setView(center, zoom);
-            resolve();
-            return;
-          }
-          map.flyTo(center, zoom, { duration: durationSec, easeLinearity: 0.25 });
-          map.once("moveend", () => resolve());
-        }),
-      flyToInitial: (durationSec = 1.2) =>
-        new Promise((resolve) => {
-          const map = mapRef.current;
-          const bounds = initialBoundsRef.current;
-          if (!map || !bounds) {
-            resolve();
-            return;
-          }
-          if (durationSec <= 0) {
-            map.fitBounds(bounds, { padding: [180, 180], animate: false });
-            resolve();
-            return;
-          }
-          map.flyToBounds(bounds, {
-            padding: [180, 180],
-            duration: durationSec,
-            easeLinearity: 0.25,
-          });
-          map.once("moveend", () => resolve());
-        }),
-      stop: () => {
-        mapRef.current?.stop();
-      },
-    }),
-    [],
-  );
 
   // Init map once
   useEffect(() => {
@@ -169,7 +125,7 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
       competitorLayerRef.current = L.layerGroup().addTo(map);
       readyRef.current = true;
 
-      // User-interact listeners — cancel tour on real user input
+      // User-interact listeners
       const fireInteract = () => onUserInteractRef.current?.();
       const container = map.getContainer();
       container.addEventListener("mousedown", fireInteract);
@@ -182,7 +138,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
         requestAnimationFrame(renderMarkers);
       };
       map.on("zoomend moveend viewreset", repaintMarkers);
-
 
       if (dive && !dovedRef.current) {
         dovedRef.current = true;
@@ -200,7 +155,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   function pinColorForScore(score: number): { fill: string; ring: string } {
     if (score >= 60) return { fill: "#34c759", ring: "#1f8b3d" }; // green
@@ -223,7 +177,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
   const CITY_ZOOM_THRESHOLD = 9;
 
   function renderMarkers() {
-
     const L = LRef.current;
     const map = mapRef.current;
     const layer = markerLayerRef.current;
@@ -319,10 +272,6 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     });
   }
 
-
-
-
-
   function renderHex() {
     // Hexes intentionally not rendered — premium pin-marker layout
     const layer = hexLayerRef.current;
@@ -412,19 +361,16 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locations]);
 
-
-
   const cellKey = useMemo(
     () => hexCells.map((c) => `${c.h3}:${c.intensity.toFixed(1)}`).join("|"),
     [hexCells],
   );
-  const focusKey = focus ? `${focus.center[0]},${focus.center[1]},${focus.radiusKm}` : "none";
   useEffect(() => {
     if (!readyRef.current) return;
     renderHex();
     renderMarkers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cellKey, selectedHex, focusKey]);
+  }, [cellKey, selectedHex]);
 
   const competitorKey = useMemo(
     () => competitorMarkers.map((m) => `${m.lat},${m.lng},${m.name}`).join("|"),
@@ -435,6 +381,5 @@ export const PulseMap = forwardRef<PulseMapHandle, Props>(function PulseMap(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [competitorKey]);
 
-
   return <div ref={containerRef} className="absolute inset-0 z-0" />;
-});
+}

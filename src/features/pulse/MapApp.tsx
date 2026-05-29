@@ -9,11 +9,7 @@ import { RoleSwitcher, type Role } from "./hud/RoleSwitcher";
 import { MentionRateLegend } from "./hud/MentionRateLegend";
 import { FilterControls } from "./hud/FilterControls";
 import { HeatReplayButton } from "./hud/HeatReplayButton";
-import { ReplayTourPill } from "./hud/ReplayTourPill";
 import { CompetitorTogglePill } from "./hud/CompetitorTogglePill";
-import { TourInsightCard } from "./tour/TourInsightCard";
-import { TourOutroSummary } from "./tour/TourOutroSummary";
-import { useBlindSpotTour, type PulseMapHandle } from "./tour/useBlindSpotTour";
 import { getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
 import { buildCompetitorMarkers, getCityCompetitorStats } from "./competitorData";
@@ -31,10 +27,9 @@ interface Props {
 export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, locations: locationsProp = null }: Props) {
   const [assistant, setAssistant] = useState<Assistant>("all");
   const [range, setRange] = useState<TimeRange>("7d");
-  const [selectedHex, setSelectedHexState] = useState<string | null>(null);
+  const [selectedHex, setSelectedHex] = useState<string | null>(null);
   const [replayDay, setReplayDay] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [mapHandle, setMapHandle] = useState<PulseMapHandle | null>(null);
   const [showCompetitors, setShowCompetitors] = useState(false);
   const [role, setRole] = useState<Role>("admin");
   const [regionCity, setRegionCity] = useState<string | null>(null);
@@ -100,56 +95,6 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
     [scopedLocations, showCompetitors],
   );
 
-  const tour = useBlindSpotTour({
-    mapHandle,
-    locations: brandedLocations,
-    scoreFor,
-    reducedMotion,
-    competitorStats: showCompetitors ? competitorStats : null,
-  });
-
-
-  const setSelectedHex = useCallback(
-    (h3: string | null) => {
-      if (h3 !== null && tour.isActive) tour.cancel();
-      setSelectedHexState(h3);
-    },
-    [tour],
-  );
-
-  // Cancel tour on filter change while active
-  const tourActiveRef = useRef(tour.isActive);
-  tourActiveRef.current = tour.isActive;
-  const tourCancelRef = useRef(tour.cancel);
-  tourCancelRef.current = tour.cancel;
-  useEffect(() => {
-    if (tourActiveRef.current) tourCancelRef.current();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assistant, range]);
-
-  const arrivedRef = useRef(false);
-  const tourStartedRef = useRef(false);
-  const handleArrived = useCallback(() => {
-    arrivedRef.current = true;
-    // Only auto-start the tour once real fetched locations are available.
-    if (!usingRealData || tourStartedRef.current) return;
-    tourStartedRef.current = true;
-    tour.start();
-  }, [tour, usingRealData]);
-
-  // If real locations arrive after the map has already settled, start the tour now.
-  useEffect(() => {
-    if (usingRealData && arrivedRef.current && !tourStartedRef.current) {
-      tourStartedRef.current = true;
-      tour.start();
-    }
-  }, [usingRealData, tour]);
-
-
-
-  const handleUserInteract = useCallback(() => {
-    if (tour.isActive) tour.cancel();
-  }, [tour]);
 
   // Replay loop (heat replay — separate from tour)
   const rafRef = useRef<number | null>(null);
@@ -259,15 +204,11 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
       <PulseMap
-        ref={setMapHandle}
         locations={scopedLocations}
         hexCells={hexCells}
         onHexSelect={setSelectedHex}
         selectedHex={selectedHex}
         dive={revealing}
-        focus={tour.focus}
-        onArrived={handleArrived}
-        onUserInteract={handleUserInteract}
         competitorMarkers={competitorMarkers}
       />
 
@@ -374,25 +315,9 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
             />
           </motion.div>
 
-          {tour.phase === "done" && tour.summary && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: EASE }}
-            >
-              <ReplayTourPill onClick={tour.start} disabled={tour.isActive} />
-            </motion.div>
-          )}
         </>
       )}
 
-      {/* Tour insight card */}
-      <AnimatePresence mode="wait">
-        {tour.currentStop && <TourInsightCard stop={tour.currentStop} />}
-      </AnimatePresence>
-
-      {/* Outro summary — shows briefly when tour completes */}
-      <OutroSummaryFlash key={tour.phase === "done" ? "done" : "pending"} active={tour.phase === "done" && !!tour.summary} summary={tour.summary ?? ""} />
 
       {/* Replay date label */}
       <AnimatePresence>
@@ -430,15 +355,3 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
   );
 }
 
-function OutroSummaryFlash({ active, summary }: { active: boolean; summary: string }) {
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    if (!active) return;
-    setShow(true);
-    const id = window.setTimeout(() => setShow(false), 3500);
-    return () => window.clearTimeout(id);
-  }, [active]);
-  return (
-    <AnimatePresence>{show && <TourOutroSummary summary={summary} />}</AnimatePresence>
-  );
-}
