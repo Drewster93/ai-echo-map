@@ -183,6 +183,19 @@ export function PulseMap({
     </svg>`;
   }
 
+  function clusterPinSvg(fill: string, ring: string): string {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="46" height="52" viewBox="0 0 46 52">
+      <defs>
+        <filter id="ds" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2.5" stdDeviation="2.2" flood-opacity="0.45"/>
+        </filter>
+      </defs>
+      <rect x="3" y="3" width="40" height="36" rx="10" fill="white" stroke="${fill}" stroke-width="1.5" filter="url(#ds)"/>
+      <path d="M23 10 C16.5 10 11.5 15.5 11.5 22.5 c0 7.5 11.5 17 11.5 17 s11.5-9.5 11.5-17 C34.5 15.5 29.5 10 23 10 z" fill="${fill}" stroke="white" stroke-width="2.5"/>
+      <circle cx="23" cy="20.5" r="4.5" fill="white" stroke="${ring}" stroke-width="1"/>
+    </svg>`;
+  }
+
   const CITY_ZOOM_THRESHOLD = 9;
 
   function renderMarkers() {
@@ -215,9 +228,10 @@ export function PulseMap({
     // and every retrieved location remains represented by at least one pin.
     function bucketKey(loc: Location): string {
       const cityKey = (loc.city || loc.cluster || "").trim().toLowerCase();
-      const grid = zoom < 4 ? 4 : zoom < 6 ? 2 : zoom < 8 ? 1 : 0.25;
+      const grid = zoom < 4 ? 6 : zoom < 6 ? 3 : zoom < 8 ? 1.25 : 0.25;
       const latB = Math.round(loc.lat / grid) * grid;
       const lngB = Math.round(loc.lng / grid) * grid;
+      if (zoom < 7) return `${latB},${lngB}`;
       return cityKey ? `${cityKey}@${latB},${lngB}` : `${latB},${lngB}`;
     }
 
@@ -241,15 +255,14 @@ export function PulseMap({
           locs.length;
         const { fill, ring } = pinColorForScore(avg);
         const count = locs.length;
+        const isCluster = count > 1;
         const icon = L.divIcon({
           className: "pulse-pin-wrap",
-          html: `<div class="pulse-pin" style="position:relative">${pinSvg(fill, ring)}${
-            count > 1
-              ? `<span style="position:absolute;top:-6px;right:-6px;background:#111;color:#fff;border:1.5px solid #fff;border-radius:9999px;font-size:10px;font-weight:600;line-height:1;padding:3px 5px;min-width:16px;text-align:center;">${count}</span>`
-              : ""
-          }</div>`,
-          iconSize: [36, 44],
-          iconAnchor: [18, 42],
+          html: isCluster
+            ? `<div class="pulse-pin" style="position:relative;width:46px;height:52px;">${clusterPinSvg(fill, ring)}<span style="position:absolute;top:-4px;right:-4px;background:#111;color:#fff;border:1.5px solid ${fill};border-radius:9999px;font-size:10px;font-weight:600;line-height:1;padding:3px 5px;min-width:16px;text-align:center;">${count}</span></div>`
+            : `<div class="pulse-pin">${pinSvg(fill, ring)}</div>`,
+          iconSize: isCluster ? [46, 52] : [34, 44],
+          iconAnchor: isCluster ? [23, 48] : [17, 42],
         });
         const marker = L.marker([lat, lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
         marker.on("click", () => {
