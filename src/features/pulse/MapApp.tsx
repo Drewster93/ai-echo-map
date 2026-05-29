@@ -204,15 +204,11 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
       <PulseMap
-        ref={setMapHandle}
         locations={scopedLocations}
         hexCells={hexCells}
         onHexSelect={setSelectedHex}
         selectedHex={selectedHex}
         dive={revealing}
-        focus={tour.focus}
-        onArrived={handleArrived}
-        onUserInteract={handleUserInteract}
         competitorMarkers={competitorMarkers}
       />
 
