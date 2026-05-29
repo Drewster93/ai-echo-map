@@ -27,10 +27,9 @@ interface Props {
 export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, locations: locationsProp = null }: Props) {
   const [assistant, setAssistant] = useState<Assistant>("all");
   const [range, setRange] = useState<TimeRange>("7d");
-  const [selectedHex, setSelectedHexState] = useState<string | null>(null);
+  const [selectedHex, setSelectedHex] = useState<string | null>(null);
   const [replayDay, setReplayDay] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [mapHandle, setMapHandle] = useState<PulseMapHandle | null>(null);
   const [showCompetitors, setShowCompetitors] = useState(false);
   const [role, setRole] = useState<Role>("admin");
   const [regionCity, setRegionCity] = useState<string | null>(null);
