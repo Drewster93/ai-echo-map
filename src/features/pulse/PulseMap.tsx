@@ -269,9 +269,9 @@ export function PulseMap({
       const { fill, ring } = pinColorForScore(score);
       const icon = L.divIcon({
         className: "pulse-pin-wrap",
-        html: `<div class="pulse-pin">${pinSvg(fill, ring)}</div>`,
-        iconSize: [30, 38],
-        iconAnchor: [15, 36],
+        html: `<div class="pulse-pin">${pinSvg(fill, ring, "md")}</div>`,
+        iconSize: [34, 44],
+        iconAnchor: [17, 42],
       });
       const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
       marker.on("click", () => {
