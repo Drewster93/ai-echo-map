@@ -1,7 +1,6 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { HexCell, Location } from "./types";
 import { styleForIntensity } from "./hexUtils";
-import type { PulseMapHandle } from "./tour/useBlindSpotTour";
 import type { CompetitorMarker } from "./competitorData";
 
 interface Props {
