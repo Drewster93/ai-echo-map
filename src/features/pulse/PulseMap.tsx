@@ -259,10 +259,10 @@ export function PulseMap({
         const icon = L.divIcon({
           className: "pulse-pin-wrap",
           html: isCluster
-            ? `<div class="pulse-pin" style="position:relative;width:46px;height:52px;">${clusterPinSvg(fill, ring)}<span style="position:absolute;top:-4px;right:-4px;background:#111;color:#fff;border:1.5px solid ${fill};border-radius:9999px;font-size:10px;font-weight:600;line-height:1;padding:3px 5px;min-width:16px;text-align:center;">${count}</span></div>`
+            ? `<div class="pulse-pin" style="position:relative;width:34px;height:44px;">${pinSvg(fill, ring)}<span style="position:absolute;top:-4px;right:-6px;background:#111;color:#fff;border:1.5px solid ${fill};border-radius:9999px;font-size:10px;font-weight:600;line-height:1;padding:3px 5px;min-width:16px;text-align:center;">${count}</span></div>`
             : `<div class="pulse-pin">${pinSvg(fill, ring)}</div>`,
-          iconSize: isCluster ? [46, 52] : [34, 44],
-          iconAnchor: isCluster ? [23, 48] : [17, 42],
+          iconSize: [34, 44],
+          iconAnchor: [17, 42],
         });
         const marker = L.marker([lat, lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
         marker.on("click", () => {
