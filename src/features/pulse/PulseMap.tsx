@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import type { HexCell, Location } from "./types";
 import { styleForIntensity } from "./hexUtils";
-import type { PulseMapHandle, TourFocus } from "./tour/useBlindSpotTour";
+import type { PulseMapHandle } from "./tour/useBlindSpotTour";
 import type { CompetitorMarker } from "./competitorData";
 
 interface Props {
@@ -15,8 +15,6 @@ interface Props {
   onArrived?: () => void;
   /** Fires when the user touches the map (drag/wheel/touch). */
   onUserInteract?: () => void;
-  /** Active focus window — non-focused cells dim out. */
-  focus?: TourFocus | null;
   /** Ghost competitor markers — rendered when non-empty. */
   competitorMarkers?: CompetitorMarker[];
 }
