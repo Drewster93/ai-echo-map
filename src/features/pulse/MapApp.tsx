@@ -315,25 +315,9 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
             />
           </motion.div>
 
-          {tour.phase === "done" && tour.summary && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: EASE }}
-            >
-              <ReplayTourPill onClick={tour.start} disabled={tour.isActive} />
-            </motion.div>
-          )}
         </>
       )}
 
-      {/* Tour insight card */}
-      <AnimatePresence mode="wait">
-        {tour.currentStop && <TourInsightCard stop={tour.currentStop} />}
-      </AnimatePresence>
-
-      {/* Outro summary — shows briefly when tour completes */}
-      <OutroSummaryFlash key={tour.phase === "done" ? "done" : "pending"} active={tour.phase === "done" && !!tour.summary} summary={tour.summary ?? ""} />
 
       {/* Replay date label */}
       <AnimatePresence>
@@ -371,15 +355,3 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
   );
 }
 
-function OutroSummaryFlash({ active, summary }: { active: boolean; summary: string }) {
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    if (!active) return;
-    setShow(true);
-    const id = window.setTimeout(() => setShow(false), 3500);
-    return () => window.clearTimeout(id);
-  }, [active]);
-  return (
-    <AnimatePresence>{show && <TourOutroSummary summary={summary} />}</AnimatePresence>
-  );
-}
