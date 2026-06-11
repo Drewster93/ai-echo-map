@@ -51,7 +51,7 @@ export function TopHeader({
           <div>
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-ultraviolet">
               <span className="text-[#1a0d3d]/40">◆</span>
-              <span>Local GEO presence · {quarterLabel}{scopeLabel ? ` · ${scopeLabel}` : ""}</span>
+              <span>GEO Pulse</span>
             </div>
             <div className="mt-1 flex items-center gap-3">
               <h1 className="font-display text-2xl leading-tight text-[#1a0d3d]">{brand}</h1>
