@@ -84,7 +84,7 @@ export function PulseMap({
       LRef.current = L;
       const map = L.map(containerRef.current, {
         zoomControl: true,
-        attributionControl: true,
+        attributionControl: false,
         worldCopyJump: true,
         zoomSnap: 0.25,
         zoomDelta: 0.5,
