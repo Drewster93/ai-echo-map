@@ -108,90 +108,115 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
             </div>
 
             {/* Tab content */}
-            {tab === "competitors" && (
-              <div className="mt-6">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                  Mention rate vs competitors
-                </p>
-                <p className="mt-2 text-sm text-slate-700">
-                  {brandName} ranks <span className="font-bold text-slate-900">#1</span> in {city}.
-                  Sampled <span className="font-bold text-slate-900">{allPromptsFull.length}</span>{" "}
-                  prompts in the last 30 days.
-                </p>
+            <AnimatePresence mode="wait" initial={false}>
+              {tab === "competitors" && (
+                <motion.div
+                  key="competitors"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-6"
+                >
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Mention rate vs competitors
+                  </p>
+                  <p className="mt-2 text-sm text-slate-700">
+                    {brandName} ranks <span className="font-bold text-slate-900">#1</span> in {city}.
+                    Sampled <span className="font-bold text-slate-900">{allPromptsFull.length}</span>{" "}
+                    prompts in the last 30 days.
+                  </p>
 
-                <div className="mt-5 overflow-hidden">
-                  <div className="grid grid-cols-[2fr_60px_2fr_80px_80px_80px] gap-4 border-b border-slate-200 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                    <span>Brand</span>
-                    <span>Rank</span>
-                    <span>Mention</span>
-                    <span className="text-right">Mention %</span>
-                    <span className="text-right">Citation %</span>
-                    <span className="text-right">Avg Pos</span>
-                  </div>
-
-                  {/* Brand row */}
-                  <Row
-                    name={brandName}
-                    color="#7c3aed"
-                    rank="#1"
-                    mention={mentionPct}
-                    mentionLabel={`${mentionPct.toFixed(1)}%`}
-                    citation={`${citationPct.toFixed(1)}%`}
-                    position={avgPosition}
-                    barColor="#7c3aed"
-                    isBrand
-                  />
-
-                  {competitorRows.map((c) => (
-                    <Row
-                      key={c.name}
-                      name={c.name}
-                      color="#cbd5e1"
-                      rank={`#${c.rank}`}
-                      mention={c.mention}
-                      mentionLabel={`${c.mention.toFixed(1)}%`}
-                      citation="—"
-                      position={c.position}
-                      barColor="#cbd5e1"
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {tab === "locations" && (
-              <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {hexLocations.map((loc) => {
-                  const m =
-                    (loc.prompts.filter((p) => p.status === "mentioned").length /
-                      Math.max(1, loc.prompts.length)) *
-                    100;
-                  return (
-                    <div
-                      key={loc.id}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"
-                    >
-                      <div className="truncate text-sm font-semibold text-slate-900">{loc.name}</div>
-                      <div className="mt-0.5 truncate text-[11px] text-slate-500">{loc.cluster}</div>
-                      <div className="mt-2 border-t border-slate-100 pt-2 text-[11px] text-slate-600">
-                        Mention <span className="font-bold text-slate-900">{m.toFixed(1)}%</span>
-                      </div>
+                  <div className="mt-5 overflow-hidden">
+                    <div className="grid grid-cols-[2fr_60px_2fr_80px_80px_80px] gap-4 border-b border-slate-200 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                      <span>Brand</span>
+                      <span>Rank</span>
+                      <span>Mention</span>
+                      <span className="text-right">Mention %</span>
+                      <span className="text-right">Citation %</span>
+                      <span className="text-right">Avg Pos</span>
                     </div>
-                  );
-                })}
-              </div>
-            )}
 
-            {tab === "prompts" && (
-              <ul className="mt-6 divide-y divide-slate-100">
-                {allPromptsFull.slice(0, 30).map((p, i) => (
-                  <li key={`${p.prompt}-${i}`} className="flex items-center justify-between gap-3 py-2.5">
-                    <span className="truncate text-sm text-slate-800">{p.prompt}</span>
-                    <StatusChip status={p.status} />
-                  </li>
-                ))}
-              </ul>
-            )}
+                    {/* Brand row */}
+                    <Row
+                      name={brandName}
+                      color="#7c3aed"
+                      rank="#1"
+                      mention={mentionPct}
+                      mentionLabel={`${mentionPct.toFixed(1)}%`}
+                      citation={`${citationPct.toFixed(1)}%`}
+                      position={avgPosition}
+                      barColor="#7c3aed"
+                      isBrand
+                    />
+
+                    {competitorRows.map((c) => (
+                      <Row
+                        key={c.name}
+                        name={c.name}
+                        color="#cbd5e1"
+                        rank={`#${c.rank}`}
+                        mention={c.mention}
+                        mentionLabel={`${c.mention.toFixed(1)}%`}
+                        citation="—"
+                        position={c.position}
+                        barColor="#cbd5e1"
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {tab === "locations" && (
+                <motion.div
+                  key="locations"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                >
+                  {hexLocations.map((loc) => {
+                    const m =
+                      (loc.prompts.filter((p) => p.status === "mentioned").length /
+                        Math.max(1, loc.prompts.length)) *
+                      100;
+                    return (
+                      <div
+                        key={loc.id}
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"
+                      >
+                        <div className="truncate text-sm font-semibold text-slate-900">{loc.name}</div>
+                        <div className="mt-0.5 truncate text-[11px] text-slate-500">{loc.cluster}</div>
+                        <div className="mt-2 border-t border-slate-100 pt-2 text-[11px] text-slate-600">
+                          Mention <span className="font-bold text-slate-900">{m.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              )}
+
+              {tab === "prompts" && (
+                <motion.div
+                  key="prompts"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="mt-6"
+                >
+                  <ul className="divide-y divide-slate-100">
+                    {allPromptsFull.slice(0, 30).map((p, i) => (
+                      <li key={`${p.prompt}-${i}`} className="flex items-center justify-between gap-3 py-2.5">
+                        <span className="truncate text-sm text-slate-800">{p.prompt}</span>
+                        <StatusChip status={p.status} />
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.section>
         </>
       )}
