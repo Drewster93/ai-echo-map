@@ -308,7 +308,6 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
               range={range}
               setRange={setRange}
             />
-            <HeatReplayButton playing={playing} progress={replayProgress} onClick={startReplay} />
             <CompetitorTogglePill
               active={showCompetitors}
               onToggle={() => setShowCompetitors((v) => !v)}
