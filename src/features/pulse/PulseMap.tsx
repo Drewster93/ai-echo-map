@@ -156,43 +156,25 @@ export function PulseMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function pinColorForScore(score: number): { fill: string; ring: string } {
-    if (score >= 60) return { fill: "#34c759", ring: "#1f8b3d" }; // green
-    if (score >= 40) return { fill: "#f5c518", ring: "#a8870b" }; // yellow
-    return { fill: "#e53935", ring: "#9b1c1c" }; // red
+  function pinColorForScore(score: number): { fill: string; ring: string; text: string } {
+    if (score >= 70) return { fill: "#5b21b6", ring: "#3b0f8a", text: "#ffffff" };
+    if (score >= 60) return { fill: "#8b5cf6", ring: "#6d28d9", text: "#ffffff" };
+    return { fill: "#c4b5fd", ring: "#7c3aed", text: "#2e1065" };
   }
 
-  function pinSvg(fill: string, ring: string, size: "sm" | "md" = "md"): string {
-    const w = size === "md" ? 34 : 30;
-    const h = size === "md" ? 44 : 38;
+  function pinSvg(fill: string, _ring: string, label: string, text: string): string {
+    const w = 38;
+    const h = 48;
     const path =
-      size === "md"
-        ? "M17 1.5 C8.7 1.5 2 8.2 2 16.5 c0 10.5 15 25.5 15 25.5 s15-15 15-25.5 C32 8.2 25.3 1.5 17 1.5 z"
-        : "M15 1 C7.3 1 1 7.3 1 15 c0 9.5 14 22 14 22 s14-12.5 14-22 C29 7.3 22.7 1 15 1 z";
-    const cx = size === "md" ? 17 : 15;
-    const cy = size === "md" ? 16.5 : 15;
-    const r = size === "md" ? 5 : 4.5;
+      "M19 1.5 C10 1.5 2.5 9 2.5 18 c0 11.5 16.5 28 16.5 28 s16.5-16.5 16.5-28 C35.5 9 28 1.5 19 1.5 z";
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
       <defs>
         <filter id="ds" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="0" dy="2.5" stdDeviation="2.2" flood-opacity="0.45"/>
         </filter>
       </defs>
-      <path filter="url(#ds)" d="${path}" fill="${fill}" stroke="white" stroke-width="3"/>
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="white" stroke="${ring}" stroke-width="1"/>
-    </svg>`;
-  }
-
-  function clusterPinSvg(fill: string, ring: string): string {
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="46" height="52" viewBox="0 0 46 52">
-      <defs>
-        <filter id="ds" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="2.5" stdDeviation="2.2" flood-opacity="0.45"/>
-        </filter>
-      </defs>
-      <rect x="3" y="3" width="40" height="36" rx="10" fill="white" stroke="${fill}" stroke-width="1.5" filter="url(#ds)"/>
-      <path d="M23 10 C16.5 10 11.5 15.5 11.5 22.5 c0 7.5 11.5 17 11.5 17 s11.5-9.5 11.5-17 C34.5 15.5 29.5 10 23 10 z" fill="${fill}" stroke="white" stroke-width="2.5"/>
-      <circle cx="23" cy="20.5" r="4.5" fill="white" stroke="${ring}" stroke-width="1"/>
+      <path filter="url(#ds)" d="${path}" fill="${fill}" stroke="#ffffff" stroke-width="2.5"/>
+      <text x="19" y="19" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto" font-size="13" font-weight="700" fill="${text}">${label}</text>
     </svg>`;
   }
 
@@ -253,12 +235,13 @@ export function PulseMap({
         const avg =
           locs.reduce((s, l) => s + (scoreByLoc.get(l.id) ?? l.visibilityScore), 0) /
           locs.length;
-        const { fill, ring } = pinColorForScore(avg);
+        const { fill, ring, text } = pinColorForScore(avg);
+        const label = String(Math.round(avg / 10) * 10);
         const icon = L.divIcon({
           className: "pulse-pin-wrap",
-          html: `<div class="pulse-pin">${pinSvg(fill, ring)}</div>`,
-          iconSize: [34, 44],
-          iconAnchor: [17, 42],
+          html: `<div class="pulse-pin">${pinSvg(fill, ring, label, text)}</div>`,
+          iconSize: [38, 48],
+          iconAnchor: [19, 46],
         });
         const marker = L.marker([lat, lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
         marker.on("click", () => {
@@ -275,12 +258,13 @@ export function PulseMap({
 
     validLocations.forEach((loc) => {
       const score = scoreByLoc.get(loc.id) ?? loc.visibilityScore;
-      const { fill, ring } = pinColorForScore(score);
+      const { fill, ring, text } = pinColorForScore(score);
+      const label = String(Math.round(score / 10) * 10);
       const icon = L.divIcon({
         className: "pulse-pin-wrap",
-        html: `<div class="pulse-pin">${pinSvg(fill, ring, "md")}</div>`,
-        iconSize: [34, 44],
-        iconAnchor: [17, 42],
+        html: `<div class="pulse-pin">${pinSvg(fill, ring, label, text)}</div>`,
+        iconSize: [38, 48],
+        iconAnchor: [19, 46],
       });
       const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
       marker.on("click", () => {
@@ -291,9 +275,25 @@ export function PulseMap({
   }
 
   function renderHex() {
-    // Hexes intentionally not rendered — premium pin-marker layout
+    const L = LRef.current;
+    const map = mapRef.current;
     const layer = hexLayerRef.current;
-    layer?.clearLayers();
+    if (!L || !map || !layer) return;
+    layer.clearLayers();
+    const zoom = map.getZoom();
+    if (zoom >= CITY_ZOOM_THRESHOLD) return;
+    hexCellsRef.current.forEach((c) => {
+      if (!c.boundary || c.boundary.length === 0) return;
+      const { fill } = pinColorForScore(c.intensity);
+      L.polygon(c.boundary, {
+        color: fill,
+        weight: 1,
+        opacity: 0.55,
+        fillColor: fill,
+        fillOpacity: 0.18,
+        interactive: false,
+      }).addTo(layer);
+    });
   }
 
   function renderCompetitors() {
