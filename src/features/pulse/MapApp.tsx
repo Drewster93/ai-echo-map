@@ -8,7 +8,7 @@ import { RegionalOverview } from "./hud/RegionalOverview";
 import { RoleSwitcher, type Role } from "./hud/RoleSwitcher";
 import { MentionRateLegend } from "./hud/MentionRateLegend";
 import { FilterControls } from "./hud/FilterControls";
-import { HeatReplayButton } from "./hud/HeatReplayButton";
+
 import { CompetitorTogglePill } from "./hud/CompetitorTogglePill";
 import { getDateLabels } from "./mockData";
 import { buildHexCells } from "./hexUtils";
@@ -308,7 +308,6 @@ export function MapApp({ brand, onSwitchBrand = () => {}, revealing = true, loca
               range={range}
               setRange={setRange}
             />
-            <HeatReplayButton playing={playing} progress={replayProgress} onClick={startReplay} />
             <CompetitorTogglePill
               active={showCompetitors}
               onToggle={() => setShowCompetitors((v) => !v)}
