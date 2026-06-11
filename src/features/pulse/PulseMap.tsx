@@ -275,9 +275,25 @@ export function PulseMap({
   }
 
   function renderHex() {
-    // Hexes intentionally not rendered — premium pin-marker layout
+    const L = LRef.current;
+    const map = mapRef.current;
     const layer = hexLayerRef.current;
-    layer?.clearLayers();
+    if (!L || !map || !layer) return;
+    layer.clearLayers();
+    const zoom = map.getZoom();
+    if (zoom >= CITY_ZOOM_THRESHOLD) return;
+    hexCellsRef.current.forEach((c) => {
+      if (!c.boundary || c.boundary.length === 0) return;
+      const { fill } = pinColorForScore(c.intensity);
+      L.polygon(c.boundary, {
+        color: fill,
+        weight: 1,
+        opacity: 0.55,
+        fillColor: fill,
+        fillOpacity: 0.18,
+        interactive: false,
+      }).addTo(layer);
+    });
   }
 
   function renderCompetitors() {
