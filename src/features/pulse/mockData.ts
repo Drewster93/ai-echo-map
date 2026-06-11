@@ -194,7 +194,13 @@ export function rand(seed: number) {
 function buildPrompts(city: string, score: number, rng: () => number): PromptResult[] {
   const pool = PROMPTS_BY_CITY[city] ?? GENERIC_PROMPTS;
   const count = 5 + Math.floor(rng() * 4);
-  const picked = [...pool].sort(() => rng() - 0.5).slice(0, count);
+  // Fisher-Yates shuffle — deterministic number of rng() calls regardless of engine
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const picked = shuffled.slice(0, count);
   return picked.map((prompt) => {
     const r = rng() * 100;
     let status: PromptResult["status"];
