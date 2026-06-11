@@ -258,12 +258,13 @@ export function PulseMap({
 
     validLocations.forEach((loc) => {
       const score = scoreByLoc.get(loc.id) ?? loc.visibilityScore;
-      const { fill, ring } = pinColorForScore(score);
+      const { fill, ring, text } = pinColorForScore(score);
+      const label = String(Math.round(score / 10) * 10);
       const icon = L.divIcon({
         className: "pulse-pin-wrap",
-        html: `<div class="pulse-pin">${pinSvg(fill, ring, "md")}</div>`,
-        iconSize: [34, 44],
-        iconAnchor: [17, 42],
+        html: `<div class="pulse-pin">${pinSvg(fill, ring, label, text)}</div>`,
+        iconSize: [38, 48],
+        iconAnchor: [19, 46],
       });
       const marker = L.marker([loc.lat, loc.lng], { icon, riseOnHover: true, pane: "pulse-pins" }).addTo(layer);
       marker.on("click", () => {
