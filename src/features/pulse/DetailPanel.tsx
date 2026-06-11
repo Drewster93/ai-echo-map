@@ -1,6 +1,6 @@
-import { type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { HexCell, Location } from "./types";
+import type { HexCell, Location, PromptStatus } from "./types";
 import { COMPETITORS } from "./mockData";
 
 interface Props {
@@ -9,17 +9,18 @@ interface Props {
   onClose: () => void;
 }
 
+type TabKey = "competitors" | "locations" | "prompts";
+
 export function DetailPanel({ hex, locations, onClose }: Props) {
+  const [tab, setTab] = useState<TabKey>("competitors");
+
   const hexLocations = hex ? locations.filter((l) => hex.locationIds.includes(l.id)) : [];
   const score = hex ? Math.round(hex.intensity) : 0;
   const cluster = hex?.cluster ?? "";
+  const firstLoc = hexLocations[0];
+  const city = firstLoc?.city ?? cluster;
+  const postcode = (firstLoc?.cluster || city || "").slice(0, 3).toUpperCase();
   const allPromptsFull = hexLocations.flatMap((l) => l.prompts);
-  const competitorsMentioned = Array.from(
-    new Set(allPromptsFull.map((p) => p.competitor).filter(Boolean) as string[]),
-  ).slice(0, 4);
-  const _fallbackCompetitors = competitorsMentioned.length
-    ? competitorsMentioned
-    : COMPETITORS.slice(0, 3);
 
   const totalPrompts = allPromptsFull.length || 1;
   const mentionPct = score;
@@ -28,14 +29,17 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
       totalPrompts) *
       100,
   );
-  const gapPp = mentionPct - competitorPct;
   const citationPct = Math.max(2, Math.round(mentionPct * 0.22));
-  const avgPosition = (1 + (100 - mentionPct) / 28).toFixed(1);
+  const avgPosition = (1 + (100 - mentionPct) / 28).toFixed(2);
+  const sovDenom = mentionPct + competitorPct;
+  const shareOfVoice = sovDenom > 0 ? ((mentionPct / sovDenom) * 100).toFixed(1) : "0.0";
 
-  const mentionBand =
-    mentionPct >= 60 ? { label: "Strong", cls: "bg-[#22c55e]/25 text-[#15803d]" }
-    : mentionPct >= 40 ? { label: "Moderate", cls: "bg-[#eab308]/25 text-[#a16207]" }
-    : { label: "Low", cls: "bg-[#f97316]/25 text-[#c2410c]" };
+  const brandName = "Halfords - Autocentre";
+  const competitorRows = COMPETITORS.slice(0, 4).map((name, i) => {
+    const m = Math.max(5, mentionPct - (i + 1) * 15);
+    const pos = (avgPositionForRank(i + 2)).toFixed(2);
+    return { name, mention: m, position: pos, rank: i + 2 };
+  });
 
   return (
     <AnimatePresence initial={false}>
@@ -46,9 +50,9 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
             onClick={onClose}
-            className="fixed inset-y-0 left-[72px] right-0 z-20 bg-black/30 backdrop-blur-[1px]"
+            className="fixed inset-y-0 left-[72px] right-0 z-20 bg-black/10"
           />
           <motion.section
             key={hex.h3}
@@ -56,168 +60,242 @@ export function DetailPanel({ hex, locations, onClose }: Props) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-[72px] right-0 bottom-0 z-30 rounded-t-3xl border-t border-[#260e5a]/10 bg-white px-6 pb-8 pt-6 text-[#260e5a] shadow-[0_-30px_80px_-20px_rgba(0,0,0,0.25)]"
+            className="fixed left-[72px] right-0 bottom-0 z-30 max-h-[78vh] overflow-y-auto rounded-t-3xl bg-white px-8 pb-8 pt-6 text-slate-900 shadow-[0_-30px_80px_-20px_rgba(15,8,40,0.25)]"
           >
-            <div className="w-full">
-
-              {/* Header bar */}
-              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#1a0d3d] px-6 py-4">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#22c55e]">
-                    <span className="mr-2 inline-block h-2 w-2 rounded-sm bg-[#22c55e] align-middle" />
-                    Market overview
-                  </p>
-                  <h3 className="mt-1 font-display text-2xl leading-tight text-white">{cluster}</h3>
-                  <p className="mt-1 text-sm text-white/65">
-                    {hexLocations.length} {hexLocations.length === 1 ? "property" : "properties"} ·{" "}
-                    {(hexLocations.length * 1400).toLocaleString()} monthly searches ·{" "}
-                    {Math.round(hexLocations.length * 880).toLocaleString()} estimated impressions
-                  </p>
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-3xl font-bold tracking-tight text-slate-900">{city}</h2>
+                  {postcode && (
+                    <span className="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">
+                      {postcode}
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={onClose}
-                    className="rounded-md border border-white/15 px-2.5 py-1 text-sm text-white/70 hover:border-white/40 hover:text-white"
-                    aria-label="Close panel"
-                  >
-                    ✕
-                  </button>
-                </div>
+                <p className="mt-1 text-sm text-slate-500">
+                  {hexLocations.length} {hexLocations.length === 1 ? "store" : "stores"}
+                </p>
               </div>
-
-
-              {/* 4-up metrics row */}
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <Metric
-                  label="Mention Rate"
-                  value={`${mentionPct.toFixed(1)}%`}
-                  footer={<span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${mentionBand.cls}`}>{mentionBand.label}</span>}
-                />
-                <Metric
-                  label="Competitor Mention"
-                  value={`${competitorPct.toFixed(1)}%`}
-                  footer={
-                    <span className="text-[11px] text-[#260e5a]/65">
-                      Gap: <span className={`rounded px-1.5 py-0.5 text-[11px] font-bold ${gapPp >= 0 ? "bg-[#22c55e]/25 text-[#15803d]" : "bg-[#f97316]/25 text-[#c2410c]"}`}>
-                        {gapPp >= 0 ? "+" : ""}{gapPp.toFixed(1)}pp
-                      </span>
-                    </span>
-                  }
-                />
-                <Metric
-                  label="Citation Rate"
-                  value={`${citationPct.toFixed(1)}%`}
-                  footer={<span className="text-[11px] text-[#260e5a]/55">Prompts citing brand</span>}
-                />
-                <Metric
-                  label="Avg Position"
-                  value={avgPosition}
-                  footer={<span className="text-[11px] text-[#260e5a]/55">Where brand is mentioned</span>}
-                />
-              </div>
-
-              {/* Properties grouped by city */}
-              {hexLocations.length > 0 && (
-                <div className="mt-5">
-                  <div className="flex items-center gap-2 border-b border-[#260e5a]/10 pb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#260e5a]">
-                      Properties
-                    </span>
-                    <span className="rounded-md bg-[#260e5a]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#260e5a]">
-                      {hexLocations.length}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 max-h-[260px] space-y-4 overflow-y-auto pr-1">
-                    {Object.entries(
-                      hexLocations.reduce<Record<string, Location[]>>((acc, loc) => {
-                        (acc[loc.city] ??= []).push(loc);
-                        return acc;
-                      }, {}),
-                    ).map(([city, locs]) => (
-                      <div key={city}>
-                        <div className="mb-2 flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#260e5a]/65">
-                            {city}
-                          </span>
-                          <span className="text-[10px] text-[#260e5a]/45">
-                            {locs.length} {locs.length === 1 ? "property" : "properties"}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                          {locs.map((loc) => {
-                            const mention =
-                              (loc.prompts.filter((p) => p.status === "mentioned").length /
-                                Math.max(1, loc.prompts.length)) *
-                              100;
-                            const confidence =
-                              loc.prompts.length >= 8
-                                ? { label: "High confidence", cls: "bg-[#22c55e]/25 text-[#15803d]" }
-                                : loc.prompts.length >= 4
-                                  ? { label: "Medium", cls: "bg-[#eab308]/25 text-[#a16207]" }
-                                  : { label: "Low", cls: "bg-[#f97316]/25 text-[#c2410c]" };
-                            return (
-                              <div
-                                key={loc.id}
-                                className="rounded-xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-3 py-2.5"
-                              >
-                                <div className="truncate text-sm font-semibold text-[#260e5a]">
-                                  {loc.name}
-                                </div>
-                                <div className="mt-0.5 truncate text-[11px] text-[#260e5a]/60">
-                                  {loc.cluster}
-                                </div>
-                                <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#260e5a]/10 pt-2">
-                                  <span className="text-[11px] text-[#260e5a]/70">
-                                    Mention{" "}
-                                    <span className="font-bold text-[#260e5a]">
-                                      {mention.toFixed(1)}%
-                                    </span>
-                                  </span>
-                                  <span
-                                    className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${confidence.cls}`}
-                                  >
-                                    {confidence.label}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <button
+                onClick={onClose}
+                className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close panel"
+              >
+                ✕
+              </button>
             </div>
-          </motion.section>
 
+            {/* KPI tiles */}
+            <div className="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4">
+              <Kpi label="Mention Rate" value={`${mentionPct.toFixed(1)}%`} />
+              <Kpi label="Citation Rate" value={`${citationPct.toFixed(1)}%`} />
+              <Kpi label="Share of Voice" value={shareOfVoice} />
+              <Kpi label="Avg Position" value={avgPosition} />
+            </div>
+
+            {/* Tabs */}
+            <div className="mt-8 flex items-center gap-8 border-b border-slate-200">
+              <Tab active={tab === "competitors"} onClick={() => setTab("competitors")}>
+                Competitors
+              </Tab>
+              <Tab active={tab === "locations"} onClick={() => setTab("locations")} count={hexLocations.length}>
+                Locations
+              </Tab>
+              <Tab active={tab === "prompts"} onClick={() => setTab("prompts")} count={allPromptsFull.length}>
+                Prompt results
+              </Tab>
+            </div>
+
+            {/* Tab content */}
+            {tab === "competitors" && (
+              <div className="mt-6">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                  Mention rate vs competitors
+                </p>
+                <p className="mt-2 text-sm text-slate-700">
+                  {brandName} ranks <span className="font-bold text-slate-900">#1</span> in {city}.
+                  Sampled <span className="font-bold text-slate-900">{allPromptsFull.length}</span>{" "}
+                  prompts in the last 30 days.
+                </p>
+
+                <div className="mt-5 overflow-hidden">
+                  <div className="grid grid-cols-[2fr_60px_2fr_80px_80px_80px] gap-4 border-b border-slate-200 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    <span>Brand</span>
+                    <span>Rank</span>
+                    <span>Mention</span>
+                    <span className="text-right">Mention %</span>
+                    <span className="text-right">Citation %</span>
+                    <span className="text-right">Avg Pos</span>
+                  </div>
+
+                  {/* Brand row */}
+                  <Row
+                    name={brandName}
+                    color="#7c3aed"
+                    rank="#1"
+                    mention={mentionPct}
+                    mentionLabel={`${mentionPct.toFixed(1)}%`}
+                    citation={`${citationPct.toFixed(1)}%`}
+                    position={avgPosition}
+                    barColor="#7c3aed"
+                    isBrand
+                  />
+
+                  {competitorRows.map((c) => (
+                    <Row
+                      key={c.name}
+                      name={c.name}
+                      color="#cbd5e1"
+                      rank={`#${c.rank}`}
+                      mention={c.mention}
+                      mentionLabel={`${c.mention.toFixed(1)}%`}
+                      citation="—"
+                      position={c.position}
+                      barColor="#cbd5e1"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {tab === "locations" && (
+              <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {hexLocations.map((loc) => {
+                  const m =
+                    (loc.prompts.filter((p) => p.status === "mentioned").length /
+                      Math.max(1, loc.prompts.length)) *
+                    100;
+                  return (
+                    <div
+                      key={loc.id}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"
+                    >
+                      <div className="truncate text-sm font-semibold text-slate-900">{loc.name}</div>
+                      <div className="mt-0.5 truncate text-[11px] text-slate-500">{loc.cluster}</div>
+                      <div className="mt-2 border-t border-slate-100 pt-2 text-[11px] text-slate-600">
+                        Mention <span className="font-bold text-slate-900">{m.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {tab === "prompts" && (
+              <ul className="mt-6 divide-y divide-slate-100">
+                {allPromptsFull.slice(0, 30).map((p, i) => (
+                  <li key={`${p.prompt}-${i}`} className="flex items-center justify-between gap-3 py-2.5">
+                    <span className="truncate text-sm text-slate-800">{p.prompt}</span>
+                    <StatusChip status={p.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </motion.section>
         </>
       )}
     </AnimatePresence>
   );
 }
 
+function avgPositionForRank(rank: number) {
+  return 1 + (rank - 1) * 1.6 + (rank * rank) / 4;
+}
 
-
-
-function Metric({
-  label,
-  value,
-  footer,
-}: {
-  label: string;
-  value: string;
-  footer?: ReactNode;
-}) {
+function Kpi({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[#260e5a]/10 bg-[#260e5a]/[0.03] px-3 py-2.5">
-      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#260e5a]/55">
-        {label}
-      </div>
-      <div className="mt-1 font-display text-2xl leading-none text-[#260e5a]">{value}</div>
-      {footer && <div className="mt-1.5">{footer}</div>}
+    <div>
+      <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">{label}</div>
+      <div className="mt-2 text-4xl font-bold tracking-tight text-slate-900">{value}</div>
     </div>
   );
 }
 
+function Tab({
+  active,
+  onClick,
+  count,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  count?: number;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`relative -mb-px pb-3 text-sm font-semibold transition ${
+        active ? "text-violet-700" : "text-slate-500 hover:text-slate-700"
+      }`}
+    >
+      <span className="flex items-center gap-1.5">
+        {children}
+        {typeof count === "number" && (
+          <span className={`text-xs font-medium ${active ? "text-violet-400" : "text-slate-400"}`}>
+            {count}
+          </span>
+        )}
+      </span>
+      {active && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-violet-600" />}
+    </button>
+  );
+}
+
+function Row({
+  name,
+  color,
+  rank,
+  mention,
+  mentionLabel,
+  citation,
+  position,
+  barColor,
+  isBrand,
+}: {
+  name: string;
+  color: string;
+  rank: string;
+  mention: number;
+  mentionLabel: string;
+  citation: string;
+  position: string;
+  barColor: string;
+  isBrand?: boolean;
+}) {
+  return (
+    <div className="grid grid-cols-[2fr_60px_2fr_80px_80px_80px] items-center gap-4 border-b border-slate-100 py-3 text-sm">
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: color }} />
+        <span className={`truncate ${isBrand ? "font-bold text-violet-700" : "text-slate-800"}`}>
+          {name}
+        </span>
+      </div>
+      <span className="text-slate-700">{rank}</span>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${Math.min(100, Math.max(0, mention))}%`, background: barColor }}
+        />
+      </div>
+      <span className="text-right font-semibold text-slate-900">{mentionLabel}</span>
+      <span className="text-right text-slate-500">{citation}</span>
+      <span className="text-right text-slate-900">{position}</span>
+    </div>
+  );
+}
+
+function StatusChip({ status }: { status: PromptStatus }) {
+  const map: Record<PromptStatus, { label: string; cls: string }> = {
+    mentioned: { label: "Mentioned", cls: "bg-violet-100 text-violet-700" },
+    competitor_higher: { label: "Competitor", cls: "bg-amber-100 text-amber-700" },
+    not_mentioned: { label: "Missed", cls: "bg-slate-100 text-slate-600" },
+  };
+  const m = map[status];
+  return (
+    <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${m.cls}`}>
+      {m.label}
+    </span>
+  );
+}
